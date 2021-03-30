@@ -1,0 +1,10 @@
+version: "3.0"
+services:
+  pagemind:
+    container_name: pagemind
+    env_file: .env
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    ports:
+      - "8040:8040"
