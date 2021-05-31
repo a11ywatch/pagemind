@@ -12,7 +12,11 @@ import { corsOptions, DEV } from "./config"
 import { root, crawl, detectImage, setScripts } from "./rest/routes"
 import { log, setConfig as setLogConfig } from "@a11ywatch/log"
 
-setLogConfig({ container: "pagemind" })
+try {
+  setLogConfig({ container: "pagemind" })
+} catch(e) {
+  console.error(e)
+}
 
 const app = express()
 
