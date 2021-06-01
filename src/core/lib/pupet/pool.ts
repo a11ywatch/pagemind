@@ -6,27 +6,26 @@
 
 import { createPuppeteerPool } from "./create-puppeteer-pool";
 import { log } from "@a11ywatch/log";
-import util from "util";
-import v8 from "v8";
+// import util from "util";
+// import v8 from "v8";
 
-const setImmediatePromise = util.promisify(setImmediate);
+// const setImmediatePromise = util.promisify(setImmediate);
 
 const puppeteerPool = createPuppeteerPool();
 
 const puppetPool = {
   acquire: async () => {
     try {
-      const stream = v8.getHeapStatistics();
-      if (
-        stream.total_heap_size * 0.4 <
-        stream.total_heap_size - stream.used_heap_size
-      ) {
-        log("os heap to low to grab puppet pool", { type: "error" });
-        return await setImmediatePromise(
-          async () => await puppeteerPool.acquire()
-        );
-      }
-
+      // const stream = v8.getHeapStatistics();
+      // if (
+      //   stream.total_heap_size * 0.4 <
+      //   stream.total_heap_size - stream.used_heap_size
+      // ) {
+      //   log("os heap to low to grab puppet pool", { type: "error" });
+      //   return await setImmediatePromise(
+      //     async () => await puppeteerPool.acquire()
+      //   );
+      // }
       return await puppeteerPool.acquire();
     } catch (e) {
       log(e, { type: "error" });
