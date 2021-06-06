@@ -21,6 +21,7 @@ export const skipContentCheck = async ({
         "skip navigation links",
         "skip to bottom nav",
         "skip main navigation",
+        "Skip navigation",
         "SKIP NAVIGATION",
       ];
 
