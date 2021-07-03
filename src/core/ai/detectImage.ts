@@ -4,8 +4,7 @@
  * LICENSE file in the root directory of this source tree.
  **/
 import fetch from "node-fetch";
-import { AI_SERVICE_URL } from "@app/config";
-import { log } from "@a11ywatch/log";
+import { AI_SERVICE_URL } from "../../config";
 
 interface ClassifyModelType {
   className: string;
@@ -36,7 +35,7 @@ export const detectImageModel = async (
       return await data.json();
     }
   } catch (e) {
-    log(e, { type: "error" });
+    console.log(e, { type: "error" });
   }
   return null;
 };

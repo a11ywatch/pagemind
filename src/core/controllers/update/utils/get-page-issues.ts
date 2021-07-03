@@ -5,11 +5,10 @@
  **/
 
 import pa11y from "pa11y";
-import { log } from "@a11ywatch/log";
-import { pa11yConfig } from "@app/config";
-import { skipContentCheck } from "@app/core/lib";
+import { pa11yConfig } from "../../../../config";
+import { skipContentCheck } from "../../../lib";
 import { skipContentTemplate } from "../templates";
-import type { PageIssues, IssueMeta } from "@app/types";
+import type { PageIssues, IssueMeta } from "../../../../types";
 
 export const getPageIssues = async ({
   urlPage,
@@ -53,7 +52,7 @@ export const getPageIssues = async ({
       },
     ];
   } catch (e) {
-    log(e);
+    console.log(e);
     return [{}, { skipContentIncluded: false }];
   }
 };

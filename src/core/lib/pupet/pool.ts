@@ -5,7 +5,6 @@
  **/
 
 import { createPuppeteerPool } from "./create-puppeteer-pool";
-import { log } from "@a11ywatch/log";
 // import util from "util";
 // import v8 from "v8";
 
@@ -28,7 +27,7 @@ const puppetPool = {
       // }
       return await puppeteerPool.acquire();
     } catch (e) {
-      log(e, { type: "error" });
+      console.log(e, { type: "error" });
       return null;
     }
   },
@@ -36,7 +35,7 @@ const puppetPool = {
     try {
       await browser?.close();
     } catch (e) {
-      log(e, { type: "error" });
+      console.log(e, { type: "error" });
     }
   },
   clean: async (browser, page) => {
@@ -46,7 +45,7 @@ const puppetPool = {
         await puppeteerPool.release(browser);
       }
     } catch (e) {
-      log(e, { type: "error" });
+      console.log(e, { type: "error" });
     }
   },
 };

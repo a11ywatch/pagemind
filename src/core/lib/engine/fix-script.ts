@@ -8,7 +8,7 @@ import {
   missingAltText,
   emptyIframeTitle,
   imgAltMissing,
-} from "@app/core/strings";
+} from "../../strings";
 import {
   EMPTY_HEAD_TITLE_TYPE,
   INVALID_HTML_PROPS,

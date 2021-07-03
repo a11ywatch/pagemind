@@ -1,5 +1,4 @@
-import { detectImageModel } from "@app/core/ai";
-import { log } from "@a11ywatch/log";
+import { detectImageModel } from "../../core/ai";
 
 const detectImage = async (req, res, next) => {
   try {
@@ -9,7 +8,7 @@ const detectImage = async (req, res, next) => {
 
     res.json(data);
   } catch (e) {
-    log(e, { type: "error" });
+    console.log(e, { type: "error" });
     next();
   }
 };

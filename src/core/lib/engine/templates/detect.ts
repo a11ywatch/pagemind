@@ -4,7 +4,7 @@
  * LICENSE file in the root directory of this source tree.
  **/
 
-import { SCRIPTS_CDN_URL_HOST } from "@app/config";
+import { SCRIPTS_CDN_URL_HOST } from "../../../../config";
 
 const scriptDetect = ({
   domain,

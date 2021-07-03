@@ -4,11 +4,9 @@
  * LICENSE file in the root directory of this source tree.
  **/
 
-import fetch from "node-fetch"
-import { SCRIPTS_CDN_URL } from "@app/config"
-import { log, setConfig as setLogConfig } from "@a11ywatch/log"
+import fetch from "node-fetch";
 
-setLogConfig({ container: "angelica" })
+const headers = { "Content-Type": "application/json" };
 
 process.on(
   "message",
@@ -18,35 +16,33 @@ process.on(
     domain,
     screenshot,
     screenshotStill,
-    authed
   }) => {
-    const headers = { "Content-Type": "application/json" }
+    console.log("boom");
     try {
-      await Promise.all([
-        fetch(`${SCRIPTS_CDN_URL}/add-screenshot`, {
-          method: "POST",
-          body: JSON.stringify({
-            cdnSourceStripped,
-            domain,
-            screenshot,
-            screenshotStill
-          }),
-          headers
+      await fetch(`${process.env.SCRIPTS_CDN_URL}/add-screenshot`, {
+        method: "POST",
+        body: JSON.stringify({
+          cdnSourceStripped,
+          domain,
+          screenshot,
+          screenshotStill,
         }),
-        fetch(`${SCRIPTS_CDN_URL}/add-script`, {
-          method: "POST",
-          body: JSON.stringify({
-            scriptBuffer,
-            cdnSourceStripped,
-            domain
-          }),
-          headers
-        })
-      ])
+        headers: { "Content-Type": "application/json" },
+      });
+
+      await fetch(`${process.env.SCRIPTS_CDN_URL}/add-script`, {
+        method: "POST",
+        body: JSON.stringify({
+          scriptBuffer,
+          cdnSourceStripped,
+          domain,
+        }),
+        headers,
+      });
     } catch (e) {
-      log(e)
+      console.error(e);
     } finally {
-      process.send("close")
+      process.send("close");
     }
   }
-)
+);

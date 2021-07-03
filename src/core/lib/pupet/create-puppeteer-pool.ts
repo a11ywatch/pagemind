@@ -6,8 +6,7 @@
 
 import genericPool from "generic-pool";
 import puppeteer from "puppeteer";
-import { DEV } from "@app/config";
-import { log } from "@a11ywatch/log";
+import { DEV } from "../../../config";
 
 const puppeteerConfig = {
   executablePath: process.env.CHROME_BIN || null,
@@ -38,14 +37,14 @@ const createPuppeteerFactory = ({ puppeteerArgs, validate }) => ({
     try {
       return await puppeteer.launch(...puppeteerArgs);
     } catch (e) {
-      log(e, { type: "error" });
+      console.log(e, { type: "error" });
     }
   },
   async destroy(browser) {
     try {
       await browser?.close();
     } catch (e) {
-      log(e, { type: "error" });
+      console.log(e, { type: "error" });
     }
   },
   validate,
@@ -55,7 +54,7 @@ export async function launchPuppeter() {
   try {
     return await puppeteer.launch(puppeteerConfig);
   } catch (e) {
-    log(e, { type: "error" });
+    console.log(e, { type: "error" });
     return null;
   }
 }

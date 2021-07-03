@@ -4,9 +4,9 @@
  * LICENSE file in the root directory of this source tree.
  **/
 
-import { detectImageModel } from "@app/core/ai";
-import { createCanvasPupet } from "@app/core/lib";
-import { needsLongTextAlt, missingAltText } from "@app/core/strings";
+import { detectImageModel } from "../../../ai";
+import { createCanvasPupet } from "../../../lib";
+import { needsLongTextAlt, missingAltText } from "../../../strings";
 import { extractAlt } from "./extract-alt";
 
 interface Alt {

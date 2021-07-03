@@ -4,7 +4,7 @@
  * LICENSE file in the root directory of this source tree.
  **/
 
-import { DEV } from "@app/config";
+import { DEV } from "../../../config";
 
 export const checkCdn = async ({ page, cdnMinJsPath, cdnJsPath }) => {
   let hasCdn = false;

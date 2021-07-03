@@ -4,142 +4,125 @@
  * LICENSE file in the root directory of this source tree.
  **/
 
-import { fork } from "child_process"
-import validUrl from "valid-url"
-import getPageSpeed from "get-page-speed"
-import { format } from "prettier"
-import { log } from "@a11ywatch/log"
-import { CDN_URL } from "@app/config"
-
-import {
-  puppetPool,
-  checkCdn,
-  grabHtmlSource,
-  scriptBuild
-} from "@app/core/lib"
-import type { IssueData } from "@app/types"
-import { sourceBuild } from "@a11ywatch/website-source-builder"
-import { loopIssues, getPageIssues, goToPage } from "./utils"
+import { fork } from "child_process";
+import validUrl from "valid-url";
+import getPageSpeed from "get-page-speed";
+import { sourceBuild } from "@a11ywatch/website-source-builder";
+import { format } from "prettier";
+import { CDN_URL } from "../../../config";
+import { puppetPool, checkCdn, grabHtmlSource, scriptBuild } from "../../lib";
+import type { IssueData } from "../../../types";
+import { loopIssues, getPageIssues, goToPage } from "./utils";
 
 const EMPTY_RESPONSE = {
   webPage: null,
   issues: null,
-  script: null
-}
+  script: null,
+};
 
 export const crawlWebsite = async ({ userId, url: urlMap, pageHeaders }) => {
   if (!validUrl.isUri(urlMap)) {
-    return EMPTY_RESPONSE
+    return EMPTY_RESPONSE;
   }
 
-  let browser = null
+  let browser = null;
 
   try {
-    browser = await puppetPool.acquire()
+    browser = await puppetPool.acquire();
   } catch (e) {
-    log(e)
+    console.log(e);
   }
 
-  let page = null
+  let page = null;
 
   try {
-    page = await browser?.newPage()
+    page = await browser?.newPage();
   } catch (e) {
-    log(e)
+    console.log(e);
   }
 
   if (!page) {
-    console.info("browser page failed to load")
-    return EMPTY_RESPONSE
+    return EMPTY_RESPONSE;
   }
-
-  console.time(`PageCrawl ${urlMap}`)
 
   const {
     domain,
     pageUrl,
     cdnSourceStripped,
     cdnJsPath,
-    cdnMinJsPath
-  } = sourceBuild(urlMap, userId)
+    cdnMinJsPath,
+  } = sourceBuild(urlMap, userId);
 
-  let resolver = Object.assign({}, EMPTY_RESPONSE)
+  let resolver = Object.assign({}, EMPTY_RESPONSE);
 
   try {
-    console.time(`GoToPage ${urlMap}`)
-    const [validPage] = await goToPage(page, urlMap, browser)
-    console.timeEnd(`GoToPage ${urlMap}`)
+    const [validPage] = await goToPage(page, urlMap, browser);
 
     if (!validPage) {
-      return EMPTY_RESPONSE
+      return EMPTY_RESPONSE;
     }
 
-    console.time(`GetPageIssues ${urlMap}`)
     const [issues, issueMeta] = await getPageIssues({
       urlPage: pageUrl,
       page,
       browser,
-      pageHeaders
-    })
-    console.timeEnd(`GetPageIssues ${urlMap}`)
+      pageHeaders,
+    });
 
-    console.time(`Screenshot ${urlMap}`)
     const [screenshot, screenshotStill] = await Promise.all([
       page.screenshot({ fullPage: true }),
       process.env.BACKUP_IMAGES
         ? page.screenshot({ fullPage: false })
-        : Promise.resolve(undefined)
-    ])
-    console.timeEnd(`Screenshot ${urlMap}`)
+        : Promise.resolve(undefined),
+    ]);
 
-    console.time(`CheckCdn ${urlMap}`)
-    const pageHasCdn = await checkCdn({ page, cdnMinJsPath, cdnJsPath })
-    console.timeEnd(`CheckCdn ${urlMap}`)
+    const pageHasCdn = await checkCdn({ page, cdnMinJsPath, cdnJsPath });
 
-    console.time(`GrabHtml ${urlMap}`)
     const [html, duration] = await grabHtmlSource({
-      page
-    })
-    console.timeEnd(`GrabHtml ${urlMap}`)
+      page,
+    });
 
-    console.time(`LoopIssues ${urlMap}`)
     const {
       errorCount,
       warningCount,
       noticeCount,
       adaScore,
       scriptChildren,
-      possibleIssuesFixedByCdn
-    } = await loopIssues({ page, issues })
-    console.timeEnd(`LoopIssues ${urlMap}`)
+      possibleIssuesFixedByCdn,
+    } = await loopIssues({ page, issues });
 
     const scriptProps = {
       scriptChildren,
       domain,
-      cdnSrc: cdnSourceStripped
-    }
+      cdnSrc: cdnSourceStripped,
+    };
 
-    const forked = fork(`${__dirname}/cdn_worker`, [], {
-      detached: true
-    })
+    const forked = fork(__dirname + "/cdn_worker", [], {
+      detached: true,
+      execArgv:
+        process.env.NODE_ENV === "production"
+          ? undefined
+          : ["-r", "ts-node/register"],
+    });
+
+    forked.on("message", (message: string) => {
+      if (message === "close") {
+        forked.kill("SIGINT");
+      }
+    });
 
     forked.send({
       cdnSourceStripped,
       domain,
       screenshot,
       screenshotStill,
-      scriptBody: scriptBuild(scriptProps, true)
-    })
-    forked.unref()
+      scriptBody: scriptBuild(scriptProps, true),
+    });
 
-    forked.on("message", (message: string) => {
-      if (message === "close") {
-        forked.kill("SIGINT")
-      }
-    })
+    forked.unref();
 
-    const cdn_url = CDN_URL.replace("/api", "")
-    const cdn_base = cdn_url + "/screenshots/"
+    const cdn_url = CDN_URL.replace("/api", "");
+    const cdn_base = cdn_url + "/screenshots/";
 
     resolver = {
       webPage: {
@@ -159,7 +142,7 @@ export const crawlWebsite = async ({ userId, url: urlMap, pageHeaders }) => {
               ? "#A5D6A7"
               : duration <= 3000
               ? "#E6EE9C"
-              : "#EF9A9A"
+              : "#EF9A9A",
         },
         html,
         htmlIncluded: !!html,
@@ -171,37 +154,36 @@ export const crawlWebsite = async ({ userId, url: urlMap, pageHeaders }) => {
           warningCount,
           noticeCount,
           adaScore,
-          issueMeta
+          issueMeta,
         } as IssueData,
         lastScanDate: new Date().toUTCString(),
-        userId
+        userId,
       },
       issues: Object.assign({}, issues, {
         domain,
         pageUrl,
-        userId
+        userId,
       }),
       script: {
         pageUrl,
         domain,
         script: format(scriptBuild(scriptProps, false), {
           semi: true,
-          parser: "html"
+          parser: "html",
         }),
         cdnUrlMinified: cdnMinJsPath,
         cdnUrl: cdnJsPath,
         cdnConnected: pageHasCdn,
         userId,
-        issueMeta
-      }
-    }
+        issueMeta,
+      },
+    };
   } catch (e) {
-    log(e)
+    console.error(e);
   } finally {
     if (browser?.isConnected()) {
-      puppetPool.clean(browser, page)
+      await puppetPool.clean(browser, page);
     }
-    console.timeEnd(`PageCrawl ${urlMap}`)
   }
-  return resolver
-}
+  return resolver;
+};

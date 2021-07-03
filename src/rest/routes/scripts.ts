@@ -1,5 +1,4 @@
-import { adjustScript, editScript } from "@app/core/controllers";
-import { log } from "@a11ywatch/log";
+import { adjustScript, editScript } from "../../core/controllers";
 
 const setScripts = async (req, res, next) => {
   const { editScript: edit, url, userId, script, newScript } = req.body;
@@ -19,7 +18,7 @@ const setScripts = async (req, res, next) => {
 
     res.json(data);
   } catch (e) {
-    log(e, { type: "error" });
+    console.log(e, { type: "error" });
     next();
   }
 };

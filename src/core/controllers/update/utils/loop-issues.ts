@@ -4,16 +4,15 @@
  * LICENSE file in the root directory of this source tree.
  **/
 
-import { getIssueFixScript } from "@app/core/lib";
+import { getIssueFixScript } from "../../../lib";
 import { getHostAsString } from "@a11ywatch/website-source-builder";
 import {
   needsLongTextAlt,
   missingAltText,
   emptyIframeTitle,
   imgAltMissing,
-} from "@app/core/strings";
+} from "../../../strings";
 import { grabAlt } from "./grab-alt";
-import { log } from "@a11ywatch/log";
 
 const ISSUE_TIMEOUT = 14000;
 
@@ -48,7 +47,7 @@ export const loopIssues = ({ issues, page }): Promise<IssueInfo> => {
     }
     let generationStop = false;
     const destroyLoopIteration = setTimeout(() => {
-      log(`Issue fix setting timeout ${ISSUE_TIMEOUT}`);
+      console.log(`Issue fix setting timeout ${ISSUE_TIMEOUT}`);
       generationStop = true;
       resolve({
         errorCount,
@@ -66,7 +65,7 @@ export const loopIssues = ({ issues, page }): Promise<IssueInfo> => {
       issueIndex++
     ) {
       if (generationStop) {
-        log("Issue generation stopped");
+        console.log("Issue generation stopped");
         break;
       }
       let element = issues?.issues[issueIndex];

@@ -4,36 +4,29 @@
  * LICENSE file in the root directory of this source tree.
  **/
 
-import type { AddressInfo } from "net"
-import express from "express"
-import cors from "cors"
-import bodyParser from "body-parser"
-import { corsOptions, DEV } from "./config"
-import { root, crawl, detectImage, setScripts } from "./rest/routes"
-import { log, setConfig as setLogConfig } from "@a11ywatch/log"
+import type { AddressInfo } from "net";
+import express from "express";
+import cors from "cors";
+import bodyParser from "body-parser";
+import { corsOptions, DEV } from "./config";
+import { root, crawl, detectImage, setScripts } from "./rest/routes";
 
-try {
-  setLogConfig({ container: "pagemind" })
-} catch(e) {
-  console.error(e)
-}
+const app = express();
 
-const app = express()
+app.use(cors(corsOptions));
+app.use(bodyParser.json({ limit: "500mb", extended: true }));
 
-app.use(cors(corsOptions))
-app.use(bodyParser.json({ limit: "500mb", extended: true }))
-
-app.get("/", root)
-app.post("/api/getPageIssues", crawl)
-app.post("/api/detectImage", detectImage)
-app.post("/api/updateScript", setScripts)
+app.get("/", root);
+app.post("/api/getPageIssues", crawl);
+app.post("/api/detectImage", detectImage);
+app.post("/api/updateScript", setScripts);
 
 const coreServer = app.listen(process.env.PORT || 0, () => {
-  log(
+  console.log(
     `🚀 Server ready at ${DEV ? "localhost" : ""}:${
       (coreServer.address() as AddressInfo).port
     }`
-  )
-})
+  );
+});
 
-export default coreServer
+export default coreServer;

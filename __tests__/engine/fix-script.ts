@@ -1,6 +1,6 @@
-import { getIssueFixScript } from "@app/core/lib/engine";
-import { NO_SKIP_CONTENT } from "@app/core/lib/engine/models/issue-type";
-import { skipNavigationMethod } from "@app/core/lib/engine/fix/js";
+import { getIssueFixScript } from "../../src/core/lib/engine";
+import { NO_SKIP_CONTENT } from "../../src/core/lib/engine/models/issue-type";
+import { skipNavigationMethod } from "../../src/core/lib/engine/fix/js";
 
 describe("Fix Script", () => {
   test("runs and returns empty string", () => {
