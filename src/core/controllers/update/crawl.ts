@@ -9,7 +9,7 @@ import validUrl from "valid-url";
 import getPageSpeed from "get-page-speed";
 import { sourceBuild } from "@a11ywatch/website-source-builder";
 import { format } from "prettier";
-import { CDN_URL } from "../../../config";
+import { CDN_URL, DEV } from "../../../config";
 import { puppetPool, checkCdn, grabHtmlSource, scriptBuild } from "../../lib";
 import type { IssueData } from "../../../types";
 import { loopIssues, getPageIssues, goToPage } from "./utils";
@@ -97,29 +97,30 @@ export const crawlWebsite = async ({ userId, url: urlMap, pageHeaders }) => {
       cdnSrc: cdnSourceStripped,
     };
 
-    const forked = fork(__dirname + "/cdn_worker", [], {
-      detached: true,
-      execArgv:
-        process.env.NODE_ENV === "production"
-          ? undefined
-          : ["-r", "ts-node/register"],
-    });
+    try {
+      const forked = fork(__dirname + "/cdn_worker", [], {
+        detached: true,
+        execArgv: DEV ? ["-r", "ts-node/register"] : undefined,
+      });
 
-    forked.on("message", (message: string) => {
-      if (message === "close") {
-        forked.kill("SIGINT");
-      }
-    });
+      forked.on("message", (message: string) => {
+        if (message === "close") {
+          forked.kill("SIGINT");
+        }
+      });
 
-    forked.send({
-      cdnSourceStripped,
-      domain,
-      screenshot,
-      screenshotStill,
-      scriptBody: scriptBuild(scriptProps, true),
-    });
+      forked.send({
+        cdnSourceStripped,
+        domain,
+        screenshot,
+        screenshotStill,
+        scriptBody: scriptBuild(scriptProps, true),
+      });
 
-    forked.unref();
+      forked.unref();
+    } catch (e) {
+      console.error(e);
+    }
 
     const cdn_url = CDN_URL.replace("/api", "");
     const cdn_base = cdn_url + "/screenshots/";
