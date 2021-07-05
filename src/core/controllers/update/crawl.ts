@@ -122,6 +122,7 @@ export const crawlWebsite = async ({ userId, url: urlMap, pageHeaders }) => {
       console.error(e);
     }
 
+    // TODO: FIX CDN PATH FOR ASSETS PROD:DEV
     const cdn_url = CDN_URL.replace("/api", "");
     const cdn_base = cdn_url + "/screenshots/";
 
