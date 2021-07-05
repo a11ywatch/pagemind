@@ -17,7 +17,6 @@ process.on(
     screenshot,
     screenshotStill,
   }) => {
-    console.log("boom");
     try {
       await fetch(`${process.env.SCRIPTS_CDN_URL}/add-screenshot`, {
         method: "POST",
