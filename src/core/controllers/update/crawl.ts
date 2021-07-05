@@ -9,7 +9,7 @@ import validUrl from "valid-url";
 import getPageSpeed from "get-page-speed";
 import { sourceBuild } from "@a11ywatch/website-source-builder";
 import { format } from "prettier";
-import { CDN_URL, DEV } from "../../../config";
+import { DEV, ASSETS_CDN } from "../../../config";
 import { puppetPool, checkCdn, grabHtmlSource, scriptBuild } from "../../lib";
 import type { IssueData } from "../../../types";
 import { loopIssues, getPageIssues, goToPage } from "./utils";
@@ -122,9 +122,7 @@ export const crawlWebsite = async ({ userId, url: urlMap, pageHeaders }) => {
       console.error(e);
     }
 
-    // TODO: FIX CDN PATH FOR ASSETS PROD:DEV
-    const cdn_url = CDN_URL.replace("/api", "");
-    const cdn_base = cdn_url + "/screenshots/";
+    const cdn_base = ASSETS_CDN + "/screenshots/";
 
     resolver = {
       webPage: {

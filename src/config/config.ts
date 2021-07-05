@@ -20,9 +20,11 @@ const CDN_URL = replaceDockerNetwork(
 const MAIN_API_URL = process.env.MAIN_API_URL;
 const SCRIPTS_CDN_URL_HOST = process.env.SCRIPTS_CDN_URL_HOST;
 const SCRIPTS_CDN_URL = replaceDockerNetwork(process.env.SCRIPTS_CDN_URL);
+const ASSETS_CDN = process.env.ASSETS_CDN ?? "http://localhost:8090";
 
 export {
   DEV,
+  ASSETS_CDN,
   CDN_URL,
   AI_SERVICE_URL,
   SCRIPTS_CDN_URL,

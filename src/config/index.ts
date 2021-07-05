@@ -6,6 +6,7 @@
 
 export {
   DEV,
+  ASSETS_CDN,
   CDN_URL,
   MAIN_API_URL,
   AI_SERVICE_URL,
