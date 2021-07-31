@@ -32,7 +32,11 @@ export const grabAlt = async ({ element, page, pageUrl }): Promise<Alt> => {
         height,
       });
 
-      alt = extractAlt(img);
+      if (img) {
+        alt = extractAlt(img);
+      } else {
+        console.info("could not get alt: invalid image.");
+      }
     } catch (e) {
       console.error(e);
     }

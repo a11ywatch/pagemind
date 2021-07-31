@@ -6,8 +6,8 @@
 
 import { fork } from "child_process";
 import { format } from "prettier";
-import { scriptBuild } from "../../../core/lib";
 import { sourceBuild } from "@a11ywatch/website-source-builder";
+import { scriptBuild } from "../../../core/lib";
 
 export const editScript = async ({
   userId,
