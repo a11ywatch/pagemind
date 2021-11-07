@@ -100,7 +100,7 @@ export const crawlWebsite = async ({ userId, url: urlMap, pageHeaders }) => {
     try {
       const forked = fork(__dirname + "/cdn_worker", [], {
         detached: true,
-        execArgv: DEV ? ["-r", "ts-node/register"] : undefined,
+        execArgv: DEV ? ["-r", "tsconfig-paths/register"] : undefined,
       });
 
       forked.on("message", (message: string) => {
