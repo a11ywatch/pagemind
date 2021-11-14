@@ -14,8 +14,10 @@ interface Alt {
   lang: string;
 }
 
-export const grabAlt = async ({ element, page, pageUrl }): Promise<Alt> => {
+export const grabAlt = async ({ element, page }): Promise<Alt> => {
   let alt = "";
+
+  console.log(element);
 
   if (
     [needsLongTextAlt, missingAltText].includes(element?.message) &&
@@ -26,6 +28,8 @@ export const grabAlt = async ({ element, page, pageUrl }): Promise<Alt> => {
         createCanvasPupet,
         element.selector
       );
+
+      console.log(imageToBase64);
 
       const img = await detectImageModel(imageToBase64, {
         width,

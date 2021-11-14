@@ -8,6 +8,7 @@ import { fork } from "child_process";
 import { format } from "prettier";
 import { sourceBuild } from "@a11ywatch/website-source-builder";
 import { scriptBuild } from "../../../core/lib";
+import { DEV } from "@app/config";
 
 export const editScript = async ({
   userId,
@@ -24,6 +25,7 @@ export const editScript = async ({
     });
     const forked = fork(`${__dirname}/cdn_worker`, [], {
       detached: true,
+      execArgv: DEV ? ["-r", "tsconfig-paths/register"] : undefined,
     });
     forked.send({
       cdnSourceStripped,
