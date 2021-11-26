@@ -33,7 +33,7 @@ export const getPageIssues = async ({
         ignoreUrl: true,
         page,
         browser,
-      })
+      }) as any
     );
     const skipContentIncluded = await skipContentCheck({ page });
 

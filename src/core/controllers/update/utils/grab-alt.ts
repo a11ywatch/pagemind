@@ -17,8 +17,6 @@ interface Alt {
 export const grabAlt = async ({ element, page }): Promise<Alt> => {
   let alt = "";
 
-  console.log(element);
-
   if (
     [needsLongTextAlt, missingAltText].includes(element?.message) &&
     element?.selector
@@ -28,8 +26,6 @@ export const grabAlt = async ({ element, page }): Promise<Alt> => {
         createCanvasPupet,
         element.selector
       );
-
-      console.log(imageToBase64);
 
       const img = await detectImageModel(imageToBase64, {
         width,

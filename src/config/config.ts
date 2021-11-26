@@ -4,10 +4,7 @@
  * LICENSE file in the root directory of this source tree.
  **/
 
-import dotenv from "dotenv";
 import { replaceDockerNetwork } from "@a11ywatch/website-source-builder";
-
-dotenv.config();
 
 const DEV = process.env.NODE_ENV !== "production";
 
@@ -20,7 +17,7 @@ const CDN_URL = replaceDockerNetwork(
 const MAIN_API_URL = process.env.MAIN_API_URL;
 const SCRIPTS_CDN_URL_HOST = process.env.SCRIPTS_CDN_URL_HOST;
 const SCRIPTS_CDN_URL = replaceDockerNetwork(process.env.SCRIPTS_CDN_URL);
-const ASSETS_CDN = process.env.ASSETS_CDN ?? "http://localhost:8090";
+const ASSETS_CDN = process.env.ASSETS_CDN || "http://localhost:8090";
 
 export {
   DEV,
