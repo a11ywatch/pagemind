@@ -72,16 +72,16 @@ export const loopIssues = ({ issues, page }): Promise<IssueInfo> => {
       const extraConfig = await grabAlt({
         element,
         page,
-        pageUrl: issues?.pageUrl,
+        // pageUrl: issues?.pageUrl,
       });
 
+      // TODO: update algorthm for score
       if (element.type === "error") {
         errorCount++;
         adaScore -= 2;
       }
       if (element.type === "warning") {
         warningCount++;
-        adaScore -= 1;
       }
       if (element.type === "notice") {
         noticeCount++;

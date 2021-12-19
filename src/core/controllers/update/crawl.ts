@@ -25,7 +25,7 @@ export const crawlWebsite = async ({ userId, url: urlMap, pageHeaders }) => {
     return EMPTY_RESPONSE;
   }
 
-  let browser = null;
+  let browser;
 
   try {
     browser = await puppetPool.acquire();
@@ -33,7 +33,7 @@ export const crawlWebsite = async ({ userId, url: urlMap, pageHeaders }) => {
     console.log(e);
   }
 
-  let page = null;
+  let page;
 
   try {
     page = await browser?.newPage();
