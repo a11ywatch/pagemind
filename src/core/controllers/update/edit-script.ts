@@ -8,7 +8,7 @@ import { fork } from "child_process";
 import { format } from "prettier";
 import { sourceBuild } from "@a11ywatch/website-source-builder";
 import { scriptBuild } from "../../../core/lib";
-import { DEV } from "@app/config";
+import { DEV } from "../../../config";
 
 export const editScript = async ({
   userId,
