@@ -18,7 +18,8 @@ const puppeteerConfig = {
     "--disable-dev-shm-usage",
     '--proxy-server="direct://"',
     "--proxy-bypass-list=*",
-  ],
+    DEV ? "--single-process" : ""
+  ].filter(Boolean),
   headless: true,
   dumpio: DEV,
   timeout: 15000,
