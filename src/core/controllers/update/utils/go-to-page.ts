@@ -48,7 +48,7 @@ const goToPage = async (
 ): Promise<[boolean, string]> => {
   let hasPage = true;
 
-  if (retryCount === 0 && page) {
+  if (retryCount === 0) {
     await page.setRequestInterception(true).catch((e) => {
       console.error(e);
     });
