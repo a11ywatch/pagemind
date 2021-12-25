@@ -4,6 +4,8 @@
  * LICENSE file in the root directory of this source tree.
  **/
 
+import type { Page } from "puppeteer";
+
 const skippedResources = [
   "quantserve",
   "adzerk",
@@ -40,20 +42,19 @@ const blockedResourceTypes = [
 ];
 
 const goToPage = async (
-  page: any,
+  page: Page,
   url: string,
-  _browser: any,
   retryCount: number = 0
 ): Promise<[boolean, string]> => {
   let hasPage = true;
 
-  if (retryCount === 0 && page) {
+  if (retryCount === 0) {
     await page.setRequestInterception(true).catch((e) => {
       console.error(e);
     });
     page.on("request", (request) => {
       try {
-        const requestUrl = request._url.split("?")[0].split("#")[0];
+        const requestUrl = request.url()?.split("?")[0].split("#")[0];
         if (
           blockedResourceTypes.indexOf(request.resourceType()) !== -1 ||
           skippedResources.some(

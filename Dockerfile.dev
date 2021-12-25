@@ -1,4 +1,17 @@
-FROM jeffmendez19/puppateer-node-light
+FROM node:14.7.0-alpine
+
+ENV CHROME_BIN="/usr/bin/chromium-browser" \
+	PUPPETEER_SKIP_CHROMIUM_DOWNLOAD="true"
+
+RUN set -x \
+	&& apk update \
+	&& apk upgrade \
+	&& apk add --no-cache \
+	udev \
+	bash \
+	ttf-freefont \
+	chromium \
+	g++ 
 
 WORKDIR /usr/src/app
 
@@ -7,5 +20,6 @@ COPY package*.json ./
 RUN npm ci
 
 COPY . .
+
 
 CMD ["node_modules/ts-node-dev/lib/bin.js", "--transpile-only", "src/server.ts"]
