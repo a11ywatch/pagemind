@@ -1,4 +1,7 @@
-FROM jeffmendez19/puppateer-node-light AS BUILD_IMAGE
+FROM node:14.7.0-alpine AS BUILD_IMAGE
+
+ENV CHROME_BIN="/usr/bin/chromium-browser" \
+	PUPPETEER_SKIP_CHROMIUM_DOWNLOAD="true"
 
 WORKDIR /usr/src/app
 
@@ -10,8 +13,19 @@ COPY . .
 
 RUN  npm run build
 
-FROM jeffmendez19/puppateer-node-light
+FROM node:14.7.0-alpine
 
+ENV CHROME_BIN="/usr/bin/chromium-browser" \
+	PUPPETEER_SKIP_CHROMIUM_DOWNLOAD="true"
+
+RUN set -x \
+	&& apk update \
+	&& apk upgrade \
+	&& apk add --no-cache \
+	ttf-freefont \
+	chromium \
+	g++ 
+    
 WORKDIR /usr/src/app
 
 COPY --from=BUILD_IMAGE /usr/src/app/dist ./dist

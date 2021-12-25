@@ -13,6 +13,7 @@ import { DEV, ASSETS_CDN } from "../../../config";
 import { puppetPool, checkCdn, grabHtmlSource, scriptBuild } from "../../lib";
 import type { IssueData } from "../../../types";
 import { loopIssues, getPageIssues, goToPage } from "./utils";
+import type { Browser, Page } from "puppeteer";
 
 const EMPTY_RESPONSE = {
   webPage: null,
@@ -25,7 +26,7 @@ export const crawlWebsite = async ({ userId, url: urlMap, pageHeaders }) => {
     return EMPTY_RESPONSE;
   }
 
-  let browser;
+  let browser: Browser;
 
   try {
     browser = await puppetPool.acquire();
@@ -33,7 +34,7 @@ export const crawlWebsite = async ({ userId, url: urlMap, pageHeaders }) => {
     console.log(e);
   }
 
-  let page;
+  let page: Page;
 
   try {
     page = await browser?.newPage();
@@ -56,7 +57,7 @@ export const crawlWebsite = async ({ userId, url: urlMap, pageHeaders }) => {
   let resolver = Object.assign({}, EMPTY_RESPONSE);
 
   try {
-    const [validPage] = await goToPage(page, urlMap, browser);
+    const [validPage] = await goToPage(page, urlMap);
 
     if (!validPage) {
       return EMPTY_RESPONSE;
