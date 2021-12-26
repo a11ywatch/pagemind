@@ -7,11 +7,14 @@ RUN set -x \
 	&& apk update \
 	&& apk upgrade \
 	&& apk add --no-cache \
-	udev \
-	bash \
 	ttf-freefont \
+	udev \
 	chromium \
-	g++ 
+	g++ \
+	jpeg-dev \
+	cairo-dev \
+	giflib-dev \
+	pango-dev
 
 WORKDIR /usr/src/app
 

@@ -23,8 +23,13 @@ RUN set -x \
 	&& apk upgrade \
 	&& apk add --no-cache \
 	ttf-freefont \
+	udev \
 	chromium \
-	g++ 
+	g++ \
+	jpeg-dev \
+	cairo-dev \
+	giflib-dev \
+	pango-dev
     
 WORKDIR /usr/src/app
 
