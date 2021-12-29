@@ -14,8 +14,6 @@ import {
 } from "../../../strings";
 import { grabAlt } from "./grab-alt";
 
-const ISSUE_TIMEOUT = 14000;
-
 interface IssueInfo {
   errorCount: number;
   warningCount: number;
@@ -45,37 +43,18 @@ export const loopIssues = ({ issues, page }): Promise<IssueInfo> => {
         possibleIssuesFixedByCdn,
       });
     }
-    let generationStop = false;
-    const destroyLoopIteration = setTimeout(() => {
-      console.log(`Issue fix setting timeout ${ISSUE_TIMEOUT}`);
-      generationStop = true;
-      resolve({
-        errorCount,
-        warningCount,
-        noticeCount,
-        adaScore,
-        scriptChildren,
-        possibleIssuesFixedByCdn,
-      });
-    }, ISSUE_TIMEOUT);
 
-    for (
-      let issueIndex = 0;
-      issueIndex < issues?.issues?.length;
-      issueIndex++
-    ) {
-      if (generationStop) {
-        console.log("Issue generation stopped");
-        break;
-      }
-      let element = issues?.issues[issueIndex];
+    let issueIndex = 0;
+
+    for await (const element of issues.issues) {
       const extraConfig = await grabAlt({
         element,
         page,
-        // pageUrl: issues?.pageUrl,
+      }).catch((e) => {
+        console.error(e);
+        return { alt: "" };
       });
 
-      // TODO: update algorthm for score
       if (element.type === "error") {
         errorCount++;
         adaScore -= 2;
@@ -88,7 +67,7 @@ export const loopIssues = ({ issues, page }): Promise<IssueInfo> => {
       }
 
       if (
-        !extraConfig.alt &&
+        !extraConfig?.alt &&
         [
           emptyIframeTitle,
           needsLongTextAlt,
@@ -108,21 +87,18 @@ export const loopIssues = ({ issues, page }): Promise<IssueInfo> => {
         scriptChildren += getFix;
       }
 
-      if (issueIndex === issues?.issues?.length - 1) {
-        if (destroyLoopIteration) {
-          clearTimeout(destroyLoopIteration);
-        }
-        resolve({
-          errorCount,
-          warningCount,
-          noticeCount,
-          adaScore,
-          scriptChildren: `${
-            includeDomainCheck ? `${getHostAsString}` : ""
-          }${scriptChildren}`,
-          possibleIssuesFixedByCdn,
-        });
-      }
+      issueIndex++;
     }
+
+    resolve({
+      errorCount,
+      warningCount,
+      noticeCount,
+      adaScore,
+      scriptChildren: `${
+        includeDomainCheck ? `${getHostAsString}` : ""
+      }${scriptChildren}`,
+      possibleIssuesFixedByCdn,
+    });
   });
 };
