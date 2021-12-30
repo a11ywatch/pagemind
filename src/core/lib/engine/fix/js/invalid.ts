@@ -25,7 +25,7 @@ export const fixInvalid = (
         imgElement${index}.alt = ${
       extraConfig.alt
         ? `"${extraConfig.alt}"`
-        : `getHostName(imgAltMissing${index}.src)`
+        : `getHostName(imgElement${index}.src)`
     };      
       }
 `,
