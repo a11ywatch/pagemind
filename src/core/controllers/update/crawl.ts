@@ -10,9 +10,17 @@ import getPageSpeed from "get-page-speed";
 import { sourceBuild } from "@a11ywatch/website-source-builder";
 import { format } from "prettier";
 import { DEV, ASSETS_CDN } from "../../../config";
-import { puppetPool, checkCdn, grabHtmlSource, scriptBuild } from "../../lib";
+import {
+  puppetPool,
+  checkCdn,
+  grabHtmlSource,
+  scriptBuild,
+  getPageIssues,
+  goToPage,
+  getPageMeta,
+} from "../../lib";
+
 import type { IssueData } from "../../../types";
-import { loopIssues, getPageIssues, goToPage } from "./utils";
 import type { Browser, Page } from "puppeteer";
 
 const EMPTY_RESPONSE = {
@@ -46,13 +54,8 @@ export const crawlWebsite = async ({ userId, url: urlMap, pageHeaders }) => {
     return EMPTY_RESPONSE;
   }
 
-  const {
-    domain,
-    pageUrl,
-    cdnSourceStripped,
-    cdnJsPath,
-    cdnMinJsPath,
-  } = sourceBuild(urlMap, userId);
+  const { domain, pageUrl, cdnSourceStripped, cdnJsPath, cdnMinJsPath } =
+    sourceBuild(urlMap, userId);
 
   let resolver = Object.assign({}, EMPTY_RESPONSE);
 
@@ -90,7 +93,7 @@ export const crawlWebsite = async ({ userId, url: urlMap, pageHeaders }) => {
       adaScore,
       scriptChildren,
       possibleIssuesFixedByCdn,
-    } = await loopIssues({ page, issues });
+    } = await getPageMeta({ page, issues, html });
 
     const scriptProps = {
       scriptChildren,

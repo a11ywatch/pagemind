@@ -5,16 +5,16 @@
  **/
 
 import { detectImageModel } from "../../../ai";
-import { createCanvasPupet } from "../../../lib";
+import { createCanvasPupet } from "../create-canvas";
 import { needsLongTextAlt, missingAltText } from "../../../strings";
-import { extractAlt } from "./extract-alt";
+import { getFirstItemBySplit } from "../utils/extract-first";
 
 interface Alt {
   alt: string;
   lang: string;
 }
 
-export const grabAlt = async ({ element, page }): Promise<Alt> => {
+export const getAltImage = async ({ element, page }): Promise<Alt> => {
   let alt = "";
 
   if (
@@ -33,7 +33,7 @@ export const grabAlt = async ({ element, page }): Promise<Alt> => {
       });
 
       if (img) {
-        alt = extractAlt(img);
+        alt = getFirstItemBySplit(img?.className);
       } else {
         console.info("could not get alt: invalid image.");
       }

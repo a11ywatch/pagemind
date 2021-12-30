@@ -6,8 +6,8 @@
 
 import pa11y from "pa11y";
 import { pa11yConfig } from "../../../../config";
-import { skipContentCheck } from "../../../lib";
-import { skipContentTemplate } from "../templates";
+import { skipContentCheck } from "../..";
+import { skipContentTemplate } from "../../../controllers/update/templates";
 import type { PageIssues, IssueMeta } from "../../../../types";
 
 export const getPageIssues = async ({
@@ -33,8 +33,9 @@ export const getPageIssues = async ({
         ignoreUrl: true,
         page,
         browser,
-      }) as any
+      })
     );
+
     const skipContentIncluded = await skipContentCheck({ page });
 
     if (issues && !skipContentIncluded) {
@@ -46,7 +47,7 @@ export const getPageIssues = async ({
     }
 
     return [
-      issues as any,
+      issues,
       {
         skipContentIncluded,
       },

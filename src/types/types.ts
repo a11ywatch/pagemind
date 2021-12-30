@@ -11,12 +11,12 @@ export interface Issue {
   message: string;
   context: string;
   selector: string;
-  runner: string;
-  runnerExtras: any;
+  runner?: string;
+  runnerExtras?: any;
 }
 
 export interface PageIssues {
-  issues?: [Issue];
+  issues?: Issue[];
 }
 
 export interface IssueMeta {

@@ -4,15 +4,11 @@
  * LICENSE file in the root directory of this source tree.
  **/
 
-import { getIssueFixScript } from "../../../lib";
+import { getIssueFixScript } from "../..";
 import { getHostAsString } from "@a11ywatch/website-source-builder";
-import {
-  needsLongTextAlt,
-  missingAltText,
-  emptyIframeTitle,
-  imgAltMissing,
-} from "../../../strings";
-import { grabAlt } from "./grab-alt";
+import { getAltImage } from "./grab-alt";
+import { getPageIssueScore } from "../utils/page-issue-score";
+import { getIncludesDomain } from "../utils/page-includes-domain";
 
 interface IssueInfo {
   errorCount: number;
@@ -23,7 +19,7 @@ interface IssueInfo {
   possibleIssuesFixedByCdn: number;
 }
 
-export const loopIssues = ({ issues, page }): Promise<IssueInfo> => {
+export const getPageMeta = ({ issues, page, html }): Promise<IssueInfo> => {
   let errorCount = 0;
   let warningCount = 0;
   let noticeCount = 0;
@@ -47,46 +43,35 @@ export const loopIssues = ({ issues, page }): Promise<IssueInfo> => {
     let issueIndex = 0;
 
     for await (const element of issues.issues) {
-      const extraConfig = await grabAlt({
+      const extraConfig = await getAltImage({
         element,
         page,
       }).catch((e) => {
         console.error(e);
         return { alt: "" };
       });
-
-      if (element.type === "error") {
-        errorCount++;
-        adaScore -= 2;
-      }
-      if (element.type === "warning") {
-        warningCount++;
-      }
-      if (element.type === "notice") {
-        noticeCount++;
-      }
+      const getFix = getIssueFixScript(element, issueIndex, extraConfig);
 
       if (
-        !extraConfig?.alt &&
-        [
-          emptyIframeTitle,
-          needsLongTextAlt,
-          missingAltText,
-          imgAltMissing,
-          "Img element is marked so that it is ignored by Assistive Technology.",
-        ].includes(element.message) &&
-        !includeDomainCheck
+        getIncludesDomain({ alt: extraConfig?.alt, message: element.message })
       ) {
         includeDomainCheck = true;
       }
-
-      const getFix = getIssueFixScript(element, issueIndex, extraConfig);
 
       if (getFix) {
         possibleIssuesFixedByCdn++;
         scriptChildren += getFix;
       }
 
+      if (element.type === "error") {
+        errorCount++;
+      } else if (element.type === "warning") {
+        warningCount++;
+      } else if (element.type === "notice") {
+        noticeCount++;
+      }
+
+      adaScore -= getPageIssueScore({ html, element });
       issueIndex++;
     }
 
@@ -96,7 +81,7 @@ export const loopIssues = ({ issues, page }): Promise<IssueInfo> => {
       noticeCount,
       adaScore,
       scriptChildren: `${
-        includeDomainCheck ? `${getHostAsString}` : ""
+        includeDomainCheck ? getHostAsString : ""
       }${scriptChildren}`,
       possibleIssuesFixedByCdn,
     });

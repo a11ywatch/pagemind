@@ -43,37 +43,31 @@ const blockedResourceTypes = [
 
 const goToPage = async (
   page: Page,
-  url: string,
-  retryCount: number = 0
+  url: string
 ): Promise<[boolean, string]> => {
   let hasPage = true;
 
-  if (retryCount === 0) {
-    await page.setRequestInterception(true).catch((e) => {
-      console.error(e);
-    });
-    page.on("request", (request) => {
-      try {
-        const requestUrl = request.url()?.split("?")[0].split("#")[0];
-        if (
-          blockedResourceTypes.indexOf(request.resourceType()) !== -1 ||
-          skippedResources.some(
-            (resource) => requestUrl.indexOf(resource) !== -1
-          )
-        ) {
-          request.abort();
-        } else {
-          request.continue();
-        }
-      } catch (e) {
-        console.log(e);
-      }
-    });
+  try {
+    await page.setRequestInterception(true);
+  } catch (e) {
+    console.error(e);
   }
 
+  page.on("request", (request) => {
+    const requestUrl = request.url()?.split("?")[0].split("#")[0];
+    if (
+      blockedResourceTypes.indexOf(request.resourceType()) !== -1 ||
+      skippedResources.some((resource) => requestUrl.indexOf(resource) !== -1)
+    ) {
+      request.abort();
+    } else {
+      request.continue();
+    }
+  });
+
   try {
-    await page?.goto(url, {
-      timeout: retryCount === 0 ? 15000 : 5000,
+    await page.goto(url, {
+      timeout: 15000,
       waitUntil: "domcontentloaded",
     });
   } catch (e) {

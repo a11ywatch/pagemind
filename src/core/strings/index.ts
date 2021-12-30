@@ -8,4 +8,5 @@ export {
   needsLongTextAlt,
   missingAltText,
   imgAltMissing,
+  imgMarkedAssertive,
 } from "./script-fix";
