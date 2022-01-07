@@ -6,7 +6,6 @@
 
 import { createPuppeteerPool } from "./create-puppeteer-pool";
 
-
 const puppeteerPool = createPuppeteerPool();
 
 const puppetPool = {

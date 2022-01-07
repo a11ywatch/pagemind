@@ -34,8 +34,6 @@ export const getAltImage = async ({ element, page }): Promise<Alt> => {
 
       if (img) {
         alt = getFirstItemBySplit(img?.className);
-      } else {
-        console.info("could not get alt: invalid image.");
       }
     } catch (e) {
       console.error(e);
