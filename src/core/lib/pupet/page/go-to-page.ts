@@ -4,42 +4,8 @@
  * LICENSE file in the root directory of this source tree.
  **/
 
+import { pa11yConfig } from "../../../../config";
 import type { Page } from "puppeteer";
-
-const skippedResources = [
-  "quantserve",
-  "adzerk",
-  "doubleclick",
-  "adition",
-  "exelator",
-  "sharethrough",
-  "cdn.api.twitter",
-  "google-analytics",
-  "googletagmanager",
-  "google",
-  "fontawesome",
-  "facebook",
-  "analytics",
-  "optimizely",
-  "clicktale",
-  "mixpanel",
-  "zedo",
-  "clicksor",
-  "tiqcdn",
-  "livereload",
-  "cdn.jsdelivr.net",
-];
-
-const blockedResourceTypes = [
-  "media",
-  "font",
-  "texttrack",
-  "object",
-  "beacon",
-  "csp_report",
-  "imageset",
-  "websocket",
-];
 
 const goToPage = async (
   page: Page,
@@ -48,26 +14,8 @@ const goToPage = async (
   let hasPage = true;
 
   try {
-    await page.setRequestInterception(true);
-  } catch (e) {
-    console.error(e);
-  }
-
-  page.on("request", (request) => {
-    const requestUrl = request.url()?.split("?")[0].split("#")[0];
-    if (
-      blockedResourceTypes.indexOf(request.resourceType()) !== -1 ||
-      skippedResources.some((resource) => requestUrl.indexOf(resource) !== -1)
-    ) {
-      request.abort();
-    } else {
-      request.continue();
-    }
-  });
-
-  try {
     await page.goto(url, {
-      timeout: 15000,
+      timeout: pa11yConfig.timeout,
       waitUntil: "domcontentloaded",
     });
   } catch (e) {

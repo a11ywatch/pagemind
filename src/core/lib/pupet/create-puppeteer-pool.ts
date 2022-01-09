@@ -5,8 +5,12 @@
  **/
 
 import genericPool from "generic-pool";
-import puppeteer from "puppeteer";
+import puppeteer from "puppeteer-extra";
+import StealthPlugin from "puppeteer-extra-plugin-stealth";
+import AdblockerPlugin from "puppeteer-extra-plugin-adblocker";
 import { DEV } from "../../../config";
+
+puppeteer.use(StealthPlugin()).use(AdblockerPlugin({ blockTrackers: true }));
 
 const puppeteerConfig = {
   executablePath: process.env.CHROME_BIN || null,
@@ -18,7 +22,7 @@ const puppeteerConfig = {
     "--disable-dev-shm-usage",
     '--proxy-server="direct://"',
     "--proxy-bypass-list=*",
-    DEV ? "--single-process" : ""
+    DEV ? "--single-process" : "",
   ].filter(Boolean),
   headless: true,
   dumpio: DEV,

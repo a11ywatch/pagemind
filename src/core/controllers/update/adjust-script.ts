@@ -8,11 +8,7 @@ import { format } from "prettier";
 import { skipNavigationMethod, scriptBuild } from "../../../core/lib";
 import { sourceBuild } from "@a11ywatch/website-source-builder";
 
-export const adjustScript = async ({
-  userId,
-  url: urlMap,
-  script: resolver,
-}) => {
+export const adjustScript = async ({ url: urlMap, script: resolver }) => {
   const enabledSkip = resolver?.scriptMeta?.skipContentEnabled;
   const { domain, cdnSourceStripped } = sourceBuild(urlMap);
 

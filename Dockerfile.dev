@@ -7,9 +7,12 @@ RUN set -x \
 	&& apk update \
 	&& apk upgrade \
 	&& apk add --no-cache \
-	ttf-freefont \
 	udev \
+	bash \
+	ttf-freefont \
 	chromium \
+	python3 \
+	make \
 	g++ \
 	jpeg-dev \
 	cairo-dev \
