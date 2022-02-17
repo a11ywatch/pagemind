@@ -19,6 +19,7 @@ import {
   goToPage,
   getPageMeta,
 } from "../../lib";
+import lighthouse from "lighthouse";
 
 import type { IssueData } from "../../../types";
 import type { Browser, Page } from "puppeteer";
@@ -29,7 +30,12 @@ const EMPTY_RESPONSE = {
   script: null,
 };
 
-export const crawlWebsite = async ({ userId, url: urlMap, pageHeaders }) => {
+export const crawlWebsite = async ({
+  userId,
+  url: urlMap,
+  pageHeaders,
+  pageInsights,
+}) => {
   if (!validUrl.isUri(urlMap)) {
     return EMPTY_RESPONSE;
   }
@@ -128,6 +134,24 @@ export const crawlWebsite = async ({ userId, url: urlMap, pageHeaders }) => {
 
     const cdn_base = ASSETS_CDN + "/screenshots/";
 
+    let insight;
+
+    if (pageInsights) {
+      try {
+        const { lhr } = await lighthouse(urlMap, {
+          port: new URL(browser.wsEndpoint()).port,
+          output: "json",
+          logLevel: "info",
+          chromeFlags: ["--headless"],
+        });
+
+        // TODO: Look into other possible props
+        insight = lhr;
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
     resolver = {
       webPage: {
         domain,
@@ -149,6 +173,7 @@ export const crawlWebsite = async ({ userId, url: urlMap, pageHeaders }) => {
               : "#EF9A9A",
         },
         html,
+        insight,
         htmlIncluded: !!html,
         issuesInfo: {
           possibleIssuesFixedByCdn: possibleIssuesFixedByCdn,

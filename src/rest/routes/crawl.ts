@@ -6,6 +6,7 @@ const crawl = async (req, res, next) => {
       url: decodeURIComponent(req.body.url + ""),
       userId: req.body.userId,
       pageHeaders: req.body.pageHeaders,
+      pageInsights: req.body.pageInsights,
     });
 
     res.json(data);

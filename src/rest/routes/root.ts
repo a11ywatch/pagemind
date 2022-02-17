@@ -1,4 +1,4 @@
-const root = (req, res) => {
+const root = (_req, res) => {
   res.json({
     server_status: "online",
   });

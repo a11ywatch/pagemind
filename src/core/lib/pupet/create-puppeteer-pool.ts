@@ -31,7 +31,7 @@ const puppeteerConfig = {
 
 const POOL_DEFAULTS = {
   min: 0,
-  max: process.env.PUPPET_POOL_MAX ?? 4,
+  max: process.env.PUPPET_POOL_MAX || 4,
   testOnBorrow: true,
   puppeteerArgs: [puppeteerConfig],
   validate: () => Promise.resolve(true),
