@@ -16,7 +16,8 @@ RUN  npm run build
 FROM node:14.7.0-alpine
 
 ENV CHROME_BIN="/usr/bin/chromium-browser" \
-	PUPPETEER_SKIP_CHROMIUM_DOWNLOAD="true"
+	PUPPETEER_SKIP_CHROMIUM_DOWNLOAD="true" \
+	DISPLAY="1.0"
 
 RUN set -x \
 	&& apk update \
