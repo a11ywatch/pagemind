@@ -1,4 +1,4 @@
-FROM node:14.7.0-alpine AS BUILD_IMAGE
+FROM node:14.18.2-alpine AS BUILD_IMAGE
 
 ENV CHROME_BIN="/usr/bin/chromium-browser" \
 	PUPPETEER_SKIP_CHROMIUM_DOWNLOAD="true"
@@ -13,7 +13,7 @@ COPY . .
 
 RUN  npm run build
 
-FROM node:14.7.0-alpine
+FROM node:14.18.2-alpine
 
 ENV CHROME_BIN="/usr/bin/chromium-browser" \
 	PUPPETEER_SKIP_CHROMIUM_DOWNLOAD="true"
