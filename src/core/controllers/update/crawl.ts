@@ -138,14 +138,12 @@ export const crawlWebsite = async ({
 
     if (pageInsights) {
       try {
+        // TODO: MOVE TO SEPERATE PROCESS WITH MESSAGE
         const { lhr } = await lighthouse(urlMap, {
           port: new URL(browser.wsEndpoint()).port,
           output: "json",
-          logLevel: "info",
-          chromeFlags: ["--headless"],
+          logLevel: DEV ? "info" : undefined,
         });
-
-        // TODO: Look into other possible props
         insight = lhr;
       } catch (e) {
         console.error(e);
