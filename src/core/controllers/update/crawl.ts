@@ -9,6 +9,7 @@ import validUrl from "valid-url";
 import getPageSpeed from "get-page-speed";
 import { sourceBuild } from "@a11ywatch/website-source-builder";
 import { format } from "prettier";
+import lighthouse from "lighthouse";
 import { DEV, ASSETS_CDN } from "../../../config";
 import {
   puppetPool,
@@ -19,8 +20,6 @@ import {
   goToPage,
   getPageMeta,
 } from "../../lib";
-import lighthouse from "lighthouse";
-
 import type { IssueData } from "../../../types";
 import type { Browser, Page } from "puppeteer";
 
@@ -212,5 +211,6 @@ export const crawlWebsite = async ({
       await puppetPool.clean(browser, page);
     }
   }
+
   return resolver;
 };

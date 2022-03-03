@@ -1,6 +1,6 @@
 {
   "name": "pagemind",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Get metrics on your web page with inclusion",
   "main": "./dist/server.js",
   "scripts": {

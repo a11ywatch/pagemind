@@ -8,6 +8,7 @@ import pa11y from "pa11y";
 import { pa11yConfig } from "../../../../config";
 import { skipContentCheck } from "../..";
 import { skipContentTemplate } from "../../../controllers/update/templates";
+import { issueSort } from "../../../lib/utils/sort";
 import type { PageIssues, IssueMeta } from "../../../../types";
 
 export const getPageIssues = async ({
@@ -44,6 +45,8 @@ export const getPageIssues = async ({
       } else {
         issues.issues = [skipContentTemplate];
       }
+      // TODO: look into grabbing in order from instance
+      issues.issues.sort(issueSort);
     }
 
     return [
