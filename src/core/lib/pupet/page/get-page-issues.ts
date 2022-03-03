@@ -4,7 +4,7 @@
  * LICENSE file in the root directory of this source tree.
  **/
 
-import pa11y from "pa11y";
+import litepa11y from "litepa11y";
 import { pa11yConfig } from "../../../../config";
 import { skipContentCheck } from "../..";
 import { skipContentTemplate } from "../../../controllers/update/templates";
@@ -28,7 +28,7 @@ export const getPageIssues = async ({
     : {};
 
   try {
-    const issues = await pa11y(
+    const issues = await litepa11y(
       urlPage,
       Object.assign({}, pa11yConfig, pa11yHeaders, {
         ignoreUrl: true,

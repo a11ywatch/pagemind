@@ -28,8 +28,10 @@ export const getPageMeta = ({ issues, page, html }): Promise<IssueInfo> => {
   let possibleIssuesFixedByCdn = 0;
   let includeDomainCheck = false;
 
+  const pageIssues = (issues && issues?.issues) || [];
+
   return new Promise(async (resolve) => {
-    if (!issues?.issues?.length) {
+    if (!pageIssues?.length) {
       resolve({
         errorCount,
         warningCount,
@@ -42,7 +44,7 @@ export const getPageMeta = ({ issues, page, html }): Promise<IssueInfo> => {
 
     let issueIndex = 0;
 
-    for await (const element of issues.issues) {
+    for (const element of pageIssues) {
       const extraConfig = await getAltImage({
         element,
         page,

@@ -35,8 +35,10 @@ WORKDIR /usr/src/app
 
 COPY --from=BUILD_IMAGE /usr/src/app/dist ./dist
 
-USER node
+COPY package*.json ./
 
 RUN npm install --production
+
+# USER node
 
 CMD [ "node", "./dist/server.js"]
