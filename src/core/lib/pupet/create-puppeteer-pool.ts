@@ -12,17 +12,27 @@ import { DEV } from "../../../config";
 
 puppeteer.use(StealthPlugin()).use(AdblockerPlugin({ blockTrackers: true }));
 
+const puppeteerArgs = [
+  "--no-sandbox",
+  "--disable-gpu",
+  "--disable-setuid-sandbox",
+  "--disable-dev-shm-usage",
+  '--proxy-server="direct://"',
+  "--proxy-bypass-list=*",
+];
+
+// TODO: m1 chip use add env for PUPPET_SINGLE_PROCESS via cli;
+if (
+  process.env.PUPPET_SINGLE_PROCESS &&
+  process.env.PUPPET_SINGLE_PROCESS === "true"
+) {
+  puppeteerArgs.push("--single-process");
+}
+
 const puppeteerConfig = {
   executablePath: process.env.CHROME_BIN || null,
   ignoreHTTPSErrors: true,
-  args: [
-    "--no-sandbox",
-    "--disable-setuid-sandbox",
-    "--disable-gpu",
-    "--disable-dev-shm-usage",
-    '--proxy-server="direct://"',
-    "--proxy-bypass-list=*",
-  ],
+  args: puppeteerArgs,
   headless: true,
   dumpio: DEV,
   timeout: 15000,
