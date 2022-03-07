@@ -8,6 +8,7 @@ import genericPool from "generic-pool";
 import puppeteer from "puppeteer-extra";
 import StealthPlugin from "puppeteer-extra-plugin-stealth";
 import AdblockerPlugin from "puppeteer-extra-plugin-adblocker";
+import type { Browser } from "puppeteer";
 import { DEV } from "../../../config";
 
 puppeteer.use(StealthPlugin()).use(AdblockerPlugin({ blockTrackers: true }));
@@ -21,7 +22,6 @@ const puppeteerArgs = [
   "--proxy-bypass-list=*",
 ];
 
-// TODO: m1 chip use add env for PUPPET_SINGLE_PROCESS via cli;
 if (
   process.env.PUPPET_SINGLE_PROCESS &&
   process.env.PUPPET_SINGLE_PROCESS === "true"
@@ -30,12 +30,12 @@ if (
 }
 
 const puppeteerConfig = {
-  executablePath: process.env.CHROME_BIN || null,
+  executablePath: process.env.CHROME_BIN || undefined,
   ignoreHTTPSErrors: true,
   args: puppeteerArgs,
   headless: true,
   dumpio: DEV,
-  timeout: 15000,
+  timeout: 25000,
 };
 
 const POOL_DEFAULTS = {
@@ -54,7 +54,7 @@ const createPuppeteerFactory = ({ puppeteerArgs, validate }) => ({
       console.log(e, { type: "error" });
     }
   },
-  async destroy(browser) {
+  async destroy(browser: Browser) {
     try {
       await browser?.close();
     } catch (e) {

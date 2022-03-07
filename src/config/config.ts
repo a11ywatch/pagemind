@@ -6,7 +6,7 @@
 
 import { replaceDockerNetwork } from "@a11ywatch/website-source-builder";
 
-const DEV = process.env.NODE_ENV !== "production";
+const DEV = process.env.NODE_ENV === "development";
 
 const AI_SERVICE_URL = replaceDockerNetwork(process.env.AI_SERVICE_URL);
 const CDN_URL = replaceDockerNetwork(

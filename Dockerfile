@@ -17,7 +17,8 @@ FROM node:14.7.0-alpine
 
 ENV CHROME_BIN="/usr/bin/chromium-browser" \
 	PUPPETEER_SKIP_CHROMIUM_DOWNLOAD="true" \
-	DISPLAY="1.0"
+	DISPLAY="1.0" \
+	NODE_ENV="production"
 
 RUN set -x \
 	&& apk update \
