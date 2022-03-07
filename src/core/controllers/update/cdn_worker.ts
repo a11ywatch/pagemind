@@ -6,42 +6,51 @@
 
 /* WORKER PROCESS - NO IMPORTS */
 const fetcher = require("node-fetch");
-const headers = { "Content-Type": "application/json" };
 
 process.on(
   "message",
-  async ({
+  ({
     scriptBody: scriptBuffer,
     cdnSourceStripped,
     domain,
     screenshot,
     screenshotStill,
   }) => {
-    try {
-      await fetcher(`${process.env.SCRIPTS_CDN_URL}/add-screenshot`, {
-        method: "POST",
-        body: JSON.stringify({
-          cdnSourceStripped,
-          domain,
-          screenshot,
-          screenshotStill,
-        }),
-        headers: { "Content-Type": "application/json" },
-      });
+    const headers = { "Content-Type": "application/json" };
 
-      await fetcher(`${process.env.SCRIPTS_CDN_URL}/add-script`, {
-        method: "POST",
-        body: JSON.stringify({
-          scriptBuffer,
-          cdnSourceStripped,
-          domain,
-        }),
-        headers,
-      });
-    } catch (e) {
-      console.error(e);
-    } finally {
+    const storeCDNValues = async () => {
+      try {
+        await fetcher(`${process.env.SCRIPTS_CDN_URL}/add-screenshot`, {
+          method: "POST",
+          body: JSON.stringify({
+            cdnSourceStripped,
+            domain,
+            screenshot,
+            screenshotStill,
+          }),
+          headers,
+        });
+      } catch (e) {
+        console.log(e);
+      }
+
+      try {
+        await fetcher(`${process.env.SCRIPTS_CDN_URL}/add-script`, {
+          method: "POST",
+          body: JSON.stringify({
+            scriptBuffer,
+            cdnSourceStripped,
+            domain,
+          }),
+          headers,
+        });
+      } catch (e) {
+        console.log(e);
+      }
+
       process.send("close");
-    }
+    };
+
+    storeCDNValues();
   }
 );
