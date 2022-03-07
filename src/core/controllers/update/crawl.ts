@@ -55,6 +55,12 @@ export const crawlWebsite = async ({
     console.log(e);
   }
 
+  try {
+    await page?.setBypassCSP(true);
+  } catch (e) {
+    console.log(e);
+  }
+
   if (!page) {
     return EMPTY_RESPONSE;
   }
