@@ -4,7 +4,7 @@
  * LICENSE file in the root directory of this source tree.
  **/
 
-import { SCRIPTS_CDN_URL_HOST } from "../../../../config";
+import { ASSETS_CDN } from "@app/config/config";
 
 const scriptDetect = ({
   domain,
@@ -14,11 +14,11 @@ const scriptDetect = ({
   cdnSrc?: string;
 }) => {
   const correctScript = `${cdnSrc.replace("-ada-fix", "")}`;
-  const domainSource = `${SCRIPTS_CDN_URL_HOST}/${domain}/${correctScript}`;
-  const pdetch = (correctScript.includes("-")
-    ? correctScript.split("-").pop()
-    : ""
+  const domainSource = `${ASSETS_CDN}/${domain}/${correctScript}`;
+  const pdetch = (
+    correctScript.includes("-") ? correctScript.split("-").pop() : ""
   ).replace("-", "/");
+  // TODO: REVIST DOMAIN EXTRACT LOGIC
 
   return `
 	// SO: SMART CDN
