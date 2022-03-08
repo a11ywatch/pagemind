@@ -24,7 +24,7 @@
     "get-page-speed": "^1.0.1",
     "lighthouse": "^9.4.0",
     "node-fetch": "2.6.0",
-    "litepa11y": "0.2.1",
+    "litepa11y": "0.2.2",
     "prettier": "^2.5.1",
     "puppeteer": "^13.4.1",
     "puppeteer-extra": "^3.2.3",
