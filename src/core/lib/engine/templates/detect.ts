@@ -4,7 +4,7 @@
  * LICENSE file in the root directory of this source tree.
  **/
 
-import { ASSETS_CDN } from "@app/config/config";
+import { ASSETS_CDN } from "../../../../config";
 
 const scriptDetect = ({
   domain,
@@ -13,21 +13,29 @@ const scriptDetect = ({
   domain?: string;
   cdnSrc?: string;
 }) => {
-  const correctScript = `${cdnSrc.replace("-ada-fix", "")}`;
-  const domainSource = `${ASSETS_CDN}/cdn/${domain}/${correctScript}`;
-  const pdetch = (
-    correctScript.includes("-") ? correctScript.split("-").pop() : ""
-  ).replace("-", "/");
-  // TODO: REVIST DOMAIN EXTRACT LOGIC
+  const findAdaIndex = cdnSrc.indexOf("-ada-fix-");
+  const baseTarget = cdnSrc.substring(0, findAdaIndex);
+  // start of cdn
+  const cdnSourceBase = `${ASSETS_CDN}/cdn/${domain}/${baseTarget}`;
+  // end of cdn target
+  const cdnSourceEndTarget = cdnSrc.slice(findAdaIndex);
+
+  const baseUrl = new URL(baseTarget);
+  const basePathName = baseUrl.pathname;
+  const currentPath = basePathName
+    // preserve domain ext
+    .replace("-", "*")
+    .replace(/[-]/g, "/")
+    .replace("*", "-");
 
   return `
 	// SO: SMART CDN
 	function detect(){
-		if (window.location.pathname !== "/${pdetch}") {
+		if (window.location.pathname !== "/${currentPath}") {
 			var ns = document.createElement("script");
 			var cs = document.currentScript;
 			var aw = window.location.pathname.replace("/", "").replace('/\?/g', "-");
-			ns.src = "${domainSource}" + aw + "-ada-fix.min.js";
+			ns.src = "${cdnSourceBase}" + aw + "${cdnSourceEndTarget}";
 			document.body.appendChild(ns);
 			if(cs) {
 				cs.remove();			
