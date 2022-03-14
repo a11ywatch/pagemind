@@ -14,7 +14,7 @@ const scriptDetect = ({
   cdnSrc?: string;
 }) => {
   const correctScript = `${cdnSrc.replace("-ada-fix", "")}`;
-  const domainSource = `${ASSETS_CDN}/${domain}/${correctScript}`;
+  const domainSource = `${ASSETS_CDN}/cdn/${domain}/${correctScript}`;
   const pdetch = (
     correctScript.includes("-") ? correctScript.split("-").pop() : ""
   ).replace("-", "/");
@@ -23,7 +23,7 @@ const scriptDetect = ({
   return `
 	// SO: SMART CDN
 	function detect(){
-		if (window.location.pathname !== "/${pdetch === "com" ? "" : pdetch}") {
+		if (window.location.pathname !== "/${pdetch}") {
 			var ns = document.createElement("script");
 			var cs = document.currentScript;
 			var aw = window.location.pathname.replace("/", "").replace('/\?/g', "-");

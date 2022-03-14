@@ -9,12 +9,9 @@ import { scriptBody, scriptDetect } from "./templates";
 const buildConfig = {
   scriptEntry: `<script defer>`,
   scriptExit: `</script>`,
-  funcHead: `try {
+  funcHead: `
   void function init() {`,
-  funcTail: `}();
-} catch (e) {
-  console.error(e);
-}`,
+  funcTail: `}();`,
 };
 
 interface ScriptBuildProps {
