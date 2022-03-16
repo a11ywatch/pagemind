@@ -19,14 +19,11 @@ const scriptDetect = ({
   const cdnSourceBase = `${ASSETS_CDN}/cdn/${domain}/${baseTarget}`;
   // end of cdn target
   const cdnSourceEndTarget = cdnSrc.slice(findAdaIndex);
+  const baseUrl = new URL(`http://${domain}/${baseTarget}`);
 
-  const baseUrl = new URL(baseTarget);
-  const basePathName = baseUrl.pathname;
-  const currentPath = basePathName
-    // preserve domain ext
-    .replace("-", "*")
-    .replace(/[-]/g, "/")
-    .replace("*", "-");
+  // transform to local path of url
+  const hostNameToPath = baseUrl.host.replace(/[.]/g, "-");
+  const currentPath = baseUrl.pathname.replace(`${hostNameToPath}-`, "");
 
   return `
 	// SO: SMART CDN
