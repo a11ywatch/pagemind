@@ -58,7 +58,8 @@ export const crawlWebsite = async ({
   }
 
   const cleanPool = async () =>
-    browser?.isConnected() && (await puppetPool.clean(browser, page));
+    browser?.isConnected() &&
+    (await puppetPool.clean(page, browser, pageInsights));
 
   if (!page) {
     await cleanPool();
@@ -119,6 +120,22 @@ export const crawlWebsite = async ({
       cdnSrc: cdnSourceStripped,
     };
 
+    let insight;
+
+    if (pageInsights) {
+      try {
+        // TODO: MOVE TO SEPERATE PROCESS WITH MESSAGE
+        const { lhr } = await lighthouse(urlMap, {
+          port: new URL(browser.wsEndpoint()).port,
+          output: "json",
+          logLevel: DEV ? "info" : undefined,
+        });
+        insight = lhr;
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
     try {
       // todo: setImmediate instead of fork
       const forked = fork(__dirname + "/cdn_worker", [], {
@@ -143,22 +160,6 @@ export const crawlWebsite = async ({
       forked.unref();
     } catch (e) {
       console.error(e);
-    }
-
-    let insight;
-
-    if (pageInsights) {
-      try {
-        // TODO: MOVE TO SEPERATE PROCESS WITH MESSAGE
-        const { lhr } = await lighthouse(urlMap, {
-          port: new URL(browser.wsEndpoint()).port,
-          output: "json",
-          logLevel: DEV ? "info" : undefined,
-        });
-        insight = lhr;
-      } catch (e) {
-        console.error(e);
-      }
     }
 
     resolver = {

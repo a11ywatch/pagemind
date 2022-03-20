@@ -4,6 +4,7 @@
  * LICENSE file in the root directory of this source tree.
  **/
 
+import type { Browser, Page } from "puppeteer";
 import { createPuppeteerPool } from "./create-puppeteer-pool";
 
 const puppeteerPool = createPuppeteerPool();
@@ -13,25 +14,20 @@ const puppetPool = {
     try {
       return await puppeteerPool.acquire();
     } catch (e) {
-      console.log(e, { type: "error" });
+      console.error(e, { type: "error" });
       return null;
     }
   },
-  close: async (browser) => {
+  clean: async (page: Page, browser: Browser, lighthouse?: boolean) => {
     try {
-      await browser?.close();
-    } catch (e) {
-      console.log(e, { type: "error" });
-    }
-  },
-  clean: async (browser, page) => {
-    try {
-      await page?.close();
-      if (browser) {
+      await page.close();
+      if (lighthouse) {
+        await puppeteerPool.destroy(browser);
+      } else {
         await puppeteerPool.release(browser);
       }
     } catch (e) {
-      console.log(e, { type: "error" });
+      console.error(e);
     }
   },
 };
