@@ -10,6 +10,9 @@ import StealthPlugin from "puppeteer-extra-plugin-stealth";
 import AdblockerPlugin from "puppeteer-extra-plugin-adblocker";
 import type { Browser } from "puppeteer";
 import { DEV } from "../../../config";
+import { cpus } from "os";
+
+const numCPUs = Math.max(Math.floor(cpus().length / 2), 1);
 
 puppeteer.use(StealthPlugin()).use(AdblockerPlugin({ blockTrackers: true }));
 
@@ -22,10 +25,7 @@ const puppeteerArgs = [
   "--proxy-bypass-list=*",
 ];
 
-if (
-  process.env.PUPPET_SINGLE_PROCESS &&
-  process.env.PUPPET_SINGLE_PROCESS === "true"
-) {
+if (process.env.PUPPET_SINGLE_PROCESS === "true") {
   puppeteerArgs.push("--single-process");
 }
 
@@ -40,7 +40,7 @@ const puppeteerConfig = {
 
 const POOL_DEFAULTS = {
   min: 0,
-  max: process.env.PUPPET_POOL_MAX || 4,
+  max: Math.max(numCPUs - 2, 4),
   testOnBorrow: true,
   puppeteerArgs: [puppeteerConfig],
   validate: () => Promise.resolve(true),

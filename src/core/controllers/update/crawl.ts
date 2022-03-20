@@ -29,6 +29,8 @@ const EMPTY_RESPONSE = {
   script: null,
 };
 
+const cdn_base = ASSETS_CDN + "/screenshots/";
+
 export const crawlWebsite = async ({
   userId,
   url: urlMap,
@@ -55,14 +57,18 @@ export const crawlWebsite = async ({
     console.log(e);
   }
 
+  const cleanPool = async () =>
+    browser?.isConnected() && (await puppetPool.clean(browser, page));
+
+  if (!page) {
+    await cleanPool();
+    return EMPTY_RESPONSE;
+  }
+
   try {
     await page?.setBypassCSP(true);
   } catch (e) {
     console.log(e);
-  }
-
-  if (!page) {
-    return EMPTY_RESPONSE;
   }
 
   const { domain, pageUrl, cdnSourceStripped, cdnJsPath, cdnMinJsPath } =
@@ -74,6 +80,7 @@ export const crawlWebsite = async ({
     const [validPage] = await goToPage(page, urlMap);
 
     if (!validPage) {
+      await cleanPool();
       return EMPTY_RESPONSE;
     }
 
@@ -113,6 +120,7 @@ export const crawlWebsite = async ({
     };
 
     try {
+      // todo: setImmediate instead of fork
       const forked = fork(__dirname + "/cdn_worker", [], {
         detached: true,
         execArgv: DEV ? ["-r", "tsconfig-paths/register"] : undefined,
@@ -136,8 +144,6 @@ export const crawlWebsite = async ({
     } catch (e) {
       console.error(e);
     }
-
-    const cdn_base = ASSETS_CDN + "/screenshots/";
 
     let insight;
 
@@ -212,11 +218,9 @@ export const crawlWebsite = async ({
     };
   } catch (e) {
     console.error(e);
-  } finally {
-    if (browser?.isConnected()) {
-      await puppetPool.clean(browser, page);
-    }
   }
+
+  await cleanPool();
 
   return resolver;
 };
