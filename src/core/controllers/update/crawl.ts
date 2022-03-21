@@ -19,10 +19,9 @@ import {
   goToPage,
   getPageMeta,
 } from "../../lib";
-import path from "path";
-import Piscina from "piscina";
 import type { Browser, Page } from "puppeteer";
 import type { IssueData } from "../../../types";
+import { storeCDNValues } from "./cdn_worker";
 
 const EMPTY_RESPONSE = {
   webPage: null,
@@ -31,14 +30,6 @@ const EMPTY_RESPONSE = {
 };
 
 const cdn_base = ASSETS_CDN + "/screenshots/";
-
-const piscina = new Piscina({
-  filename: path.resolve(__dirname, "cdn_worker.js"),
-  // @ts-ignore
-  env: {
-    SCRIPTS_CDN_URL: process.env.SCRIPTS_CDN_URL,
-  },
-});
 
 export const crawlWebsite = async ({
   userId,
@@ -145,17 +136,19 @@ export const crawlWebsite = async ({
       }
     }
 
-    try {
-      await piscina.run({
-        cdnSourceStripped,
-        domain,
-        screenshot,
-        screenshotStill,
-        scriptBody: scriptBuild(scriptProps, true),
-      });
-    } catch (e) {
-      console.error(e);
-    }
+    setImmediate(async () => {
+      try {
+        await storeCDNValues({
+          cdnSourceStripped,
+          domain,
+          screenshot,
+          screenshotStill,
+          scriptBody: scriptBuild(scriptProps, true),
+        });
+      } catch (e) {
+        console.error(e);
+      }
+    });
 
     resolver = {
       webPage: {

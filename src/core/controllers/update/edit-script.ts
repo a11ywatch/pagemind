@@ -7,15 +7,8 @@
 import { format } from "prettier";
 import { sourceBuild } from "@a11ywatch/website-source-builder";
 import { scriptBuild } from "../../../core/lib";
-import path from "path";
-import Piscina from "piscina";
 
-const piscina = new Piscina({
-  filename: path.resolve(__dirname, "cdn_worker.js"),
-  env: {
-    SCRIPTS_CDN_URL: process.env.SCRIPTS_CDN_URL,
-  },
-});
+import { storeCDNValues } from "./cdn_worker";
 
 export const editScript = async ({
   userId,
@@ -30,24 +23,26 @@ export const editScript = async ({
     parser: "html",
   });
 
-  try {
-    await piscina.run({
-      cdnSourceStripped,
-      scriptBody: scriptBuild(
-        {
-          scriptChildren: newScript
-            .replace("<script defer>", "")
-            .replace("</script>", ""),
-          domain,
-          cdnSrc: cdnSourceStripped,
-        },
-        true
-      ),
-      domain: domain || resolver?.domain,
-    });
-  } catch (e) {
-    console.log(e, { type: "error" });
-  }
+  setImmediate(async () => {
+    try {
+      await storeCDNValues({
+        cdnSourceStripped,
+        scriptBody: scriptBuild(
+          {
+            scriptChildren: newScript
+              .replace("<script defer>", "")
+              .replace("</script>", ""),
+            domain,
+            cdnSrc: cdnSourceStripped,
+          },
+          true
+        ),
+        domain: domain || resolver?.domain,
+      });
+    } catch (e) {
+      console.log(e, { type: "error" });
+    }
+  });
 
   return resolver;
 };
