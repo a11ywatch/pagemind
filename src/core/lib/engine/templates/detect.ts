@@ -16,12 +16,12 @@ const scriptDetect = ({
   const findAdaIndex = cdnSrc.indexOf("-ada-fix-");
   const baseTarget = cdnSrc.substring(0, findAdaIndex);
   // start of cdn
-  const cdnSourceBase = `${ASSETS_CDN}/cdn/${domain}/${baseTarget}`;
+  const cdnSourceBase = `${ASSETS_CDN}/scripts/${domain}/${baseTarget}`;
   // end of cdn target
   const cdnSourceEndTarget = cdnSrc.slice(findAdaIndex);
-  const baseUrl = new URL(`http://${domain}/${baseTarget}`);
 
   // transform to local path of url
+  const baseUrl = new URL(`http://${domain}/${baseTarget}`);
   const hostNameToPath = baseUrl.host.replace(/[.]/g, "-");
   const currentPath = baseUrl.pathname.replace(`${hostNameToPath}-`, "");
 
@@ -32,7 +32,7 @@ const scriptDetect = ({
 			var ns = document.createElement("script");
 			var cs = document.currentScript;
 			var aw = window.location.pathname.replace("/", "").replace('/\?/g', "-");
-			ns.src = "${cdnSourceBase}" + aw + "${cdnSourceEndTarget}";
+			ns.src = "${cdnSourceBase}" + aw + "${cdnSourceEndTarget}.min.js";
 			document.body.appendChild(ns);
 			if(cs) {
 				cs.remove();			
