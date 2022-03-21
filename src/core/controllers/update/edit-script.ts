@@ -4,11 +4,18 @@
  * LICENSE file in the root directory of this source tree.
  **/
 
-import { fork } from "child_process";
 import { format } from "prettier";
 import { sourceBuild } from "@a11ywatch/website-source-builder";
 import { scriptBuild } from "../../../core/lib";
-import { DEV } from "../../../config";
+import path from "path";
+import Piscina from "piscina";
+
+const piscina = new Piscina({
+  filename: path.resolve(__dirname, "cdn_worker.js"),
+  env: {
+    SCRIPTS_CDN_URL: process.env.SCRIPTS_CDN_URL,
+  },
+});
 
 export const editScript = async ({
   userId,
@@ -18,16 +25,13 @@ export const editScript = async ({
 }) => {
   const { domain, cdnSourceStripped } = sourceBuild(urlMap, userId);
 
+  resolver.script = format(newScript, {
+    semi: true,
+    parser: "html",
+  });
+
   try {
-    resolver.script = format(newScript, {
-      semi: true,
-      parser: "html",
-    });
-    const forked = fork(`${__dirname}/cdn_worker`, [], {
-      detached: true,
-      execArgv: DEV ? ["-r", "tsconfig-paths/register"] : undefined,
-    });
-    forked.send({
+    await piscina.run({
       cdnSourceStripped,
       scriptBody: scriptBuild(
         {
@@ -40,12 +44,6 @@ export const editScript = async ({
         true
       ),
       domain: domain || resolver?.domain,
-    });
-    forked.unref();
-    forked.on("message", (message: string) => {
-      if (message === "close") {
-        forked.kill("SIGINT");
-      }
     });
   } catch (e) {
     console.log(e, { type: "error" });

@@ -4,7 +4,6 @@
  * LICENSE file in the root directory of this source tree.
  **/
 
-import { fork } from "child_process";
 import validUrl from "valid-url";
 import getPageSpeed from "get-page-speed";
 import { sourceBuild } from "@a11ywatch/website-source-builder";
@@ -20,8 +19,10 @@ import {
   goToPage,
   getPageMeta,
 } from "../../lib";
-import type { IssueData } from "../../../types";
+import path from "path";
+import Piscina from "piscina";
 import type { Browser, Page } from "puppeteer";
+import type { IssueData } from "../../../types";
 
 const EMPTY_RESPONSE = {
   webPage: null,
@@ -30,6 +31,14 @@ const EMPTY_RESPONSE = {
 };
 
 const cdn_base = ASSETS_CDN + "/screenshots/";
+
+const piscina = new Piscina({
+  filename: path.resolve(__dirname, "cdn_worker.js"),
+  // @ts-ignore
+  env: {
+    SCRIPTS_CDN_URL: process.env.SCRIPTS_CDN_URL,
+  },
+});
 
 export const crawlWebsite = async ({
   userId,
@@ -137,27 +146,13 @@ export const crawlWebsite = async ({
     }
 
     try {
-      // todo: setImmediate instead of fork
-      const forked = fork(__dirname + "/cdn_worker", [], {
-        detached: true,
-        execArgv: DEV ? ["-r", "tsconfig-paths/register"] : undefined,
-      });
-
-      forked.on("message", (message: string) => {
-        if (message === "close") {
-          forked.kill("SIGINT");
-        }
-      });
-
-      forked.send({
+      await piscina.run({
         cdnSourceStripped,
         domain,
         screenshot,
         screenshotStill,
         scriptBody: scriptBuild(scriptProps, true),
       });
-
-      forked.unref();
     } catch (e) {
       console.error(e);
     }
@@ -168,9 +163,9 @@ export const crawlWebsite = async ({
         url: pageUrl,
         adaScore,
         cdnConnected: pageHasCdn,
-        screenshot: cdn_base + cdnJsPath.replace(".js", ".png"),
+        screenshot: `${cdn_base}${cdnJsPath.replace(".js", ".png")}`,
         screenshotStill: screenshotStill
-          ? cdn_base + cdnJsPath.replace(".js", "-still.png")
+          ? `${cdn_base}${cdnJsPath.replace(".js", "-still.png")}`
           : "",
         pageLoadTime: {
           duration,
