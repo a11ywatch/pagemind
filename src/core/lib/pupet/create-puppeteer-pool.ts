@@ -12,7 +12,7 @@ import type { Browser } from "puppeteer";
 import { DEV } from "../../../config";
 import { cpus } from "os";
 
-const numCPUs = Math.max(Math.floor(cpus().length / 2), 1);
+const numCPUs = Math.max(Math.floor(cpus().length / 3), 1);
 
 puppeteer.use(StealthPlugin()).use(AdblockerPlugin({ blockTrackers: true }));
 
@@ -35,12 +35,12 @@ const puppeteerConfig = {
   args: puppeteerArgs,
   headless: true,
   dumpio: DEV,
-  timeout: 25000,
+  timeout: 15000,
 };
 
 const POOL_DEFAULTS = {
   min: 0,
-  max: Math.max(numCPUs - 2, 4),
+  max: Math.max(numCPUs, 4),
   testOnBorrow: true,
   puppeteerArgs: [puppeteerConfig],
   validate: () => Promise.resolve(true),

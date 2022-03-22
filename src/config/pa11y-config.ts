@@ -8,5 +8,5 @@ export const pa11yConfig = {
   includeNotices: false,
   includeWarnings: true,
   chromeLaunchConfig: { ignoreHTTPSErrors: true, executablePath: undefined },
-  timeout: 30000,
+  timeout: 15000,
 };
