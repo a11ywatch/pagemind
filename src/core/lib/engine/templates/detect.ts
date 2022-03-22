@@ -27,21 +27,21 @@ const scriptDetect = ({
 
   return `
 	// SO: SMART CDN
-	function detect(){
-		if (window.location.pathname !== "/${currentPath}") {
-			var ns = document.createElement("script");
-			var cs = document.currentScript;
-			var aw = window.location.pathname.replace("/", "").replace('/\?/g', "-");
-			ns.src = "${cdnSourceBase}" + aw + "${cdnSourceEndTarget}.min.js";
-			document.body.appendChild(ns);
-			if(cs) {
-				cs.remove();			
-			}
-			return false;
-		}  
-	};
-	detect();
-	window.addEventListener('popstate', detect);
+	// function detect(){
+	// 	if (window.location.pathname !== "${currentPath}") {
+	// 		var ns = document.createElement("script");
+	// 		var cs = document.currentScript;
+	// 		var aw = window.location.pathname.replace("/", "").replace('/\?/g', "-");
+	// 		ns.src = "${cdnSourceBase}" + aw + "${cdnSourceEndTarget}.min.js";
+	// 		document.body.appendChild(ns);
+	// 		if(cs) {
+	// 			cs.remove();			
+	// 		}
+	// 		return false;
+	// 	}  
+	// };
+	// detect();
+	// window.addEventListener('popstate', detect);
 	// EO: SMART CDN
 	`;
 };
