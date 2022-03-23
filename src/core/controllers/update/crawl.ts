@@ -16,6 +16,7 @@ import {
 import type { Browser, Page } from "puppeteer";
 import type { IssueData } from "../../../types";
 import { storeCDNValues } from "./cdn_worker";
+import { chromeHost } from "@app/config/chrome";
 
 const EMPTY_RESPONSE = {
   webPage: null,
@@ -52,8 +53,7 @@ export const crawlWebsite = async ({
   }
 
   const cleanPool = async () =>
-    browser?.isConnected() &&
-    (await puppetPool.clean(page, browser, pageInsights));
+    browser?.isConnected() && (await puppetPool.clean(page));
 
   if (!page) {
     await cleanPool();
@@ -121,8 +121,10 @@ export const crawlWebsite = async ({
         // TODO: MOVE TO SEPERATE PROCESS WITH MESSAGE
         const { lhr } = await lighthouse(urlMap, {
           port: new URL(browser.wsEndpoint()).port,
+          hostname: chromeHost,
           output: "json",
           logLevel: DEV ? "info" : undefined,
+          disableStorageReset: true,
         });
         insight = lhr;
       } catch (e) {

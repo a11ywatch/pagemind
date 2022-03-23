@@ -1,4 +1,4 @@
-import type { Browser, Page } from "puppeteer";
+import type { Page } from "puppeteer";
 import { createPuppeteerPool } from "./create-puppeteer-pool";
 
 const puppeteerPool = createPuppeteerPool();
@@ -6,20 +6,15 @@ const puppeteerPool = createPuppeteerPool();
 const puppetPool = {
   acquire: async () => {
     try {
-      return await puppeteerPool.acquire();
+      return await puppeteerPool.create();
     } catch (e) {
       console.error(e, { type: "error" });
       return null;
     }
   },
-  clean: async (page: Page, browser: Browser, lighthouse?: boolean) => {
+  clean: async (page: Page) => {
     try {
-      await page.close();
-      if (lighthouse) {
-        await puppeteerPool.destroy(browser);
-      } else {
-        await puppeteerPool.release(browser);
-      }
+      return await puppeteerPool.destroy(page);
     } catch (e) {
       console.error(e);
     }

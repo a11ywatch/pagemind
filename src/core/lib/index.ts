@@ -13,7 +13,6 @@ export {
   checkCdn,
   grabHtmlSource,
   createPuppeteerPool,
-  launchPuppeter,
   skipContentCheck,
   puppetPool,
 } from "./pupet";
