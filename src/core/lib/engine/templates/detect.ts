@@ -38,7 +38,9 @@ const scriptDetect = (scriptProps: ScriptSource) => {
 			var ns = document.createElement("script");
 			var cs = document.currentScript;
 			var aw = window.location.pathname.replace("/", "").replace('/\?/g', "-");
-			ns.src = "${cdnSourceBase}" + aw + "${cdnSourceEndTarget}.min.js";
+      var ppath = aw !== "/" ? "-" : "";
+
+			ns.src = "${cdnSourceBase}" + ppath + aw + "${cdnSourceEndTarget}.min.js";
 			document.body.appendChild(ns);
 			if(cs) {
 				cs.remove();			
