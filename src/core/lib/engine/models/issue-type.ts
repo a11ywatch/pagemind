@@ -1,9 +1,3 @@
-/*
- * Copyright (c) A11yWatch, LLC. and its affiliates.
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree.
- **/
-
 const EMPTY_HEAD_TITLE_TYPE =
   "The title element in the head section should be non-empty.";
 
@@ -11,8 +5,7 @@ const INVALID_HTML_PROPS = {
   ignored: {
     img: "Img element is marked so that it is ignored by Assistive Technology.",
   },
-  lang:
-    "The html element should have a lang or xml:lang attribute which describes the language of the document.",
+  lang: "The html element should have a lang or xml:lang attribute which describes the language of the document.",
   anchor_needs_props:
     "Anchor element found with a valid href attribute, but no link content has been supplied.",
   button:

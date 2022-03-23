@@ -1,9 +1,3 @@
-/*
- * Copyright (c) A11yWatch, LLC. and its affiliates.
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree.
- **/
-
 import genericPool from "generic-pool";
 import puppeteer from "puppeteer-extra";
 import StealthPlugin from "puppeteer-extra-plugin-stealth";
@@ -12,7 +6,7 @@ import type { Browser } from "puppeteer";
 import { DEV } from "../../../config";
 import { cpus } from "os";
 
-const numCPUs = Math.max(Math.floor(cpus().length / 3), 1);
+const numCPUs = Math.max(Math.floor(cpus().length / 3), 2);
 
 puppeteer.use(StealthPlugin()).use(AdblockerPlugin({ blockTrackers: true }));
 
@@ -40,7 +34,7 @@ const puppeteerConfig = {
 
 const POOL_DEFAULTS = {
   min: 0,
-  max: Math.max(numCPUs, 4),
+  max: numCPUs,
   testOnBorrow: true,
   puppeteerArgs: [puppeteerConfig],
   validate: () => Promise.resolve(true),
@@ -68,7 +62,7 @@ export async function launchPuppeter() {
   try {
     return await puppeteer.launch(puppeteerConfig);
   } catch (e) {
-    console.log(e, { type: "error" });
+    console.error(e);
     return null;
   }
 }
