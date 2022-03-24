@@ -1,9 +1,6 @@
-import puppeteer from "puppeteer-extra";
-import StealthPlugin from "puppeteer-extra-plugin-stealth";
+import puppeteer from "puppeteer";
 import type { Browser, Page } from "puppeteer";
 import { wsChromeEndpointurl } from "@app/config/chrome";
-
-puppeteer.use(StealthPlugin());
 
 const createPuppeteerFactory = () => ({
   async create() {

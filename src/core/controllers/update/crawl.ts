@@ -26,6 +26,9 @@ const EMPTY_RESPONSE = {
 
 const cdn_base = ASSETS_CDN + "/screenshots/";
 
+const cleanPool = async (browser: Browser, page: Page) =>
+  browser.isConnected() && (await puppetPool.clean(page, browser));
+
 export const crawlWebsite = async ({
   userId,
   url: urlMap,
@@ -52,11 +55,8 @@ export const crawlWebsite = async ({
     console.log(e);
   }
 
-  const cleanPool = async () =>
-    browser?.isConnected() && (await puppetPool.clean(page, browser));
-
   if (!page) {
-    await cleanPool();
+    await cleanPool(browser, page);
     return EMPTY_RESPONSE;
   }
 
@@ -69,7 +69,7 @@ export const crawlWebsite = async ({
     const [validPage] = await goToPage(page, urlMap);
 
     if (!validPage) {
-      await cleanPool();
+      await cleanPool(browser, page);
       return EMPTY_RESPONSE;
     }
 
@@ -118,7 +118,6 @@ export const crawlWebsite = async ({
           hostname: chromeHost,
           output: "json",
           logLevel: DEV ? "info" : undefined,
-          disableStorageReset: true,
         });
         insight = lhr;
       } catch (e) {
@@ -199,7 +198,7 @@ export const crawlWebsite = async ({
     console.error(e);
   }
 
-  await cleanPool();
+  await cleanPool(browser, page);
 
   return resolver;
 };

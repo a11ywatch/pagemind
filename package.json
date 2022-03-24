@@ -26,8 +26,6 @@
     "node-fetch": "2.6.0",
     "prettier": "^2.5.1",
     "puppeteer": "^13.5.1",
-    "puppeteer-extra": "^3.2.3",
-    "puppeteer-extra-plugin-stealth": "^2.9.0",
     "valid-url": "^1.0.9"
   },
   "devDependencies": {
