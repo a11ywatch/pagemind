@@ -1,4 +1,4 @@
-import type { Page } from "puppeteer";
+import type { Browser, Page } from "puppeteer";
 import { createPuppeteerPool } from "./create-puppeteer-pool";
 
 const puppeteerPool = createPuppeteerPool();
@@ -12,9 +12,9 @@ const puppetPool = {
       return null;
     }
   },
-  clean: async (page: Page) => {
+  clean: async (page: Page, browser: Browser) => {
     try {
-      return await puppeteerPool.destroy(page);
+      return await puppeteerPool.destroy(page, browser);
     } catch (e) {
       console.error(e);
     }

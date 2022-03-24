@@ -53,17 +53,11 @@ export const crawlWebsite = async ({
   }
 
   const cleanPool = async () =>
-    browser?.isConnected() && (await puppetPool.clean(page));
+    browser?.isConnected() && (await puppetPool.clean(page, browser));
 
   if (!page) {
     await cleanPool();
     return EMPTY_RESPONSE;
-  }
-
-  try {
-    await page?.setBypassCSP(true);
-  } catch (e) {
-    console.log(e);
   }
 
   const { domain, pageUrl, cdnSourceStripped, cdnJsPath, cdnMinJsPath } =

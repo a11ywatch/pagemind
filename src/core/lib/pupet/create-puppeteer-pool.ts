@@ -1,24 +1,25 @@
 import puppeteer from "puppeteer-extra";
 import StealthPlugin from "puppeteer-extra-plugin-stealth";
-import AdblockerPlugin from "puppeteer-extra-plugin-adblocker";
-import type { Page } from "puppeteer";
+import type { Browser, Page } from "puppeteer";
 import { wsChromeEndpointurl } from "@app/config/chrome";
 
-puppeteer.use(StealthPlugin()).use(AdblockerPlugin({ blockTrackers: true }));
+puppeteer.use(StealthPlugin());
 
 const createPuppeteerFactory = () => ({
   async create() {
     try {
       return await puppeteer.connect({
         browserWSEndpoint: wsChromeEndpointurl,
+        ignoreHTTPSErrors: true,
       });
     } catch (e) {
       console.error(e);
     }
   },
-  async destroy(page: Page) {
+  async destroy(page: Page, browser: Browser) {
     try {
-      return await page?.close();
+      await page?.close();
+      await browser.disconnect();
     } catch (e) {
       console.error(e);
     }

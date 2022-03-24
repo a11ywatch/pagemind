@@ -10,7 +10,7 @@ const goToPage = async (
   try {
     await page.goto(url, {
       timeout: pa11yConfig.timeout,
-      waitUntil: "domcontentloaded",
+      waitUntil: "load",
     });
   } catch (e) {
     console.error(e);
