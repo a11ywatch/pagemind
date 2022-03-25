@@ -26,8 +26,8 @@ const EMPTY_RESPONSE = {
 
 const cdn_base = ASSETS_CDN + "/screenshots/";
 
-const cleanPool = async (browser: Browser, page: Page) =>
-  browser.isConnected() && (await puppetPool.clean(page, browser));
+const cleanPool = async (browser?: Browser, page?: Page) =>
+  browser?.isConnected() && (await puppetPool.clean(page, browser));
 
 export const crawlWebsite = async ({
   userId,
@@ -112,12 +112,12 @@ export const crawlWebsite = async ({
 
     if (pageInsights) {
       try {
-        // TODO: MOVE TO SEPERATE PROCESS WITH MESSAGE
         const { lhr } = await lighthouse(urlMap, {
           port: new URL(browser.wsEndpoint()).port,
           hostname: chromeHost,
           output: "json",
           logLevel: DEV ? "info" : undefined,
+          disableStorageReset: true,
         });
         insight = lhr;
       } catch (e) {
