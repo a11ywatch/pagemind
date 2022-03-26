@@ -3,6 +3,7 @@ import { getHostAsString } from "@a11ywatch/website-source-builder";
 import { getAltImage } from "./grab-alt";
 import { getPageIssueScore } from "../utils/page-issue-score";
 import { getIncludesDomain } from "../utils/page-includes-domain";
+import { missingAltText } from "@app/core/strings";
 
 interface IssueInfo {
   errorCount: number;
@@ -38,7 +39,7 @@ export const getPageMeta = ({ issues, page, html }): Promise<IssueInfo> => {
 
     let issueIndex = 0;
 
-    for (const element of pageIssues) {
+    for (let element of pageIssues) {
       const extraConfig = await getAltImage({
         element,
         page,
@@ -46,6 +47,17 @@ export const getPageMeta = ({ issues, page, html }): Promise<IssueInfo> => {
         console.error(e);
         return { alt: "" };
       });
+
+      const altFix = extraConfig?.alt;
+
+      if (altFix && element.message.includes(missingAltText)) {
+        element.message = `${element.message} Try setting the alt prop to ${altFix}.`;
+        element.context = `${element.context.replace(
+          ">",
+          ` alt="${altFix}">`
+        )}`;
+      }
+
       const getFix = getIssueFixScript(element, issueIndex, extraConfig);
 
       if (

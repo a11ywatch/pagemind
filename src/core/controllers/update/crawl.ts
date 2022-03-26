@@ -39,23 +39,21 @@ export const crawlWebsite = async ({
     return EMPTY_RESPONSE;
   }
 
-  let browser: Browser;
-
-  try {
-    browser = await puppetPool.acquire();
-  } catch (e) {
-    console.log(e);
-  }
-
+  const browser: Browser = await puppetPool.acquire();
   let page: Page;
 
   try {
     page = await browser?.newPage();
   } catch (e) {
-    console.log(e);
+    console.error(e);
   }
 
   if (!page) {
+    await cleanPool(browser, page);
+    return EMPTY_RESPONSE;
+  }
+
+  if (!(await goToPage(page, urlMap))) {
     await cleanPool(browser, page);
     return EMPTY_RESPONSE;
   }
@@ -66,19 +64,19 @@ export const crawlWebsite = async ({
   let resolver = Object.assign({}, EMPTY_RESPONSE);
 
   try {
-    const [validPage] = await goToPage(page, urlMap);
-
-    if (!validPage) {
-      await cleanPool(browser, page);
-      return EMPTY_RESPONSE;
-    }
-
-    const [issues, issueMeta] = await getPageIssues({
+    const a11yIssues = await getPageIssues({
       urlPage: pageUrl,
       page,
       browser,
       pageHeaders,
     });
+
+    if (!a11yIssues) {
+      await cleanPool(browser, page);
+      return EMPTY_RESPONSE;
+    }
+
+    const [issues, issueMeta] = a11yIssues;
 
     const [screenshot, screenshotStill] = await Promise.all([
       page.screenshot({ fullPage: true }),

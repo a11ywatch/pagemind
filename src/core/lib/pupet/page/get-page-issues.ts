@@ -10,7 +10,7 @@ export const getPageIssues = async ({
   page,
   browser,
   pageHeaders,
-}): Promise<[PageIssues, IssueMeta]> => {
+}): Promise<[PageIssues, IssueMeta] | false> => {
   const pa11yHeaders = pageHeaders?.length
     ? {
         headers: pageHeaders.map((item: any) => {
@@ -50,7 +50,7 @@ export const getPageIssues = async ({
       },
     ];
   } catch (e) {
-    console.log(e);
-    return [{}, { skipContentIncluded: false }];
+    console.error(e);
+    return false;
   }
 };
