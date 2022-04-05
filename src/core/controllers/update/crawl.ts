@@ -7,7 +7,6 @@ import { DEV, ASSETS_CDN } from "../../../config";
 import {
   puppetPool,
   checkCdn,
-  grabHtmlSource,
   scriptBuild,
   getPageIssues,
   goToPage,
@@ -53,10 +52,15 @@ export const crawlWebsite = async ({
     return EMPTY_RESPONSE;
   }
 
+  let duration = 0;
+
+  const start = Date.now();
+
   if (!(await goToPage(page, urlMap))) {
     await cleanPool(browser, page);
     return EMPTY_RESPONSE;
   }
+  duration = Math.floor(Date.now() - start);
 
   const { domain, pageUrl, cdnSourceStripped, cdnJsPath, cdnMinJsPath } =
     sourceBuild(urlMap, userId);
@@ -71,6 +75,7 @@ export const crawlWebsite = async ({
       pageHeaders,
     });
 
+    // if the method failed to run runner
     if (!a11yIssues) {
       await cleanPool(browser, page);
       return EMPTY_RESPONSE;
@@ -87,9 +92,7 @@ export const crawlWebsite = async ({
 
     const pageHasCdn = await checkCdn({ page, cdnMinJsPath, cdnJsPath });
 
-    const [html, duration] = await grabHtmlSource({
-      page,
-    });
+    let html = "";
 
     const {
       errorCount,
@@ -159,7 +162,6 @@ export const crawlWebsite = async ({
         },
         html,
         insight,
-        htmlIncluded: !!html,
         issuesInfo: {
           possibleIssuesFixedByCdn: possibleIssuesFixedByCdn,
           totalIssues: issues?.issues?.length || 0,
