@@ -10,10 +10,10 @@ import {
   goToPage,
   getPageMeta,
 } from "../../lib";
-import type { Browser, Page } from "puppeteer";
-import type { IssueData } from "../../../types";
 import { storeCDNValues } from "./cdn_worker";
 import { chromeHost } from "@app/config/chrome";
+import type { Browser, Page } from "puppeteer";
+import type { IssueData } from "../../../types";
 
 const EMPTY_RESPONSE = {
   webPage: null,
@@ -116,7 +116,9 @@ export const crawlWebsite = async ({
       }
     }
 
-    // TODO: move to RPC
+    const scriptBody = scriptBuild(scriptProps, true);
+
+    // TODO: move to gRPC FROM API SERVER NOT PAGEMIND -> CDN
     setImmediate(async () => {
       try {
         await storeCDNValues({
@@ -124,7 +126,7 @@ export const crawlWebsite = async ({
           domain,
           screenshot,
           screenshotStill,
-          scriptBody: scriptBuild(scriptProps, true),
+          scriptBody,
         });
       } catch (e) {
         console.error(e);
@@ -173,7 +175,7 @@ export const crawlWebsite = async ({
       script: {
         pageUrl,
         domain,
-        script: scriptBuild(scriptProps, false),
+        script: scriptBody,
         cdnUrlMinified: cdnMinJsPath,
         cdnUrl: cdnJsPath,
         cdnConnected: pageHasCdn,

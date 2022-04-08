@@ -39,11 +39,6 @@ const blockedResourceTypes = [
   // "image", // images can take intense CPU
 ];
 
-const viewport = {
-  width: 1280,
-  height: 1024,
-};
-
 const networkBlock = (request: HTTPRequest) => {
   const requestUrl = request.url()?.split("?")[0].split("#")[0];
   if (
@@ -58,12 +53,6 @@ const networkBlock = (request: HTTPRequest) => {
 
 const goToPage = async (page: Page, url: string): Promise<boolean> => {
   let hasPage = true;
-
-  try {
-    await page.setViewport(viewport);
-  } catch (e) {
-    console.error(e);
-  }
 
   try {
     await page.setRequestInterception(true);

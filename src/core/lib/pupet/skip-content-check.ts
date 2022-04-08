@@ -19,9 +19,8 @@ export const skipContentCheck = async ({
       ];
 
       var matchFound: Node | boolean = false;
-      var type = "button";
 
-      void (function skipAll(index = 0) {
+      void (function skipAll(index = 0, type = "button") {
         const xpath = `//${type}[translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz')='${skipNameList[index]}']`;
         const matchingElement = document.evaluate(
           xpath,
@@ -38,7 +37,7 @@ export const skipContentCheck = async ({
           }
 
           if (skipNameList[index + 1]) {
-            skipAll(index + 1);
+            skipAll(index + 1, type);
           }
         } else {
           matchFound = matchingElement;

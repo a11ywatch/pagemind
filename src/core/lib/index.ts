@@ -11,7 +11,6 @@ export {
   getAltImage,
   createCanvasPupet,
   checkCdn,
-  grabHtmlSource,
   createPuppeteerPool,
   skipContentCheck,
   puppetPool,

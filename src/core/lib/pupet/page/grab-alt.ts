@@ -27,7 +27,7 @@ export const getAltImage = async ({ element, page }): Promise<Alt> => {
       });
 
       if (img) {
-        alt = getFirstItemBySplit(img?.className);
+        alt = getFirstItemBySplit(img.className);
       }
     } catch (e) {
       console.error(e);
