@@ -1,4 +1,3 @@
-import validUrl from "valid-url";
 import getPageSpeed from "get-page-speed";
 import { sourceBuild } from "@a11ywatch/website-source-builder";
 import { format } from "prettier";
@@ -34,10 +33,6 @@ export const crawlWebsite = async ({
   pageHeaders,
   pageInsights,
 }) => {
-  if (!validUrl.isUri(urlMap)) {
-    return EMPTY_RESPONSE;
-  }
-
   const browser: Browser = await puppetPool.acquire();
   let page: Page;
 
@@ -126,6 +121,7 @@ export const crawlWebsite = async ({
       }
     }
 
+    // TODO: move to RPC
     setImmediate(async () => {
       try {
         await storeCDNValues({
@@ -165,7 +161,7 @@ export const crawlWebsite = async ({
         issuesInfo: {
           possibleIssuesFixedByCdn: possibleIssuesFixedByCdn,
           totalIssues: issues?.issues?.length || 0,
-          issuesFixedByCdn: pageHasCdn ? possibleIssuesFixedByCdn : 0,
+          issuesFixedByCdn: possibleIssuesFixedByCdn || 0,
           errorCount,
           warningCount,
           noticeCount,

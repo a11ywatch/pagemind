@@ -1,4 +1,3 @@
-import "dotenv/config";
 import type { AddressInfo } from "net";
 import express from "express";
 import bodyParser from "body-parser";
