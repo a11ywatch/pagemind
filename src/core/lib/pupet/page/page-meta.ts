@@ -14,7 +14,7 @@ interface IssueInfo {
   possibleIssuesFixedByCdn: number;
 }
 
-export const getPageMeta = ({ issues, page, html }): Promise<IssueInfo> => {
+export const getPageMeta = ({ issues, page }): Promise<IssueInfo> => {
   let errorCount = 0;
   let warningCount = 0;
   let noticeCount = 0;
@@ -79,7 +79,7 @@ export const getPageMeta = ({ issues, page, html }): Promise<IssueInfo> => {
         noticeCount++;
       }
 
-      adaScore -= getPageIssueScore({ html, element });
+      adaScore -= getPageIssueScore({ element });
       issueIndex++;
     }
 

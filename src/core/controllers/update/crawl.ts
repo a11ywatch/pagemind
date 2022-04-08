@@ -1,6 +1,5 @@
 import getPageSpeed from "get-page-speed";
 import { sourceBuild } from "@a11ywatch/website-source-builder";
-import { format } from "prettier";
 import lighthouse from "lighthouse";
 import { DEV, ASSETS_CDN } from "../../../config";
 import {
@@ -63,7 +62,7 @@ export const crawlWebsite = async ({
   let resolver = Object.assign({}, EMPTY_RESPONSE);
 
   try {
-    const a11yIssues = await getPageIssues({
+    const [issues, issueMeta] = await getPageIssues({
       urlPage: pageUrl,
       page,
       browser,
@@ -71,12 +70,10 @@ export const crawlWebsite = async ({
     });
 
     // if the method failed to run runner
-    if (!a11yIssues) {
+    if (!issues) {
       await cleanPool(browser, page);
       return EMPTY_RESPONSE;
     }
-
-    const [issues, issueMeta] = a11yIssues;
 
     const [screenshot, screenshotStill] = await Promise.all([
       page.screenshot({ fullPage: true }),
@@ -87,8 +84,6 @@ export const crawlWebsite = async ({
 
     const pageHasCdn = await checkCdn({ page, cdnMinJsPath, cdnJsPath });
 
-    let html = "";
-
     const {
       errorCount,
       warningCount,
@@ -96,7 +91,7 @@ export const crawlWebsite = async ({
       adaScore,
       scriptChildren,
       possibleIssuesFixedByCdn,
-    } = await getPageMeta({ page, issues, html });
+    } = await getPageMeta({ page, issues });
 
     const scriptProps = {
       scriptChildren,
@@ -156,7 +151,6 @@ export const crawlWebsite = async ({
               ? "#E6EE9C"
               : "#EF9A9A",
         },
-        html,
         insight,
         issuesInfo: {
           possibleIssuesFixedByCdn: possibleIssuesFixedByCdn,
@@ -179,10 +173,7 @@ export const crawlWebsite = async ({
       script: {
         pageUrl,
         domain,
-        script: format(scriptBuild(scriptProps, false), {
-          semi: true,
-          parser: "html",
-        }),
+        script: scriptBuild(scriptProps, false),
         cdnUrlMinified: cdnMinJsPath,
         cdnUrl: cdnJsPath,
         cdnConnected: pageHasCdn,
