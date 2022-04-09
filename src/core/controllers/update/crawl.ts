@@ -28,10 +28,11 @@ const cleanPool = async (browser?: Browser, page?: Page) =>
 
 export const crawlWebsite = async ({
   userId,
-  url: urlMap,
+  url: uri,
   pageHeaders,
   pageInsights,
 }) => {
+  const urlMap = decodeURIComponent(uri);
   const browser: Browser = await puppetPool.acquire();
   let page: Page;
 
@@ -46,15 +47,14 @@ export const crawlWebsite = async ({
     return EMPTY_RESPONSE;
   }
 
-  let duration = 0;
-
-  const start = Date.now();
+  let duration = Date.now();
 
   if (!(await goToPage(page, urlMap))) {
     await cleanPool(browser, page);
     return EMPTY_RESPONSE;
   }
-  duration = Math.floor(Date.now() - start);
+
+  duration = Math.floor(Date.now() - duration); // set the duration to time it takes to load page for ttyl
 
   const { domain, pageUrl, cdnSourceStripped, cdnJsPath, cdnMinJsPath } =
     sourceBuild(urlMap, userId);
@@ -68,12 +68,6 @@ export const crawlWebsite = async ({
       browser,
       pageHeaders,
     });
-
-    // if the method failed to run runner
-    if (!issues) {
-      await cleanPool(browser, page);
-      return EMPTY_RESPONSE;
-    }
 
     const [screenshot, screenshotStill] = await Promise.all([
       page.screenshot({ fullPage: true }),

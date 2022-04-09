@@ -1,5 +1,2 @@
-import { MAIN_API_URL } from "./config";
-
-export const corsOptions = {
-  origin: [MAIN_API_URL + ""],
-};
+export const GRPC_PORT = 50051;
+export const GRPC_HOST = `127.0.0.1:${GRPC_PORT}`;

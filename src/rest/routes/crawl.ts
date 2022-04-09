@@ -2,12 +2,7 @@ import { crawlWebsite } from "../../core/controllers";
 
 const crawl = async (req, res, next) => {
   try {
-    const data = await crawlWebsite({
-      url: decodeURIComponent(req.body.url + ""),
-      userId: req.body.userId,
-      pageHeaders: req.body.pageHeaders,
-      pageInsights: req.body.pageInsights,
-    });
+    const data = await crawlWebsite(req.body);
 
     res.json(data);
   } catch (e) {

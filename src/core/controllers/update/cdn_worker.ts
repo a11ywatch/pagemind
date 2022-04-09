@@ -2,6 +2,7 @@ import fetcher from "node-fetch";
 
 const headers = { "Content-Type": "application/json" };
 
+// TODO: MOVE THIS EVENT TO API-SERVER
 export const storeCDNValues = async ({
   scriptBody: scriptBuffer,
   cdnSourceStripped,

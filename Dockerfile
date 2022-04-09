@@ -1,4 +1,4 @@
-FROM node:14.19.0-alpine AS BUILD_IMAGE
+FROM --platform=$BUILDPLATFORM node:17.8-alpine3.14 AS BUILD_IMAGE
 
 ENV CHROME_BIN="/usr/bin/chromium-browser" \
 	PUPPETEER_SKIP_CHROMIUM_DOWNLOAD="true"
@@ -13,7 +13,7 @@ COPY . .
 
 RUN  npm run build
 
-FROM node:14.19.0-alpine
+FROM node:17.8-alpine3.14
 
 ENV CHROME_BIN="/usr/bin/chromium-browser" \
 	PUPPETEER_SKIP_CHROMIUM_DOWNLOAD="true" \
@@ -28,6 +28,7 @@ RUN set -x \
 	ttf-freefont \
 	python3 \
 	make \
+	curl \
 	g++
     
 WORKDIR /usr/src/app
