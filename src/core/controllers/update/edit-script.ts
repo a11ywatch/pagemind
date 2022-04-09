@@ -1,7 +1,5 @@
-import { format } from "prettier";
 import { sourceBuild } from "@a11ywatch/website-source-builder";
-import { scriptBuild } from "../../../core/lib";
-
+import { scriptBuild } from "@app/core/lib/engine/build";
 import { storeCDNValues } from "./cdn_worker";
 
 export const editScript = async ({
@@ -12,10 +10,7 @@ export const editScript = async ({
 }) => {
   const { domain, cdnSourceStripped } = sourceBuild(urlMap, userId);
 
-  resolver.script = format(newScript, {
-    semi: true,
-    parser: "html",
-  });
+  resolver.script = newScript;
 
   setImmediate(async () => {
     try {
@@ -34,7 +29,7 @@ export const editScript = async ({
         domain: domain || resolver?.domain,
       });
     } catch (e) {
-      console.log(e, { type: "error" });
+      console.error(e);
     }
   });
 

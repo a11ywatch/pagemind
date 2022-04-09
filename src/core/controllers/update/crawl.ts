@@ -1,7 +1,7 @@
 import getPageSpeed from "get-page-speed";
 import { sourceBuild } from "@a11ywatch/website-source-builder";
 import lighthouse from "lighthouse";
-import { DEV, ASSETS_CDN } from "../../../config";
+import { DEV, ASSETS_CDN } from "@app/config/config";
 import {
   puppetPool,
   checkCdn,
@@ -9,11 +9,11 @@ import {
   getPageIssues,
   goToPage,
   getPageMeta,
-} from "../../lib";
-import { storeCDNValues } from "./cdn_worker";
+} from "@app/core/lib";
 import { chromeHost } from "@app/config/chrome";
+import { storeCDNValues } from "./cdn_worker";
 import type { Browser, Page } from "puppeteer";
-import type { IssueData } from "../../../types";
+import type { IssueData } from "@app/types";
 
 const EMPTY_RESPONSE = {
   webPage: null,

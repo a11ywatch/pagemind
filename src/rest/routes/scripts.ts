@@ -18,7 +18,7 @@ const setScripts = async (req, res, next) => {
 
     res.json(data);
   } catch (e) {
-    console.log(e, { type: "error" });
+    console.error(e);
     next();
   }
 };

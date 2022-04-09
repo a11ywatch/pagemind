@@ -1,5 +1,4 @@
-import { format } from "prettier";
-import { skipNavigationMethod, scriptBuild } from "../../../core/lib";
+import { skipNavigationMethod, scriptBuild } from "@app/core/lib";
 import { sourceBuild } from "@a11ywatch/website-source-builder";
 import { storeCDNValues } from "./cdn_worker";
 
@@ -24,10 +23,7 @@ export const adjustScript = async ({ url: urlMap, script: resolver }) => {
     }
   }
 
-  resolver.script = format(scriptBody, {
-    semi: true,
-    parser: "html",
-  });
+  resolver.script = scriptBody;
 
   setImmediate(async () => {
     try {
