@@ -1,4 +1,8 @@
+
 syntax = "proto3";
+
+import "google/protobuf/any.proto";
+
 
 service WebsiteService {
    rpc List (Empty) returns (WebsiteList) {}
@@ -21,7 +25,7 @@ message ScanParams {
 }
 
 message PageInsights {
-   string json = 1;
+   google.protobuf.Any json = 1;
 }
 
 message IssueMeta {

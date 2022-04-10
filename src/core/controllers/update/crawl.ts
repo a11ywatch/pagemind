@@ -105,6 +105,7 @@ export const crawlWebsite = async ({
           logLevel: DEV ? "info" : undefined,
           disableStorageReset: true,
         });
+        // TODO: map to protobufs
         insight = JSON.stringify(lhr);
       } catch (e) {
         console.error(e);
