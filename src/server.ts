@@ -1,16 +1,10 @@
 import type { AddressInfo } from "net";
 import express from "express";
-import bodyParser from "body-parser";
-import { detectImage, setScripts } from "./rest/routes";
 import { startGRPC } from "./proto/init";
 
 const app = express();
 
-app.use(bodyParser.json({ limit: "500mb", extended: true }));
-
-app.post("/api/detectImage", detectImage);
-app.post("/api/updateScript", setScripts);
-
+// TODO: move to http
 app.get("/_internal_/healthcheck", (_, res) => {
   res.send({
     status: "healthy",

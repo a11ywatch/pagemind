@@ -1,6 +1,7 @@
 import { Server, ServerCredentials } from "@grpc/grpc-js";
 import { GRPC_HOST, GRPC_PORT } from "@app/config/rpc";
 import { crawlWebsite } from "@app/core/controllers/update/crawl";
+import { mutateScript } from "@app/core/controllers/mutate";
 import { getProto } from "./website";
 
 // test data todo remove
@@ -28,6 +29,11 @@ export const createServer = async () => {
     // crawl page via puppeteer for issues
     scan: async (call, callback) => {
       const page = await crawlWebsite(call.request);
+      callback(null, page);
+    },
+    // set scripts for the page
+    setScript: async (call, callback) => {
+      const page = await mutateScript(call.request);
       callback(null, page);
     },
   });
