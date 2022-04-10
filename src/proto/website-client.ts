@@ -25,9 +25,9 @@ const listWebsites = () => {
   });
 };
 
-const insertWebsites = (website = {}) => {
+const gather = (website = {}) => {
   return new Promise((resolve, reject) => {
-    client.insert(website, (error, res) => {
+    client.gather(website, (error, res) => {
       if (!error) {
         resolve(res);
       } else {
@@ -39,7 +39,7 @@ const insertWebsites = (website = {}) => {
 
 const controller = {
   listWebsites,
-  insertWebsites,
+  gather,
 };
 
 export { client, createClient, controller };

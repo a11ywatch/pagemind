@@ -27,11 +27,12 @@ const cleanPool = async (browser?: Browser, page?: Page) =>
   browser?.isConnected() && (await puppetPool.clean(page, browser));
 
 export const crawlWebsite = async ({
-  userId,
+  userId: uid,
   url: uri,
   pageHeaders,
   pageInsights,
 }) => {
+  const userId = Number(uid);
   const urlMap = decodeURIComponent(uri);
   const browser: Browser = await puppetPool.acquire();
   let page: Page;
@@ -104,7 +105,7 @@ export const crawlWebsite = async ({
           logLevel: DEV ? "info" : undefined,
           disableStorageReset: true,
         });
-        insight = lhr;
+        insight = JSON.stringify(lhr);
       } catch (e) {
         console.error(e);
       }
