@@ -79,9 +79,8 @@ export const getPageMeta = ({ issues, page }): Promise<IssueInfo> => {
         noticeCount++;
       }
 
-      if (adaScore > 0) {
-        adaScore -= getPageIssueScore({ element });
-      }
+      adaScore -= getPageIssueScore({ element });
+
       issueIndex++;
     }
 

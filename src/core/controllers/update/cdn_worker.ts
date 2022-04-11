@@ -1,39 +1,35 @@
-import fetch from "node-fetch";
+import { controller } from "@app/proto/website-client";
 
-const headers = { "Content-Type": "application/json" };
+export interface Resource {
+  scriptBody?: string;
+  domain: string;
+  cdnSourceStripped?: string;
+  screenshot?: string | Buffer;
+  screenshotStill?: string;
+}
 
-// TODO: gRPC
 export const storeCDNValues = async ({
   scriptBody: scriptBuffer,
   cdnSourceStripped,
   domain,
   screenshot,
   screenshotStill,
-}: any) => {
+}: Resource) => {
   try {
-    await fetch(`${process.env.SCRIPTS_CDN_URL}/add-screenshot`, {
-      method: "POST",
-      body: JSON.stringify({
-        cdnSourceStripped,
-        domain,
-        screenshot,
-        screenshotStill,
-      }),
-      headers,
+    await controller.addScreenshot({
+      cdnSourceStripped,
+      domain,
+      screenshot,
+      screenshotStill,
     });
   } catch (e) {
     console.log(e);
   }
-
   try {
-    await fetch(`${process.env.SCRIPTS_CDN_URL}/add-script`, {
-      method: "POST",
-      body: JSON.stringify({
-        scriptBuffer,
-        cdnSourceStripped,
-        domain,
-      }),
-      headers,
+    await controller.addScript({
+      scriptBuffer,
+      cdnSourceStripped,
+      domain,
     });
   } catch (e) {
     console.log(e);
