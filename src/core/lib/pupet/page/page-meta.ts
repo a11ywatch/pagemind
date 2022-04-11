@@ -79,7 +79,9 @@ export const getPageMeta = ({ issues, page }): Promise<IssueInfo> => {
         noticeCount++;
       }
 
-      adaScore -= getPageIssueScore({ element });
+      if (adaScore > 0) {
+        adaScore -= getPageIssueScore({ element });
+      }
       issueIndex++;
     }
 
@@ -87,7 +89,7 @@ export const getPageMeta = ({ issues, page }): Promise<IssueInfo> => {
       errorCount,
       warningCount,
       noticeCount,
-      adaScore,
+      adaScore: Math.max(0, adaScore),
       scriptChildren: `${
         includeDomainCheck ? getHostAsString : ""
       }${scriptChildren}`,

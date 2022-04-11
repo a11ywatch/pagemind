@@ -1,8 +1,8 @@
-import fetcher from "node-fetch";
+import fetch from "node-fetch";
 
 const headers = { "Content-Type": "application/json" };
 
-// TODO: MOVE THIS EVENT TO API-SERVER
+// TODO: gRPC
 export const storeCDNValues = async ({
   scriptBody: scriptBuffer,
   cdnSourceStripped,
@@ -11,7 +11,7 @@ export const storeCDNValues = async ({
   screenshotStill,
 }: any) => {
   try {
-    await fetcher(`${process.env.SCRIPTS_CDN_URL}/add-screenshot`, {
+    await fetch(`${process.env.SCRIPTS_CDN_URL}/add-screenshot`, {
       method: "POST",
       body: JSON.stringify({
         cdnSourceStripped,
@@ -26,7 +26,7 @@ export const storeCDNValues = async ({
   }
 
   try {
-    await fetcher(`${process.env.SCRIPTS_CDN_URL}/add-script`, {
+    await fetch(`${process.env.SCRIPTS_CDN_URL}/add-script`, {
       method: "POST",
       body: JSON.stringify({
         scriptBuffer,

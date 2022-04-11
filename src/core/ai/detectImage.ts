@@ -1,7 +1,6 @@
-import fetch from "node-fetch";
-import { AI_SERVICE_URL } from "../../config";
+import { controller } from "@app/proto/website-client";
 
-interface ClassifyModelType {
+export interface ClassifyModelType {
   className: string;
   probability: number;
 }
@@ -17,20 +16,15 @@ export const detectImageModel = async (
     return null;
   }
   try {
-    const data = await fetch(`${AI_SERVICE_URL}/api/parseImg`, {
-      method: "POST",
-      body: JSON.stringify({
-        img: String(img),
-        width: Number(config.width),
-        height: Number(config.height),
-      }),
-      headers: { "Content-Type": "application/json" },
-    });
-    if (data?.status === 200) {
-      return await data.json();
-    }
+    const data = (await controller.parseImg({
+      img,
+      width: Number(config.width),
+      height: Number(config.height),
+    })) as any;
+
+    return data;
   } catch (e) {
-    console.log(e, { type: "error" });
+    console.error(e);
   }
   return null;
 };
