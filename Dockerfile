@@ -23,13 +23,7 @@ RUN set -x \
 	&& apk update \
 	&& apk upgrade \
 	&& apk add --no-cache \
-	udev \
-	bash \
-	ttf-freefont \
-	python3 \
-	make \
-	curl \
-	g++
+	curl
     
 WORKDIR /usr/src/app
 
@@ -38,7 +32,5 @@ COPY --from=BUILD_IMAGE /usr/src/app/dist ./dist
 COPY package*.json ./
 
 RUN npm install --production
-
-# USER node
 
 CMD [ "node", "./dist/server.js"]

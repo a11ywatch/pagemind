@@ -8,12 +8,7 @@ RUN set -x \
 	&& apk update \
 	&& apk upgrade \
 	&& apk add --no-cache \
-	udev \
-	bash \
-	ttf-freefont \
-	python3 \
-	make \
-	g++
+	curl
 
 WORKDIR /usr/src/app
 

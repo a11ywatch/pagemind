@@ -1,17 +1,20 @@
 import type { AddressInfo } from "net";
-import express from "express";
+import http from "http";
 import { startGRPC } from "./proto/init";
 
-const app = express();
-
-// TODO: move to http
-app.get("/_internal_/healthcheck", (_, res) => {
-  res.send({
-    status: "healthy",
-  });
+// TODO: REMOVE for central GRPC HC server
+const server = http.createServer(function (req, res) {
+  if (
+    req.url === "/_internal_/healthcheck" ||
+    req.url === "/_internal_/healthcheck/"
+  ) {
+    res.writeHead(200, { "Content-Type": "application/json" });
+    res.write(`{ status: "healthy" }`); // status -> healthy, degraded, offline
+    res.end();
+  }
 });
 
-const coreServer = app.listen(process.env.PORT || 0, async () => {
+const coreServer = server.listen(process.env.PORT || 0, async () => {
   console.log(
     `🚀 Server ready at 127.0.0.1:${(coreServer.address() as AddressInfo).port}`
   );
