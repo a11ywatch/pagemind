@@ -1,18 +1,32 @@
-import fetch from "node-fetch";
+import { get } from "http";
 
 export const chromeHost = process.env.CHROME_HOST || "docker.for.mac.localhost";
+
+const getWs = (): Promise<{ webSocketDebuggerUrl?: string }> => {
+  return new Promise((resolve) => {
+    get(`http://${chromeHost}:9222/json/version`, (res) => {
+      let data = [];
+      res.on("data", (chunk) => {
+        data.push(chunk);
+      });
+      res.on("end", () => {
+        resolve(JSON.parse(data.join()));
+      });
+    }).on("error", (err) => {
+      console.error(err.message);
+      resolve({});
+    });
+  });
+};
 
 let wsChromeEndpointurl;
 
 const getWsEndPoint = async (retry?: boolean) => {
   try {
-    const req = await fetch(`http://${chromeHost}:9222/json/version`);
-    if (req.ok) {
-      const json = (await req.json()) as any;
-      if (json) {
-        wsChromeEndpointurl = json.webSocketDebuggerUrl;
-      }
-      // REMOVE AND MOVE TO HC
+    const json = (await getWs()) as any;
+
+    if (json?.webSocketDebuggerUrl) {
+      wsChromeEndpointurl = json.webSocketDebuggerUrl;
     } else if (retry) {
       setTimeout(() => getWsEndPoint(), 250);
     }

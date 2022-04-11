@@ -1,7 +1,7 @@
 import getPageSpeed from "get-page-speed";
 import { sourceBuild } from "@a11ywatch/website-source-builder";
 import lighthouse from "lighthouse";
-import { DEV, ASSETS_CDN } from "@app/config/config";
+import { DEV } from "@app/config/config";
 import {
   puppetPool,
   checkCdn,
@@ -20,8 +20,6 @@ const EMPTY_RESPONSE = {
   issues: null,
   script: null,
 };
-
-const cdn_base = ASSETS_CDN + "/screenshots/";
 
 const cleanPool = async (browser?: Browser, page?: Page) =>
   browser?.isConnected() && (await puppetPool.clean(page, browser));
@@ -68,13 +66,6 @@ export const crawlWebsite = async ({
       pageHeaders,
     });
 
-    const [screenshot, screenshotStill] = await Promise.all([
-      page.screenshot({ fullPage: true }),
-      process.env.BACKUP_IMAGES
-        ? page.screenshot({ fullPage: false })
-        : Promise.resolve(undefined),
-    ]);
-
     const pageHasCdn = await checkCdn({ page, cdnMinJsPath, cdnJsPath });
 
     const {
@@ -112,17 +103,18 @@ export const crawlWebsite = async ({
 
     const scriptBody = scriptBuild(scriptProps, true);
 
-    // TODO: move to stream
-    try {
-      await storeCDNValues({
-        cdnSourceStripped,
-        domain,
-        screenshot,
-        screenshotStill,
-        scriptBody,
-      });
-    } catch (e) {
-      console.error(e);
+    // ATM userID 0 set to bot to ignore stores (refactor rpc call)
+    if (userId) {
+      // TODO: move to stream
+      try {
+        await storeCDNValues({
+          cdnSourceStripped,
+          domain,
+          scriptBody,
+        });
+      } catch (e) {
+        console.error(e);
+      }
     }
 
     resolver = {
@@ -131,10 +123,6 @@ export const crawlWebsite = async ({
         url: pageUrl,
         adaScore,
         cdnConnected: pageHasCdn,
-        screenshot: `${cdn_base}${cdnJsPath.replace(".js", ".png")}`,
-        screenshotStill: screenshotStill
-          ? `${cdn_base}${cdnJsPath.replace(".js", "-still.png")}`
-          : "",
         pageLoadTime: {
           duration,
           durationFormated: getPageSpeed(duration),

@@ -1,15 +1,7 @@
 syntax = "proto3";
 
 service WebsiteService {
-   rpc AddScreenshot (ScreenshotParams) returns (Empty) {}
    rpc AddScript (ScriptParams) returns (Empty) {}
-}
-
-message ScreenshotParams {
-   string cdnSourceStripped = 1;
-   string domain = 2;
-   bytes screenshot = 3;
-   bytes screenshotStill = 4;
 }
 
 message ScriptParams {
