@@ -1,8 +1,6 @@
 syntax = "proto3";
 
 service WebsiteService {
-   rpc List (Empty) returns (WebsiteList) {}
-   rpc Gather (Website) returns (Website) {}
    rpc Scan (ScanParams) returns (Web) {}
    rpc SetScript (ScriptParams) returns (Script) {}
 }
@@ -98,14 +96,3 @@ message Web {
    Issues issues = 2;
    Script script = 3;
 }
-
-message Website {
-   string id = 1;
-   string title = 2;
-   string content = 3;
-}
-
-message WebsiteList {
-   repeated Website websites = 1;
-}
-

@@ -5,7 +5,7 @@ import {
 } from "@app/proto/website-client";
 import { createServer, killServer } from "@app/proto/website-server";
 
-const { listWebsites, gather } = controller;
+const { scan } = controller;
 
 describe("gRPC websites", () => {
   beforeAll(async () => {
@@ -16,16 +16,9 @@ describe("gRPC websites", () => {
     await killClient();
     await killServer();
   });
-  test("websites list", async () => {
-    const { websites } = await listWebsites();
+  test.skip("scan website", async () => {
+    const { webPage } = await scan("https://a11ywatch.com");
 
-    expect(websites.length).toBe(2);
-  });
-
-  test("websites gather", async () => {
-    const websiteAdd = { id: "3", title: "Website 3", content: "Content 3" };
-    const website = await gather(websiteAdd);
-
-    expect(website).toStrictEqual(websiteAdd);
+    expect(webPage).toBeTruthy();
   });
 });

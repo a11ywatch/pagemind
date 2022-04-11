@@ -4,12 +4,6 @@ import { crawlWebsite } from "@app/core/controllers/update/crawl";
 import { mutateScript } from "@app/core/controllers/mutate";
 import { getProto } from "./website";
 
-// test data todo remove
-const pages = [
-  { id: "1", title: "Website 1", content: "Content 1" },
-  { id: "2", title: "Website 2", content: "Content 2" },
-];
-
 let server: Server;
 
 export const createServer = async () => {
@@ -17,15 +11,6 @@ export const createServer = async () => {
   server = new Server();
 
   server.addService(websiteProto.WebsiteService.service, {
-    // @testing
-    list: (_, callback) => {
-      callback(null, { websites: pages });
-    },
-    // @testing
-    gather: (call, callback) => {
-      let page = call.request;
-      callback(null, page);
-    },
     // crawl page via puppeteer for issues
     scan: async (call, callback) => {
       const page = await crawlWebsite(call.request);
