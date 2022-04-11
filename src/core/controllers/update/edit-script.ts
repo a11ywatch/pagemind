@@ -12,26 +12,24 @@ export const editScript = async ({
 
   resolver.script = newScript;
 
-  setImmediate(async () => {
-    try {
-      await storeCDNValues({
-        cdnSourceStripped,
-        scriptBody: scriptBuild(
-          {
-            scriptChildren: newScript
-              .replace("<script defer>", "")
-              .replace("</script>", ""),
-            domain,
-            cdnSrc: cdnSourceStripped,
-          },
-          true
-        ),
-        domain: domain || resolver?.domain,
-      });
-    } catch (e) {
-      console.error(e);
-    }
-  });
+  try {
+    await storeCDNValues({
+      cdnSourceStripped,
+      scriptBody: scriptBuild(
+        {
+          scriptChildren: newScript
+            .replace("<script defer>", "")
+            .replace("</script>", ""),
+          domain,
+          cdnSrc: cdnSourceStripped,
+        },
+        true
+      ),
+      domain: domain || resolver?.domain,
+    });
+  } catch (e) {
+    console.error(e);
+  }
 
   return resolver;
 };

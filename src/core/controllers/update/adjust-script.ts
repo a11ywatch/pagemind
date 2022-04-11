@@ -25,25 +25,19 @@ export const adjustScript = async ({ url: urlMap, script: resolver }) => {
 
   resolver.script = scriptBody;
 
-  setImmediate(async () => {
-    try {
-      await storeCDNValues({
-        cdnSourceStripped,
-        scriptBody: scriptBuild(
-          {
-            scriptChildren: scriptBody
-              .replace("<script defer>", "")
-              .replace("</script>", ""),
-            domain,
-            cdnSrc: cdnSourceStripped,
-          },
-          true
-        ),
-        domain: domain || resolver?.domain,
-      });
-    } catch (e) {
-      console.log(e, { type: "error" });
-    }
+  await storeCDNValues({
+    cdnSourceStripped,
+    scriptBody: scriptBuild(
+      {
+        scriptChildren: scriptBody
+          .replace("<script defer>", "")
+          .replace("</script>", ""),
+        domain,
+        cdnSrc: cdnSourceStripped,
+      },
+      true
+    ),
+    domain: domain || resolver?.domain,
   });
 
   return resolver;

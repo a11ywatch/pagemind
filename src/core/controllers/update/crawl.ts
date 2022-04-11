@@ -32,7 +32,7 @@ export const crawlWebsite = async ({
   pageHeaders,
   pageInsights,
 }) => {
-  const userId = Number(uid);
+  const userId = Number(uid || 0);
   const urlMap = decodeURIComponent(uri);
   const browser: Browser = await puppetPool.acquire();
   let page: Page;
@@ -48,13 +48,11 @@ export const crawlWebsite = async ({
     return EMPTY_RESPONSE;
   }
 
-  let duration = Date.now();
-
+  let duration = Date.now(); // page ttl
   if (!(await goToPage(page, urlMap))) {
     await cleanPool(browser, page);
     return EMPTY_RESPONSE;
   }
-
   duration = Math.floor(Date.now() - duration); // set the duration to time it takes to load page for ttyl
 
   const { domain, pageUrl, cdnSourceStripped, cdnJsPath, cdnMinJsPath } =
@@ -114,20 +112,18 @@ export const crawlWebsite = async ({
 
     const scriptBody = scriptBuild(scriptProps, true);
 
-    // TODO: move to gRPC FROM API SERVER NOT PAGEMIND -> CDN
-    setImmediate(async () => {
-      try {
-        await storeCDNValues({
-          cdnSourceStripped,
-          domain,
-          screenshot,
-          screenshotStill,
-          scriptBody,
-        });
-      } catch (e) {
-        console.error(e);
-      }
-    });
+    // TODO: move to stream
+    try {
+      await storeCDNValues({
+        cdnSourceStripped,
+        domain,
+        screenshot,
+        screenshotStill,
+        scriptBody,
+      });
+    } catch (e) {
+      console.error(e);
+    }
 
     resolver = {
       webPage: {
