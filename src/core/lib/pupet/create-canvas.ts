@@ -1,20 +1,23 @@
 // use this method in PAGE evaluations to get imgs from dom ONLY USE PLAIN JS HERE: NO LET, CONST
-function createCanvasPupet(selector: any) {
+const createCanvasPupet = (selector) => {
   var img = document.querySelector(selector);
   if (img) {
     var canvas = document.createElement("canvas");
 
-    var scaleDown = function (value) {
-      if (value > 250) {
-        var softScale = value > 1500 ? 1.5 : 1.3;
-        var dive = value / softScale / 100;
-        return value / dive || 0;
+    var scaleDown = function (value = 1) {
+      var softScale = 1;
+      if (value > 2000) {
+        softScale = value > 3000 ? 2 : 1.8;
+      } else if (value > 1500) {
+        softScale = 1.5;
+      } else if (value > 250) {
+        softScale = 1.3;
       }
-      return value;
+      return value / softScale;
     };
 
-    var width = scaleDown(img.width);
-    var height = scaleDown(img.height);
+    var width = scaleDown(img.width) || 0;
+    var height = scaleDown(img.height) || 0;
 
     canvas.width = width;
     canvas.height = height;
@@ -28,6 +31,6 @@ function createCanvasPupet(selector: any) {
     }
   }
   return { imageToBase64: "", width: 0, height: 0 };
-}
+};
 
 export { createCanvasPupet };
