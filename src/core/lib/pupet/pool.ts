@@ -8,7 +8,7 @@ const puppetPool = {
     try {
       return await puppeteerPool.create();
     } catch (e) {
-      console.error(e, { type: "error" });
+      console.error(e);
       return null;
     }
   },
