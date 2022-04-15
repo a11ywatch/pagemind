@@ -19,6 +19,7 @@ const EMPTY_RESPONSE = {
   webPage: null,
   issues: null,
   script: null,
+  userId: null,
 };
 
 const cleanPool = async (browser?: Browser, page?: Page) =>
@@ -30,7 +31,7 @@ export const crawlWebsite = async ({
   pageHeaders,
   pageInsights,
 }) => {
-  const userId = Number(uid || 0);
+  const userId = typeof uid !== "undefined" ? Number(uid) : undefined;
   const urlMap = decodeURIComponent(uri);
   const browser: Browser = await puppetPool.acquire();
   let page: Page;
@@ -145,12 +146,10 @@ export const crawlWebsite = async ({
           issueMeta,
         } as IssueData,
         lastScanDate: new Date().toUTCString(),
-        userId,
       },
       issues: Object.assign({}, issues, {
         domain,
         pageUrl,
-        userId,
       }),
       script: {
         pageUrl,
@@ -159,9 +158,9 @@ export const crawlWebsite = async ({
         cdnUrlMinified: cdnMinJsPath,
         cdnUrl: cdnJsPath,
         cdnConnected: pageHasCdn,
-        userId,
         issueMeta,
       },
+      userId,
     };
   } catch (e) {
     console.error(e);

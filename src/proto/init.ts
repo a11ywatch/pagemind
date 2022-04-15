@@ -3,7 +3,7 @@ import {
   createMavClient,
   createCdnClient,
 } from "./website-client";
-import { createServer } from "./website-server";
+import { createServer } from "./grpc-server";
 
 export const startGRPC = async () => {
   await createServer();

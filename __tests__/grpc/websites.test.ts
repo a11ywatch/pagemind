@@ -3,7 +3,7 @@ import {
   killClient,
   controller,
 } from "@app/proto/website-client";
-import { createServer, killServer } from "@app/proto/website-server";
+import { createServer, killServer } from "@app/proto/grpc-server";
 
 const { scan } = controller;
 

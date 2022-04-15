@@ -16,7 +16,7 @@ export interface Service {
 }
 
 export const getProto = async (
-  target: string = "website.proto"
+  target: string = "pagemind.proto"
 ): Promise<Service & GRPC> => {
   try {
     const packageDef = await load(`${__dirname}/${target}`, {
