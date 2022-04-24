@@ -51,7 +51,7 @@ export const getPageMeta = ({ issues, page }): Promise<IssueInfo> => {
       const altFix = extraConfig?.alt;
 
       if (altFix && element.message.includes(missingAltText)) {
-        element.message = `${element.message} Try setting the alt prop to ${altFix}.`;
+        element.message = `${element.message} Recommendation: set the alt prop to ${altFix}.`;
         element.context = `${element.context.replace(
           ">",
           ` alt="${altFix}">`
