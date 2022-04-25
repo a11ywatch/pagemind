@@ -26,12 +26,12 @@ const cleanPool = async (browser?: Browser, page?: Page) =>
   browser?.isConnected() && (await puppetPool.clean(page, browser));
 
 export const crawlWebsite = async ({
-  userId: uid,
+  userId,
   url: uri,
   pageHeaders,
   pageInsights,
+  noStore, // do not store any data
 }) => {
-  const userId = typeof uid !== "undefined" ? Number(uid) : undefined;
   const urlMap = decodeURIComponent(uri);
   const browser: Browser = await puppetPool.acquire();
   let page: Page;
@@ -105,7 +105,7 @@ export const crawlWebsite = async ({
     const scriptBody = scriptBuild(scriptProps, true);
 
     // ATM userID 0 set to bot to ignore stores (refactor rpc call)
-    if (userId) {
+    if (!noStore) {
       // TODO: move to stream
       try {
         await storeCDNValues({

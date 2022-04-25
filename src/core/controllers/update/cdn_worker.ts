@@ -6,6 +6,7 @@ export interface Resource {
   cdnSourceStripped?: string;
 }
 
+// not a worker but, sends values to the cdn server
 export const storeCDNValues = async ({
   scriptBody: scriptBuffer,
   cdnSourceStripped,
