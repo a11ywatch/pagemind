@@ -12,9 +12,14 @@ interface IssueInfo {
   adaScore: number;
   scriptChildren: string;
   possibleIssuesFixedByCdn: number;
+  scriptsEnabled?: boolean;
 }
 
-export const getPageMeta = ({ issues, page }): Promise<IssueInfo> => {
+export const getPageMeta = ({
+  issues,
+  page,
+  scriptsEnabled,
+}): Promise<IssueInfo> => {
   let errorCount = 0;
   let warningCount = 0;
   let noticeCount = 0;
@@ -61,6 +66,7 @@ export const getPageMeta = ({ issues, page }): Promise<IssueInfo> => {
       const getFix = getIssueFixScript(element, issueIndex, extraConfig);
 
       if (
+        // TODO: re visit func
         getIncludesDomain({ alt: extraConfig?.alt, message: element.message })
       ) {
         includeDomainCheck = true;
@@ -68,7 +74,10 @@ export const getPageMeta = ({ issues, page }): Promise<IssueInfo> => {
 
       if (getFix) {
         possibleIssuesFixedByCdn++;
-        scriptChildren += getFix;
+
+        if (scriptsEnabled) {
+          scriptChildren += getFix;
+        }
       }
 
       if (element.type === "error") {
@@ -89,9 +98,9 @@ export const getPageMeta = ({ issues, page }): Promise<IssueInfo> => {
       warningCount,
       noticeCount,
       adaScore: Math.max(0, adaScore),
-      scriptChildren: `${
-        includeDomainCheck ? getHostAsString : ""
-      }${scriptChildren}`,
+      scriptChildren: scriptsEnabled
+        ? `${includeDomainCheck ? getHostAsString : ""}${scriptChildren}`
+        : null,
       possibleIssuesFixedByCdn,
     });
   });

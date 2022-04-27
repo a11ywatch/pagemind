@@ -31,6 +31,7 @@ export const crawlWebsite = async ({
   pageHeaders,
   pageInsights,
   noStore, // do not store any data
+  scriptsEnabled,
 }) => {
   const urlMap = decodeURIComponent(uri);
   const browser: Browser = await puppetPool.acquire();
@@ -76,16 +77,37 @@ export const crawlWebsite = async ({
       adaScore,
       scriptChildren,
       possibleIssuesFixedByCdn,
-    } = await getPageMeta({ page, issues });
+    } = await getPageMeta({ page, issues, scriptsEnabled });
 
-    const scriptProps = {
-      scriptChildren,
-      domain,
-      cdnSrc: cdnSourceStripped,
-    };
+    let scriptProps = {};
+    let scriptBody;
+
+    if (scriptsEnabled) {
+      scriptProps = {
+        scriptChildren,
+        domain,
+        cdnSrc: cdnSourceStripped,
+      };
+      scriptBody = scriptBuild(scriptProps, true);
+    }
+
+    // ATM userID 0 set to bot to ignore stores (refactor rpc call)
+    if (!noStore) {
+      // TODO: move to stream
+      try {
+        await storeCDNValues({
+          cdnSourceStripped,
+          domain,
+          scriptBody,
+        });
+      } catch (e) {
+        console.error(e);
+      }
+    }
 
     let insight;
 
+    // light house pageinsights
     if (pageInsights) {
       try {
         const { lhr } = await lighthouse(urlMap, {
@@ -97,22 +119,6 @@ export const crawlWebsite = async ({
         });
         // TODO: map to protobufs
         insight = JSON.stringify(lhr);
-      } catch (e) {
-        console.error(e);
-      }
-    }
-
-    const scriptBody = scriptBuild(scriptProps, true);
-
-    // ATM userID 0 set to bot to ignore stores (refactor rpc call)
-    if (!noStore) {
-      // TODO: move to stream
-      try {
-        await storeCDNValues({
-          cdnSourceStripped,
-          domain,
-          scriptBody,
-        });
       } catch (e) {
         console.error(e);
       }
@@ -151,15 +157,17 @@ export const crawlWebsite = async ({
         domain,
         pageUrl,
       }),
-      script: {
-        pageUrl,
-        domain,
-        script: scriptBody,
-        cdnUrlMinified: cdnMinJsPath,
-        cdnUrl: cdnJsPath,
-        cdnConnected: pageHasCdn,
-        issueMeta,
-      },
+      script: scriptsEnabled
+        ? {
+            pageUrl,
+            domain,
+            script: scriptBody,
+            cdnUrlMinified: cdnMinJsPath,
+            cdnUrl: cdnJsPath,
+            cdnConnected: pageHasCdn,
+            issueMeta,
+          }
+        : null,
       userId,
     };
   } catch (e) {
