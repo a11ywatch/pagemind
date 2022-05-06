@@ -1,4 +1,4 @@
-import { scriptBody, scriptDetect } from "./templates";
+import { scriptBody } from "./templates";
 
 const buildConfig = {
   scriptEntry: `<script defer>`,
@@ -22,7 +22,8 @@ export const scriptBuild = (
 ${buildConfig.funcHead}
 ${scriptBody(
   { scriptChildren },
-  (cdn && scriptDetect({ domain, cdnSrc })) || ""
+  ""
+  // (cdn && scriptDetect({ domain, cdnSrc })) || ""
 )}
 ${buildConfig.funcTail}
 ${!cdn ? buildConfig.scriptExit : ""}

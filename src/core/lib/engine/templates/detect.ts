@@ -27,6 +27,7 @@ export const cdnRouteReplaceHandler = ({ domain, cdnSrc }: ScriptSource) => {
   };
 };
 
+// TEMP DISABLED FOR INFINITE REDIRCTS
 const scriptDetect = (scriptProps: ScriptSource) => {
   const { currentPath, cdnSourceBase, cdnSourceEndTarget } =
     cdnRouteReplaceHandler(scriptProps);
