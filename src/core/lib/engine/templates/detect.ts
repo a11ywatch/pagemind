@@ -26,33 +26,3 @@ export const cdnRouteReplaceHandler = ({ domain, cdnSrc }: ScriptSource) => {
     cdnSourceEndTarget,
   };
 };
-
-// TEMP DISABLED FOR INFINITE REDIRCTS
-const scriptDetect = (scriptProps: ScriptSource) => {
-  const { currentPath, cdnSourceBase, cdnSourceEndTarget } =
-    cdnRouteReplaceHandler(scriptProps);
-
-  return `
-	// SO: SMART CDN
-	function detect(){
-		if (window.location.pathname !== "${currentPath}") {
-			var ns = document.createElement("script");
-			var cs = document.currentScript;
-			var aw = window.location.pathname.replace("/", "").replace('/\?/g', "-");
-      var ppath = aw !== "/" ? "-" : "";
-
-			ns.src = "${cdnSourceBase}" + ppath + aw + "${cdnSourceEndTarget}.min.js";
-			document.body.appendChild(ns);
-			if(cs) {
-				cs.remove();			
-			}
-			return false;
-		}  
-	};
-	detect();
-	window.addEventListener('popstate', detect);
-	// EO: SMART CDN
-	`;
-};
-
-export { scriptDetect };

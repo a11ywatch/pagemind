@@ -15,16 +15,12 @@ interface ScriptBuildProps {
 }
 
 export const scriptBuild = (
-  { scriptChildren, domain, cdnSrc }: ScriptBuildProps,
+  { scriptChildren }: ScriptBuildProps,
   cdn: boolean
 ) => {
   return `${!cdn ? buildConfig.scriptEntry : ""}
 ${buildConfig.funcHead}
-${scriptBody(
-  { scriptChildren },
-  ""
-  // (cdn && scriptDetect({ domain, cdnSrc })) || ""
-)}
+${scriptBody({ scriptChildren }, "")}
 ${buildConfig.funcTail}
 ${!cdn ? buildConfig.scriptExit : ""}
 `;
