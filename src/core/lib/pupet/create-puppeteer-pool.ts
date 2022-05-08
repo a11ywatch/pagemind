@@ -1,17 +1,34 @@
 import puppeteer from "puppeteer";
 import type { Browser, Page } from "puppeteer";
-import { wsChromeEndpointurl } from "@app/config/chrome";
+import { wsChromeEndpointurl, getWsEndPoint } from "@app/config/chrome";
 
 const createPuppeteerFactory = () => ({
-  async create() {
+  async create(): Promise<Browser> {
+    let browser;
+
     try {
-      return await puppeteer.connect({
+      browser = await puppeteer.connect({
         browserWSEndpoint: wsChromeEndpointurl,
         ignoreHTTPSErrors: true,
       });
     } catch (e) {
       console.error(e);
     }
+
+    // retry and wait for ws endpoint
+    if (!browser) {
+      try {
+        const browserWSEndpoint = await getWsEndPoint();
+        browser = await puppeteer.connect({
+          browserWSEndpoint: browserWSEndpoint,
+          ignoreHTTPSErrors: true,
+        });
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    return browser;
   },
   async destroy(page: Page, browser: Browser) {
     try {

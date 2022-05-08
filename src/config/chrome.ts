@@ -1,16 +1,19 @@
 import { get } from "http";
 
-export const chromeHost = process.env.CHROME_HOST || "docker.for.mac.localhost";
+export const chromeHost = process.env.CHROME_HOST || "127.0.0.1";
 
-const getWs = (host: string): Promise<{ webSocketDebuggerUrl?: string }> => {
+const getWs = (): Promise<{ webSocketDebuggerUrl?: string }> => {
   return new Promise((resolve) => {
-    get(`http://${host}:9222/json/version`, (res) => {
-      let data = [];
+    get(`http://${chromeHost}:9222/json/version`, (res) => {
+      res.setEncoding("utf8");
+      let data = "";
+
       res.on("data", (chunk) => {
-        data.push(chunk);
+        data += chunk;
       });
+
       res.on("end", () => {
-        resolve(JSON.parse(data.join()));
+        resolve(JSON.parse(data));
       });
     }).on("error", (err) => {
       console.error(err.message);
@@ -19,11 +22,12 @@ const getWs = (host: string): Promise<{ webSocketDebuggerUrl?: string }> => {
   });
 };
 
-let wsChromeEndpointurl;
+// the chrome socket connection to connect to
+let wsChromeEndpointurl = process.env.CHROME_SOCKET_URL;
 
-const getWsEndPoint = async (retry?: boolean) => {
+export const getWsEndPoint = async (retry?: boolean) => {
   try {
-    const json = (await getWs(retry ? "localhost" : chromeHost)) as any;
+    const json = (await getWs()) as any;
 
     if (json?.webSocketDebuggerUrl) {
       wsChromeEndpointurl = json.webSocketDebuggerUrl;
@@ -33,8 +37,12 @@ const getWsEndPoint = async (retry?: boolean) => {
   } catch (e) {
     console.error(e);
   }
+
+  return wsChromeEndpointurl;
 };
 
-getWsEndPoint(true);
+if (!wsChromeEndpointurl) {
+  getWsEndPoint(true);
+}
 
 export { wsChromeEndpointurl };

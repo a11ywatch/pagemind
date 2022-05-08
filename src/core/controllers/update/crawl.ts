@@ -33,9 +33,14 @@ export const crawlWebsite = async ({
   noStore, // do not store any data
   scriptsEnabled,
 }) => {
-  const urlMap = decodeURIComponent(uri);
-  const browser: Browser = await puppetPool.acquire();
   let page: Page;
+  let browser: Browser;
+
+  try {
+    browser = await puppetPool.acquire();
+  } catch (e) {
+    console.error(e);
+  }
 
   try {
     page = await browser?.newPage();
@@ -43,13 +48,10 @@ export const crawlWebsite = async ({
     console.error(e);
   }
 
-  if (!page) {
-    await cleanPool(browser, page);
-    return EMPTY_RESPONSE;
-  }
+  const urlMap = decodeURIComponent(uri);
 
   let duration = Date.now(); // page ttl
-  if (!(await goToPage(page, urlMap))) {
+  if (!page || !(await goToPage(page, urlMap))) {
     await cleanPool(browser, page);
     return EMPTY_RESPONSE;
   }

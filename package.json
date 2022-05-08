@@ -11,13 +11,13 @@
     "start": "node dist/server.js"
   },
   "dependencies": {
-    "@a11ywatch/website-source-builder": "^0.0.19",
+    "@a11ywatch/website-source-builder": "^0.0.21",
     "@grpc/grpc-js": "^1.6.2",
     "@grpc/proto-loader": "^0.6.9",
     "get-page-speed": "^1.0.1",
     "lighthouse": "9.5.0",
     "litepa11y": "0.3.2",
-    "puppeteer": "^13.5.2"
+    "puppeteer": "^13.7.0"
   },
   "devDependencies": {
     "@swc/core": "^1.2.117",
