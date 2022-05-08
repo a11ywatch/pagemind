@@ -2,9 +2,9 @@ import { get } from "http";
 
 export const chromeHost = process.env.CHROME_HOST || "docker.for.mac.localhost";
 
-const getWs = (): Promise<{ webSocketDebuggerUrl?: string }> => {
+const getWs = (host: string): Promise<{ webSocketDebuggerUrl?: string }> => {
   return new Promise((resolve) => {
-    get(`http://${chromeHost}:9222/json/version`, (res) => {
+    get(`http://${host}:9222/json/version`, (res) => {
       let data = [];
       res.on("data", (chunk) => {
         data.push(chunk);
@@ -23,7 +23,7 @@ let wsChromeEndpointurl;
 
 const getWsEndPoint = async (retry?: boolean) => {
   try {
-    const json = (await getWs()) as any;
+    const json = (await getWs(retry ? "localhost" : chromeHost)) as any;
 
     if (json?.webSocketDebuggerUrl) {
       wsChromeEndpointurl = json.webSocketDebuggerUrl;
