@@ -1,9 +1,9 @@
 import { get } from "http";
 
-export const chromeHost = process.env.CHROME_HOST || "127.0.0.1";
+let chromeHost = process.env.CHROME_HOST || "127.0.0.1";
 
-const getWs = (host?: string): Promise<{ webSocketDebuggerUrl?: string }> => {
-  return new Promise((resolve) => {
+const getWs = (host?: string): Promise<string> => {
+  return new Promise((resolve, reject) => {
     get(`http://${host || chromeHost}:9222/json/version`, (res) => {
       res.setEncoding("utf8");
       let rawData = "";
@@ -13,11 +13,18 @@ const getWs = (host?: string): Promise<{ webSocketDebuggerUrl?: string }> => {
       });
 
       res.on("end", () => {
-        resolve(JSON.parse(rawData));
+        let data;
+        try {
+          data = JSON.parse(rawData);
+        } catch (e) {
+          console.error(e);
+        }
+        resolve(data?.webSocketDebuggerUrl);
       });
     }).on("error", (err) => {
-      console.error(err.message);
-      resolve({});
+      reject(
+        `${err.message}: Retrying with docker host targets. Set the env variable of 'CHROME_HOST' before to bypass retries.`
+      );
     });
   });
 };
@@ -26,25 +33,27 @@ const getWs = (host?: string): Promise<{ webSocketDebuggerUrl?: string }> => {
 let wsChromeEndpointurl = process.env.CHROME_SOCKET_URL;
 
 export const getWsEndPoint = async (retry?: boolean) => {
-  let json;
   try {
+    let retryHost = !retry ? "docker.for.mac.localhost" : "";
     // retry connection on as mac localhost
-    json = (await getWs(!retry ? "docker.for.mac.localhost" : "")) as any;
+    wsChromeEndpointurl = await getWs(retryHost);
+    // if docker host valid set the default host for lighthouse
+    if (!retry && wsChromeEndpointurl) {
+      chromeHost = "docker.for.mac.localhost";
+    }
   } catch (e) {
     console.error(e);
   }
 
-  if (json?.webSocketDebuggerUrl) {
-    wsChromeEndpointurl = json.webSocketDebuggerUrl;
-  } else if (retry) {
-    setTimeout(async () => await getWsEndPoint(), 250);
+  try {
+    if (!wsChromeEndpointurl && retry) {
+      await getWsEndPoint();
+    }
+  } catch (e) {
+    console.error(e);
   }
 
   return wsChromeEndpointurl;
 };
 
-if (!wsChromeEndpointurl) {
-  getWsEndPoint(true);
-}
-
-export { wsChromeEndpointurl };
+export { wsChromeEndpointurl, chromeHost };
