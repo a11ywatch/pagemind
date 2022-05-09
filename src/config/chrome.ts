@@ -5,15 +5,12 @@ export const chromeHost = process.env.CHROME_HOST || "127.0.0.1";
 const getWs = (): Promise<{ webSocketDebuggerUrl?: string }> => {
   return new Promise((resolve) => {
     get(`http://${chromeHost}:9222/json/version`, (res) => {
-      res.setEncoding("utf8");
-      let data = "";
-
+      let data = [];
       res.on("data", (chunk) => {
-        data += chunk;
+        data.push(chunk);
       });
-
       res.on("end", () => {
-        resolve(JSON.parse(data));
+        resolve(JSON.parse(data.join()));
       });
     }).on("error", (err) => {
       console.error(err.message);

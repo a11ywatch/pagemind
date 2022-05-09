@@ -20,9 +20,10 @@ export const getPageIssues = async ({
         }),
       }
     : {};
+  let results;
 
   try {
-    const results = await litepa11y(
+    results = await litepa11y(
       urlPage,
       Object.assign({}, pa11yConfig, pa11yHeaders, {
         ignoreUrl: true,
@@ -30,34 +31,40 @@ export const getPageIssues = async ({
         browser,
       })
     );
+  } catch (e) {
+    // fallback to linter
+    console.error(e);
+  }
 
-    const skipContentIncluded = await skipContentCheck({ page });
+  let skipContentIncluded = false;
 
-    if (results) {
-      const issueLength = results.issues?.length;
+  try {
+    skipContentIncluded = await skipContentCheck({ page });
+  } catch (e) {
+    console.error(e);
+  }
 
-      if (!skipContentIncluded) {
-        // containers issues add skip content to end
-        if (issueLength) {
-          results.issues.push(skipContentTemplate);
-        } else {
-          results.issues = [skipContentTemplate];
-        }
-      }
+  if (results) {
+    const issueLength = results.issues?.length;
 
+    if (!skipContentIncluded) {
+      // containers issues add skip content to end
       if (issueLength) {
-        results.issues.sort(issueSort);
+        results.issues.push(skipContentTemplate);
+      } else {
+        results.issues = [skipContentTemplate];
       }
     }
 
-    return [
-      results,
-      {
-        skipContentIncluded,
-      },
-    ];
-  } catch (e) {
-    console.error(e);
-    return [null, { skipContentIncluded: false }];
+    if (issueLength) {
+      results.issues.sort(issueSort);
+    }
   }
+
+  return [
+    results,
+    {
+      skipContentIncluded,
+    },
+  ];
 };
