@@ -10,6 +10,7 @@ export const getPageIssues = async ({
   page,
   browser,
   pageHeaders,
+  mobile,
 }): Promise<[PageIssues | null, IssueMeta]> => {
   const pa11yHeaders = pageHeaders?.length
     ? {
@@ -20,7 +21,18 @@ export const getPageIssues = async ({
         }),
       }
     : {};
+
   let results;
+  let viewport;
+
+  if (mobile) {
+    viewport = {
+      width: 320,
+      height: 480,
+      deviceScaleFactor: 2,
+      isMobile: true,
+    };
+  }
 
   try {
     results = await litepa11y(
@@ -29,6 +41,7 @@ export const getPageIssues = async ({
         ignoreUrl: true,
         page,
         browser,
+        viewport,
       })
     );
   } catch (e) {

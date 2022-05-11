@@ -32,6 +32,7 @@ export const crawlWebsite = async ({
   pageInsights,
   noStore, // do not store any data
   scriptsEnabled,
+  mobile,
 }) => {
   let page: Page;
   let browser: Browser;
@@ -70,6 +71,7 @@ export const crawlWebsite = async ({
       page,
       browser,
       pageHeaders,
+      mobile,
     });
   } catch (e) {
     console.error(e);

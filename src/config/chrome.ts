@@ -37,7 +37,7 @@ const getWs = (host?: string): Promise<string> => {
 
     // add dns lookup from network
     if (!chromeHost) {
-      dns.lookup("chrome", (err, address, family) => {
+      dns.lookup("chrome", (_err, address, family) => {
         console.log("address: %j family: IPv%s", address, family);
         chromeHost = address;
         lookupChromeHost(address);
@@ -50,7 +50,7 @@ const getWs = (host?: string): Promise<string> => {
 
 export const getWsEndPoint = async (retry?: boolean) => {
   try {
-    let retryHost = !retry ? "docker.for.mac.localhost" : "";
+    let retryHost = !retry ? "host.docker.internal" : "";
     // retry connection on as mac localhost
     wsChromeEndpointurl = await getWs(retryHost);
   } catch (e) {
