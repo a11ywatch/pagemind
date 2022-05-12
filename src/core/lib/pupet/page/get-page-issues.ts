@@ -11,7 +11,8 @@ export const getPageIssues = async ({
   browser,
   pageHeaders,
   mobile,
-  actions,
+  actions: pageActions,
+  standard: wcagStandard,
 }): Promise<[PageIssues | null, IssueMeta]> => {
   const pa11yHeaders = pageHeaders?.length
     ? {
@@ -35,6 +36,19 @@ export const getPageIssues = async ({
     };
   }
 
+  let standard;
+  let actions;
+
+  // pass wcag standard
+  if (wcagStandard) {
+    standard = wcagStandard;
+  }
+
+  // pass in actions if they exist
+  if (pageActions && pageActions.length) {
+    actions = pageActions;
+  }
+
   try {
     results = await litepa11y(
       urlPage,
@@ -44,10 +58,11 @@ export const getPageIssues = async ({
         browser,
         viewport,
         actions,
+        standard,
       })
     );
   } catch (e) {
-    // fallback to linter
+    // TODO: fallback to linter
     console.error(e);
   }
 
