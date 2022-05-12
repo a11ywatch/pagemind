@@ -11,6 +11,7 @@ export const getPageIssues = async ({
   browser,
   pageHeaders,
   mobile,
+  actions,
 }): Promise<[PageIssues | null, IssueMeta]> => {
   const pa11yHeaders = pageHeaders?.length
     ? {
@@ -42,6 +43,7 @@ export const getPageIssues = async ({
         page,
         browser,
         viewport,
+        actions,
       })
     );
   } catch (e) {
