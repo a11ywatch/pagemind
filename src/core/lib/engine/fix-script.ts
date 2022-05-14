@@ -1,9 +1,4 @@
-import {
-  needsLongTextAlt,
-  missingAltText,
-  emptyIframeTitle,
-  imgAltMissing,
-} from "../../strings";
+import { emptyIframeTitle } from "../../strings";
 import {
   EMPTY_HEAD_TITLE_TYPE,
   INVALID_HTML_PROPS,
@@ -12,6 +7,7 @@ import {
 } from "./models/issue-type";
 import { fixInvalid } from "./fix/js";
 import { getSelectorType } from "./get-selector-type";
+import { isAltMissing } from "../pupet";
 
 type ExtraConfig = {
   alt?: string;
@@ -71,14 +67,7 @@ function getIssueFixScript(
     reasonMessage = button;
   } else if (message.includes(INVALID_HTML_PROPS.lang)) {
     reasonMessage = lang;
-  } else if (
-    [
-      imgAltMissing,
-      needsLongTextAlt,
-      missingAltText,
-      INVALID_HTML_PROPS.ignored.img,
-    ].includes(message)
-  ) {
+  } else if (isAltMissing(message)) {
     reasonMessage = alt;
   } else if (message.includes(INVALID_HTML_PROPS.textinput)) {
     reasonMessage = textinput;

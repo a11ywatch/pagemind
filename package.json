@@ -11,7 +11,7 @@
     "start": "node dist/server.js"
   },
   "dependencies": {
-    "@a11ywatch/website-source-builder": "^0.0.26",
+    "@a11ywatch/website-source-builder": "^0.0.28",
     "@grpc/grpc-js": "1.6.2",
     "@grpc/proto-loader": "0.6.9",
     "get-page-speed": "^1.0.1",

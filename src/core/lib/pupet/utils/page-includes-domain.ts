@@ -11,7 +11,7 @@ interface Params {
   message?: string;
 }
 
-// determine if current page matches domain
+// determine if current page should return the domain as the aria element alt,title, etc
 export const getIncludesDomain = ({ alt, message }: Params): boolean => {
   let includeDomainCheck = false;
   if (

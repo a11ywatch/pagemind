@@ -1,9 +1,8 @@
 import { getIssueFixScript } from "../..";
 import { getHostAsString } from "@a11ywatch/website-source-builder";
-import { getAltImage } from "./grab-alt";
+import { getAltImage, isAltMissing } from "./grab-alt";
 import { getPageIssueScore } from "../utils/page-issue-score";
 import { getIncludesDomain } from "../utils/page-includes-domain";
-import { missingAltText } from "@app/core/strings";
 
 interface IssueInfo {
   errorCount: number;
@@ -45,32 +44,38 @@ export const getPageMeta = ({
     let issueIndex = 0;
 
     for (let element of pageIssues) {
-      const extraConfig = await getAltImage({
-        element,
-        page,
-      }).catch((e) => {
-        console.error(e);
-        return { alt: "" };
-      });
+      let extraConfig;
 
-      const altFix = extraConfig?.alt;
+      // element contains alt tag related error message
+      if (isAltMissing(element.message)) {
+        extraConfig = await getAltImage({
+          element,
+          page,
+        }).catch((e) => {
+          console.error(e);
+        });
 
-      if (altFix && element.message.includes(missingAltText)) {
-        element.message = `${element.message} Recommendation: set the alt prop to ${altFix}.`;
-        element.context = `${element.context.replace(
-          ">",
-          ` alt="${altFix}">`
-        )}`;
+        const altFix = extraConfig?.alt;
+
+        // if alt fix is returned treat
+        if (altFix) {
+          element.message = `${element.message} Recommendation: set the alt prop to ${altFix}.`;
+          element.context = `${element.context.replace(
+            ">",
+            ` alt="${altFix}">`
+          )}`;
+        }
       }
 
-      const getFix = getIssueFixScript(element, issueIndex, extraConfig);
-
+      // the name of the domain should be used like a Logo. Only run if alt is not returned
       if (
-        // TODO: re visit func
         getIncludesDomain({ alt: extraConfig?.alt, message: element.message })
       ) {
         includeDomainCheck = true;
       }
+
+      // get the js fix for the page
+      const getFix = getIssueFixScript(element, issueIndex, extraConfig);
 
       if (getFix) {
         possibleIssuesFixedByCdn++;

@@ -23,6 +23,7 @@ const skippedResources = [
   "tiqcdn",
   "livereload",
   "cdn.jsdelivr.net",
+  "https://www.facebook.com/sharer.php?", // authenticated facebook page
 ];
 
 const blockedResourceTypes = [

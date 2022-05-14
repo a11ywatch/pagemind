@@ -3,4 +3,10 @@ export { checkCdn } from "./check-cdn";
 export { puppetPool } from "./pool";
 export { createPuppeteerPool } from "./create-puppeteer-pool";
 export { skipContentCheck } from "./skip-content-check";
-export { getAltImage, getPageIssues, getPageMeta, goToPage } from "./page";
+export {
+  getAltImage,
+  isAltMissing,
+  getPageIssues,
+  getPageMeta,
+  goToPage,
+} from "./page";
