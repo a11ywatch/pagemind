@@ -1,5 +1,7 @@
 syntax = "proto3";
 
+import "google/protobuf/struct.proto";
+
 service WebsiteService {
    rpc Scan (ScanParams) returns (Web) {}
    rpc SetScript (ScriptParams) returns (Script) {}
@@ -60,7 +62,7 @@ message Page {
    int64 adaScore = 3;
    bool cdnConnected = 4;
    PageLoadTime pageLoadTime = 5;
-   string insight = 6;
+   google.protobuf.Struct insight = 6; // the json details from lighthouse
    IssuesInfo issuesInfo = 7;
    string lastScanDate = 8;  
 }

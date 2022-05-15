@@ -14,6 +14,7 @@ import { chromeHost } from "@app/config/chrome";
 import { storeCDNValues } from "./cdn_worker";
 import type { Browser, Page } from "puppeteer";
 import type { IssueData } from "@app/types";
+import { struct } from "pb-util";
 
 const EMPTY_RESPONSE = {
   webPage: null,
@@ -143,8 +144,8 @@ export const crawlWebsite = async ({
         logLevel: DEV ? "info" : undefined,
         disableStorageReset: true,
       });
-      // TODO: map to protobufs
-      insight = JSON.stringify(lhr);
+      // convert to gRPC Struct
+      insight = struct.encode(lhr);
     } catch (e) {
       console.error(e);
     }
