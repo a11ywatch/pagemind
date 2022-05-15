@@ -36,6 +36,7 @@ export const crawlWebsite = async ({
   mobile,
   actions,
   standard,
+  ua,
 }) => {
   let page: Page;
   let browser: Browser;
@@ -77,6 +78,7 @@ export const crawlWebsite = async ({
       mobile,
       actions,
       standard,
+      ua,
     });
   } catch (e) {
     console.error(e);

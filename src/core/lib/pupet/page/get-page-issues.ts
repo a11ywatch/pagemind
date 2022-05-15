@@ -13,6 +13,7 @@ export const getPageIssues = async ({
   mobile,
   actions: pageActions,
   standard: wcagStandard,
+  ua,
 }): Promise<[PageIssues | null, IssueMeta]> => {
   const pa11yHeaders = pageHeaders?.length
     ? {
@@ -38,10 +39,18 @@ export const getPageIssues = async ({
 
   let standard;
   let actions;
+  let userAgent;
 
   // pass wcag standard
-  if (wcagStandard) {
+  if (
+    wcagStandard &&
+    ["WCAG2A", "WCAG2AA", "WCAG2AAAA"].includes(wcagStandard)
+  ) {
     standard = wcagStandard;
+  }
+
+  if (ua) {
+    userAgent = ua;
   }
 
   // pass in actions if they exist
@@ -59,6 +68,7 @@ export const getPageIssues = async ({
         viewport,
         actions,
         standard,
+        userAgent,
       })
     );
   } catch (e) {

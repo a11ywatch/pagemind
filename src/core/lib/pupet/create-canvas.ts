@@ -7,11 +7,11 @@ const createCanvasPupet = (selector) => {
     var scaleDown = function (value = 1) {
       var softScale = 1;
       if (value > 2000) {
-        softScale = value > 3000 ? 2 : 1.8;
+        softScale = value > 3000 ? 2 : 1.6;
       } else if (value > 1500) {
-        softScale = 1.5;
+        softScale = 1.4;
       } else if (value > 550) {
-        softScale = 1.3;
+        softScale = 1.2;
       }
       return value / softScale;
     };
