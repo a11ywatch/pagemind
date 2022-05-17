@@ -35,7 +35,7 @@
     "jest-config": "^26.6.3",
     "prettier": "^2.5.1",
     "ts-node-dev": "^1.1.6",
-    "tsc-alias": "^1.6.4",
+    "tsc-alias": "1.6.3",
     "tsconfig-paths": "^3.9.0",
     "typescript": "4.6.2",
     "typescript-eslint": "0.0.1-alpha.0"

@@ -42,30 +42,6 @@ const createCdnClient = async () => {
   }
 };
 
-const listWebsites = () => {
-  return new Promise((resolve, reject) => {
-    client.list({}, (error, res) => {
-      if (!error) {
-        resolve(res);
-      } else {
-        reject(error);
-      }
-    });
-  });
-};
-
-const gather = (website = {}) => {
-  return new Promise((resolve, reject) => {
-    client.gather(website, (error, res) => {
-      if (!error) {
-        resolve(res);
-      } else {
-        reject(error);
-      }
-    });
-  });
-};
-
 const parseImg = (website = {}) => {
   return new Promise((resolve, reject) => {
     mavClient.parseImg(website, (error, res) => {
@@ -103,8 +79,6 @@ const addScript = (website = {}) => {
 };
 
 export const controller = {
-  listWebsites,
-  gather,
   parseImg,
   addScript,
   addScreenshot,
