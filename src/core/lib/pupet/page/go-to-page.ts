@@ -41,7 +41,10 @@ const blockedResourceTypes = [
 ];
 
 const networkBlock = (request: HTTPRequest) => {
-  const requestUrl = request.url()?.split("?")[0].split("#")[0];
+  const urlBase = request.url()?.split("?");
+  const splitBase = urlBase?.length ? urlBase[0].split("#") : [];
+
+  const requestUrl = splitBase?.length ? splitBase[0] : "";
   if (
     blockedResourceTypes.indexOf(request.resourceType()) !== -1 ||
     skippedResources.some((resource) => requestUrl.indexOf(resource) !== -1)
@@ -54,6 +57,12 @@ const networkBlock = (request: HTTPRequest) => {
 
 const goToPage = async (page: Page, url: string): Promise<boolean> => {
   let hasPage = true;
+
+  // try {
+  //   await page.setCacheEnabled(false);
+  // } catch (e) {
+  //   console.error(e);
+  // }
 
   try {
     await page.setRequestInterception(true);

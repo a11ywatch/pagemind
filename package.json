@@ -18,7 +18,7 @@
     "lighthouse": "9.5.0",
     "litepa11y": "0.4.1",
     "pb-util": "^1.0.3",
-    "puppeteer": "14.0.0"
+    "puppeteer": "14.1.1"
   },
   "devDependencies": {
     "@swc/core": "^1.2.117",
