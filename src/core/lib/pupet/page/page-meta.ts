@@ -43,14 +43,17 @@ export const getPageMeta = ({
 
     let issueIndex = 0;
 
+    let index = 0;
+
     for (let element of pageIssues) {
       let extraConfig;
 
-      // element contains alt tag related error message
+      // element contains alt tag related error message and reload the page if issues exist.
       if (isAltMissing(element.message)) {
         extraConfig = await getAltImage({
           element,
           page,
+          index,
         }).catch((e) => {
           console.error(e);
         });
@@ -65,6 +68,8 @@ export const getPageMeta = ({
             ` alt="${altFix}">`
           )}`;
         }
+
+        index++;
       }
 
       // the name of the domain should be used like a Logo. Only run if alt is not returned

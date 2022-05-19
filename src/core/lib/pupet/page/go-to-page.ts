@@ -24,6 +24,8 @@ const skippedResources = [
   "livereload",
   "cdn.jsdelivr.net",
   "https://www.facebook.com/sharer.php?", // authenticated facebook page
+  "googlesyndication.com",
+  "adservice.google.com",
 ];
 
 const blockedResourceTypes = [
@@ -36,33 +38,51 @@ const blockedResourceTypes = [
   "websocket",
   "script",
   "preflight",
-  // "imageset",
-  // "image", // images can take intense CPU
+  "image",
+  "imageset",
+  "ping",
 ];
 
-const networkBlock = (request: HTTPRequest) => {
-  const urlBase = request.url()?.split("?");
+export const networkBlock = (request: HTTPRequest, allowImage?: boolean) => {
+  const url = request.url();
+  const urlBase = url?.split("?");
   const splitBase = urlBase?.length ? urlBase[0].split("#") : [];
-
   const requestUrl = splitBase?.length ? splitBase[0] : "";
+
+  const resourceType = request.resourceType();
+
+  // abort all video request
+  if (
+    resourceType == "media" ||
+    url.endsWith(".mp4") ||
+    url.endsWith(".avi") ||
+    url.endsWith(".flv") ||
+    url.endsWith(".mov") ||
+    url.endsWith(".wmv")
+  ) {
+    request.abort();
+    return;
+  }
+
+  // allow images upon reload intercepting.
+  if (resourceType === "image" && allowImage) {
+    request.continue();
+    return;
+  }
+
   if (
     blockedResourceTypes.indexOf(request.resourceType()) !== -1 ||
     skippedResources.some((resource) => requestUrl.indexOf(resource) !== -1)
   ) {
     request.abort();
-  } else {
-    request.continue();
+    return;
   }
+
+  request.continue();
 };
 
 const goToPage = async (page: Page, url: string): Promise<boolean> => {
   let hasPage = true;
-
-  // try {
-  //   await page.setCacheEnabled(false);
-  // } catch (e) {
-  //   console.error(e);
-  // }
 
   try {
     await page.setRequestInterception(true);
