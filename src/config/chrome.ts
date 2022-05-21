@@ -59,7 +59,9 @@ export const getWsEndPoint = async (retry?: boolean) => {
 
   try {
     if (!wsChromeEndpointurl && retry) {
-      await getWsEndPoint();
+      setTimeout(async () => {
+        await getWsEndPoint();
+      }, 250);
     }
   } catch (e) {
     console.error(e);

@@ -19,7 +19,11 @@ const coreServer = server.listen(process.env.PORT || 0, async () => {
   console.log(
     `🚀 Server ready at 127.0.0.1:${(coreServer.address() as AddressInfo).port}`
   );
-  await getWsEndPoint(true);
+
+  setTimeout(async () => {
+    // slight delay wait for chrome to boot first. TODO: HC priority order.
+    await getWsEndPoint(true);
+  }, 80);
 
   await startGRPC();
 });
