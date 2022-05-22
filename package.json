@@ -15,8 +15,8 @@
     "@grpc/grpc-js": "1.6.2",
     "@grpc/proto-loader": "0.6.9",
     "get-page-speed": "^1.0.1",
-    "lighthouse": "9.5.0",
-    "litepa11y": "0.4.2",
+    "lighthouse": "9.6.1",
+    "litepa11y": "0.5.8",
     "pb-util": "^1.0.3",
     "puppeteer": "14.1.1"
   },

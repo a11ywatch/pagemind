@@ -24,7 +24,35 @@ const EMPTY_RESPONSE = {
 };
 
 const cleanPool = async (browser?: Browser, page?: Page) =>
-  browser?.isConnected() && (await puppetPool.clean(page, browser));
+  await puppetPool.clean(page, browser);
+
+export const promisifyLighthouse = ({ browser, urlMap }: any) => {
+  return new Promise(async (resolve) => {
+    try {
+      const { lhr } = await lighthouse(urlMap, {
+        port: new URL(browser.wsEndpoint()).port,
+        hostname: chromeHost,
+        output: "json",
+        logLevel: DEV ? "info" : undefined,
+        disableStorageReset: true,
+        onlyCategories: [
+          "accessibility",
+          "best-practices",
+          "performance",
+          "seo",
+        ],
+      });
+      if (lhr) {
+        // convert to gRPC Struct
+        resolve(struct.encode(lhr));
+      } else {
+        resolve(null);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  });
+};
 
 export const crawlWebsite = async ({
   userId,
@@ -40,6 +68,7 @@ export const crawlWebsite = async ({
 }) => {
   let page: Page;
   let browser: Browser;
+  const urlMap = decodeURIComponent(uri);
 
   try {
     browser = await puppetPool.acquire();
@@ -53,21 +82,41 @@ export const crawlWebsite = async ({
     console.error(e);
   }
 
-  const urlMap = decodeURIComponent(uri);
+  try {
+    await page?.setBypassCSP(true);
+  } catch (e) {
+    console.error(e);
+  }
 
+  let hasPage = true;
   let duration = Date.now(); // page ttl
   try {
-    await goToPage(page, urlMap);
+    hasPage = await goToPage(page, urlMap);
   } catch (e) {
     console.error(e);
   }
   duration = Math.floor(Date.now() - duration); // set the duration to time it takes to load page for ttyl
+
+  // if page did not succeed exit.
+  if (!hasPage) {
+    try {
+      await cleanPool(browser, page);
+    } catch (e) {
+      console.error(e);
+    }
+
+    return {
+      ...EMPTY_RESPONSE,
+      userId,
+    };
+  }
 
   const { domain, pageUrl, cdnSourceStripped, cdnJsPath, cdnMinJsPath } =
     sourceBuild(urlMap, userId);
 
   let resolver = Object.assign({}, EMPTY_RESPONSE);
   let pageIssues = [];
+  let insight;
 
   try {
     pageIssues = await getPageIssues({
@@ -84,7 +133,8 @@ export const crawlWebsite = async ({
     console.error(e);
   }
 
-  const [issues, issueMeta] = pageIssues;
+  const [issues, issueMeta] = pageIssues ?? [];
+
   let pageHasCdn;
   let pageMeta;
 
@@ -134,20 +184,10 @@ export const crawlWebsite = async ({
     }
   }
 
-  let insight;
-
   // light house pageinsights
   if (pageInsights) {
     try {
-      const { lhr } = await lighthouse(urlMap, {
-        port: new URL(browser.wsEndpoint()).port,
-        hostname: chromeHost,
-        output: "json",
-        logLevel: DEV ? "info" : undefined,
-        disableStorageReset: true,
-      });
-      // convert to gRPC Struct
-      insight = struct.encode(lhr);
+      insight = await promisifyLighthouse({ urlMap, browser });
     } catch (e) {
       console.error(e);
     }
