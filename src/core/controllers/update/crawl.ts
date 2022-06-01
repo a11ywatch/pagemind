@@ -1,7 +1,6 @@
 import getPageSpeed from "get-page-speed";
 import { sourceBuild } from "@a11ywatch/website-source-builder";
 import lighthouse from "lighthouse";
-import { DEV } from "@app/config/config";
 import {
   puppetPool,
   checkCdn,
@@ -26,17 +25,13 @@ const EMPTY_RESPONSE = {
 const cleanPool = async (browser?: Browser, page?: Page) =>
   await puppetPool.clean(page, browser);
 
-export const promisifyLighthouse = (
-  { browser, urlMap }: any,
-  retry?: boolean
-) => {
+export const promisifyLighthouse = ({ browser, urlMap }: any) => {
   return new Promise(async (resolve) => {
     try {
       const { lhr } = (await lighthouse(urlMap, {
         port: new URL(browser.wsEndpoint()).port,
         hostname: chromeHost,
         output: "json",
-        logLevel: DEV ? "info" : undefined,
         disableStorageReset: true,
         onlyCategories: [
           "accessibility",
@@ -54,20 +49,11 @@ export const promisifyLighthouse = (
         // convert to gRPC Struct
         resolve(struct.encode(lhr));
       } else {
-        if (!retry) {
-          setTimeout(async () => {
-            await promisifyLighthouse({ browser, urlMap }, true);
-          }, 0);
-        }
         resolve(null);
       }
     } catch (e) {
       console.error(e);
-      if (!retry) {
-        setTimeout(async () => {
-          await promisifyLighthouse({ browser, urlMap }, true);
-        }, 0);
-      }
+      resolve(null);
     }
   });
 };
@@ -99,15 +85,6 @@ export const crawlWebsite = async ({
     page = await browser?.newPage();
   } catch (e) {
     console.error(e);
-  }
-
-  // light house pageinsights
-  if (pageInsights) {
-    try {
-      insight = await promisifyLighthouse({ urlMap, browser });
-    } catch (e) {
-      console.error(e);
-    }
   }
 
   let hasPage = true;
@@ -200,6 +177,15 @@ export const crawlWebsite = async ({
         domain,
         scriptBody,
       });
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  // light house pageinsights
+  if (pageInsights) {
+    try {
+      insight = await promisifyLighthouse({ urlMap, browser });
     } catch (e) {
       console.error(e);
     }

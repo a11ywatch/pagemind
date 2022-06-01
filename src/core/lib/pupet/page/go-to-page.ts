@@ -85,14 +85,14 @@ const goToPage = async (page: Page, url: string): Promise<boolean> => {
   let hasPage = true;
 
   try {
-    await page.setRequestInterception(true);
+    await page?.setRequestInterception(true);
     page.on("request", networkBlock);
   } catch (e) {
     console.error(e);
   }
 
   try {
-    await page.goto(url, {
+    await page?.goto(url, {
       timeout: pa11yConfig.timeout,
       waitUntil: "domcontentloaded",
     });
