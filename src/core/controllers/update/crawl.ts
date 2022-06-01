@@ -26,10 +26,13 @@ const EMPTY_RESPONSE = {
 const cleanPool = async (browser?: Browser, page?: Page) =>
   await puppetPool.clean(page, browser);
 
-export const promisifyLighthouse = ({ browser, urlMap }: any) => {
+export const promisifyLighthouse = (
+  { browser, urlMap }: any,
+  retry?: boolean
+) => {
   return new Promise(async (resolve) => {
     try {
-      const { lhr } = await lighthouse(urlMap, {
+      const { lhr } = (await lighthouse(urlMap, {
         port: new URL(browser.wsEndpoint()).port,
         hostname: chromeHost,
         output: "json",
@@ -41,15 +44,30 @@ export const promisifyLighthouse = ({ browser, urlMap }: any) => {
           "performance",
           "seo",
         ],
-      });
+        saveAssets: false,
+        gatherMode: false,
+        auditMode: false,
+        maxWaitForLoad: 20000,
+      })) ?? { lhr: null };
+
       if (lhr) {
         // convert to gRPC Struct
         resolve(struct.encode(lhr));
       } else {
+        if (!retry) {
+          setTimeout(async () => {
+            await promisifyLighthouse({ browser, urlMap }, true);
+          }, 0);
+        }
         resolve(null);
       }
     } catch (e) {
       console.error(e);
+      if (!retry) {
+        setTimeout(async () => {
+          await promisifyLighthouse({ browser, urlMap }, true);
+        }, 0);
+      }
     }
   });
 };
@@ -68,6 +86,7 @@ export const crawlWebsite = async ({
 }) => {
   let page: Page;
   let browser: Browser;
+  let insight;
   const urlMap = decodeURIComponent(uri);
 
   try {
@@ -82,10 +101,13 @@ export const crawlWebsite = async ({
     console.error(e);
   }
 
-  try {
-    await page?.setBypassCSP(true);
-  } catch (e) {
-    console.error(e);
+  // light house pageinsights
+  if (pageInsights) {
+    try {
+      insight = await promisifyLighthouse({ urlMap, browser });
+    } catch (e) {
+      console.error(e);
+    }
   }
 
   let hasPage = true;
@@ -116,7 +138,6 @@ export const crawlWebsite = async ({
 
   let resolver = Object.assign({}, EMPTY_RESPONSE);
   let pageIssues = [];
-  let insight;
 
   try {
     pageIssues = await getPageIssues({
@@ -179,15 +200,6 @@ export const crawlWebsite = async ({
         domain,
         scriptBody,
       });
-    } catch (e) {
-      console.error(e);
-    }
-  }
-
-  // light house pageinsights
-  if (pageInsights) {
-    try {
-      insight = await promisifyLighthouse({ urlMap, browser });
     } catch (e) {
       console.error(e);
     }
