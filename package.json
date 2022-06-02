@@ -14,6 +14,7 @@
     "@a11ywatch/website-source-builder": "^0.0.28",
     "@grpc/grpc-js": "1.6.2",
     "@grpc/proto-loader": "0.6.9",
+    "fastq": "^1.13.0",
     "get-page-speed": "^1.0.1",
     "lighthouse": "9.6.1",
     "litepa11y": "0.5.8",

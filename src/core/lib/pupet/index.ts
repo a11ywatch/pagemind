@@ -10,3 +10,7 @@ export {
   getPageMeta,
   goToPage,
 } from "./page";
+export {
+  queueLighthouse,
+  queueLighthouseUntilResults,
+} from "./queue-lighthouse";

@@ -1,6 +1,5 @@
 import getPageSpeed from "get-page-speed";
 import { sourceBuild } from "@a11ywatch/website-source-builder";
-import lighthouse from "lighthouse";
 import {
   puppetPool,
   checkCdn,
@@ -9,11 +8,10 @@ import {
   goToPage,
   getPageMeta,
 } from "@app/core/lib";
-import { chromeHost } from "@app/config/chrome";
 import { storeCDNValues } from "./cdn_worker";
 import type { Browser, Page } from "puppeteer";
 import type { IssueData } from "@app/types";
-import { struct } from "pb-util";
+import { queueLighthouseUntilResults } from "@app/core/lib/pupet/queue-lighthouse";
 
 const EMPTY_RESPONSE = {
   webPage: null,
@@ -24,39 +22,6 @@ const EMPTY_RESPONSE = {
 
 const cleanPool = async (browser?: Browser, page?: Page) =>
   await puppetPool.clean(page, browser);
-
-export const promisifyLighthouse = ({ browser, urlMap }: any) => {
-  return new Promise(async (resolve) => {
-    try {
-      const { lhr } = (await lighthouse(urlMap, {
-        port: new URL(browser.wsEndpoint()).port,
-        hostname: chromeHost,
-        output: "json",
-        disableStorageReset: true,
-        onlyCategories: [
-          "accessibility",
-          "best-practices",
-          "performance",
-          "seo",
-        ],
-        saveAssets: false,
-        gatherMode: false,
-        auditMode: false,
-        maxWaitForLoad: 20000,
-      })) ?? { lhr: null };
-
-      if (lhr) {
-        // convert to gRPC Struct
-        resolve(struct.encode(lhr));
-      } else {
-        resolve(null);
-      }
-    } catch (e) {
-      console.error(e);
-      resolve(null);
-    }
-  });
-};
 
 export const crawlWebsite = async ({
   userId,
@@ -113,7 +78,6 @@ export const crawlWebsite = async ({
   const { domain, pageUrl, cdnSourceStripped, cdnJsPath, cdnMinJsPath } =
     sourceBuild(urlMap, userId);
 
-  let resolver = Object.assign({}, EMPTY_RESPONSE);
   let pageIssues = [];
 
   try {
@@ -182,16 +146,20 @@ export const crawlWebsite = async ({
     }
   }
 
-  // light house pageinsights
-  if (pageInsights) {
-    try {
-      insight = await promisifyLighthouse({ urlMap, browser });
-    } catch (e) {
-      console.error(e);
-    }
+  try {
+    await cleanPool(browser, page);
+  } catch (e) {
+    console.error(e);
   }
 
-  resolver = {
+  // light house pageinsights
+  if (pageInsights) {
+    insight = await queueLighthouseUntilResults({ urlMap }).catch((e) =>
+      console.error(e)
+    );
+  }
+
+  return {
     webPage: {
       domain,
       url: pageUrl,
@@ -237,12 +205,4 @@ export const crawlWebsite = async ({
       : null,
     userId,
   };
-
-  try {
-    await cleanPool(browser, page);
-  } catch (e) {
-    console.error(e);
-  }
-
-  return resolver;
 };
