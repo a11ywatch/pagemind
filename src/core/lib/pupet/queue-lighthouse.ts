@@ -5,9 +5,11 @@ import { chromeHost } from "@app/config/chrome";
 import { struct } from "pb-util";
 import { lighthouseEmitter } from "@app/core/event/lh";
 import { CHROME_PORT } from "@app/config/config";
+import { fetchUrl } from "../utils/fetch";
 
 interface Task {
   urlMap: string;
+  apiKey?: string;
 }
 
 export const promisifyLighthouse = async ({ urlMap }: any) => {
@@ -47,9 +49,33 @@ export const queueLighthouse: queueAsPromised<Task> = fastq.promise(
   1
 );
 
-export const queueLighthouseUntilResults = ({ urlMap }: Task) => {
+export const queueLighthouseUntilResults = ({ urlMap, apiKey }: Task) => {
   // queue and wait for results
   return new Promise(async (resolve) => {
+    const key = apiKey ?? process.env.PAGESPEED_API_KEY;
+    const API_KEY = key ? `&key=${String(key).trim()}` : "";
+    const categories =
+      "&category=accessibility&category=best-practices&category=performance&category=seo";
+
+    // if item in queue use rest api for pageinsights to speed up process. SWAP between queue and network.
+    if (
+      (!queueLighthouse.idle() && key) ||
+      (!key && !queueLighthouse.idle() && queueLighthouse.length() === 1)
+    ) {
+      const data = await fetchUrl(
+        `https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=${urlMap}${categories}${API_KEY}`
+      ).catch((e) => {
+        console.error(e);
+      });
+
+      // no errors exist process results.
+      if (data && "lighthouseResult" in data && "error" in data === false) {
+        resolve(struct.encode(data));
+        return;
+      }
+    }
+
+    // event process the lighthouse result from queue
     lighthouseEmitter.once(`lh-processing-${urlMap}`, (data) => {
       if (data) {
         resolve(struct.encode(data));
@@ -58,7 +84,7 @@ export const queueLighthouseUntilResults = ({ urlMap }: Task) => {
       }
     });
 
-    await queueLighthouse.push({ urlMap }).catch((e) => {
+    queueLighthouse.push({ urlMap }).catch((e) => {
       console.error(e);
       // exit the method
       resolve(null);
