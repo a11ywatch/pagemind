@@ -163,7 +163,6 @@ export const crawlWebsite = async ({
     webPage: {
       domain,
       url: pageUrl,
-      adaScore,
       cdnConnected: pageHasCdn,
       pageLoadTime: {
         duration,
