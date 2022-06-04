@@ -2,8 +2,11 @@ import { createMavClient, createCdnClient } from "./website-client";
 import { createServer } from "./grpc-server";
 
 export const startGRPC = async () => {
-  await createServer();
-  await startClientsGRPC();
+  return new Promise(async (resolve) => {
+    await createServer();
+    await startClientsGRPC();
+    resolve(true);
+  });
 };
 
 export const startClientsGRPC = async (retry?: boolean) => {

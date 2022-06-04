@@ -24,7 +24,12 @@ const createCanvasPupet = (selector) => {
 
     try {
       canvas.getContext("2d").drawImage(img, 0, 0, width, height);
-      return { imageToBase64: canvas.toDataURL("image/jpg"), width, height };
+      return {
+        imageToBase64: canvas.toDataURL("image/jpg"),
+        width,
+        height,
+        url: img.src || "",
+      };
     } catch (e) {
       console.error(e);
     }

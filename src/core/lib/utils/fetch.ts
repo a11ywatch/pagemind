@@ -18,7 +18,6 @@ export const fetchUrl = (url: string): Promise<any> => {
         } catch (e) {
           console.error(e);
         }
-        console.log(data);
         resolve(data);
       });
     }).on("error", (err) => {

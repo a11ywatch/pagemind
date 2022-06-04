@@ -12,12 +12,14 @@ interface IssueInfo {
   scriptChildren: string;
   possibleIssuesFixedByCdn: number;
   scriptsEnabled?: boolean;
+  cv?: boolean; // can use computer vision
 }
 
 export const getPageMeta = ({
   issues,
   page,
   scriptsEnabled,
+  cv,
 }): Promise<IssueInfo> => {
   let errorCount = 0;
   let warningCount = 0;
@@ -54,6 +56,7 @@ export const getPageMeta = ({
           element,
           page,
           index,
+          cv,
         }).catch((e) => {
           console.error(e);
         });

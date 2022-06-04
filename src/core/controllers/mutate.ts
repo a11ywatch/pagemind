@@ -4,18 +4,22 @@ import { adjustScript, editScript } from "./update";
 export const mutateScript = async (body) => {
   const { editScript: edit, url, userId, script, newScript } = body ?? {};
 
+  const props = Object.assign(
+    {},
+    {
+      url: decodeURIComponent(url + ""),
+      userId,
+      script,
+      newScript,
+    }
+  );
+
   try {
-    return await (edit ? editScript : adjustScript)(
-      Object.assign(
-        {},
-        {
-          url: decodeURIComponent(url + ""),
-          userId,
-          script,
-          newScript,
-        }
-      )
-    );
+    if (edit) {
+      return await editScript(props);
+    } else {
+      return await adjustScript(props);
+    }
   } catch (e) {
     console.error(e);
   }

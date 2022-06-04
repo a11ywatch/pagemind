@@ -28,6 +28,7 @@ interface AltProps {
   element: any;
   page: Page;
   index: number;
+  cv?: boolean; // can use computer vision
 }
 
 // determine if an alt is missing in an image and reload the page.
@@ -35,11 +36,13 @@ export const getAltImage = async ({
   element,
   page,
   index,
+  cv,
 }: AltProps): Promise<Alt> => {
   let imageToBase64;
   let width;
   let height;
   let alt = "";
+  let url = ""; // image url
 
   const selector = element?.selector; // the selector to use for the page
 
@@ -55,6 +58,7 @@ export const getAltImage = async ({
         console.error(e);
       }
     }
+
     try {
       const image = (await page.evaluate(
         createCanvasPupet,
@@ -65,6 +69,7 @@ export const getAltImage = async ({
         imageToBase64 = image?.imageToBase64;
         width = image?.width;
         height = image?.height;
+        url = image?.url;
       }
     } catch (e) {
       console.error(e);
@@ -75,10 +80,15 @@ export const getAltImage = async ({
 
   if (imageToBase64) {
     try {
-      img = await detectImageModel(imageToBase64, {
-        width,
-        height,
-      });
+      img = await detectImageModel(
+        imageToBase64,
+        {
+          width,
+          height,
+        },
+        url,
+        cv
+      );
     } catch (e) {
       console.error(e);
     }

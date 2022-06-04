@@ -34,6 +34,7 @@ export const crawlWebsite = async ({
   actions,
   standard,
   ua,
+  cv,
 }) => {
   let page: Page;
   let browser: Browser;
@@ -107,7 +108,7 @@ export const crawlWebsite = async ({
   }
 
   try {
-    pageMeta = await getPageMeta({ page, issues, scriptsEnabled });
+    pageMeta = await getPageMeta({ page, issues, scriptsEnabled, cv });
   } catch (e) {
     console.error(e);
   }

@@ -11,15 +11,22 @@ export const adjustScript = async ({ url: urlMap, script: resolver }) => {
   if (scriptBody) {
     const startOfReplaceScript = scriptBody.indexOf("// SO: SKIP NAVIGATION");
     const endOfReplaceScript = scriptBody.indexOf("// EO: SKIP NAVIGATION");
+
     if (!enabledSkip) {
-      scriptBody =
-        scriptBody.substr(0, startOfReplaceScript) +
-        scriptBody.substr(endOfReplaceScript + "// EO: SKIP NAVIGATION".length);
+      if (String(scriptBody).includes("// SO: SKIP NAVIGATION")) {
+        scriptBody =
+          scriptBody.substr(0, startOfReplaceScript) +
+          scriptBody.substr(
+            endOfReplaceScript + "// EO: SKIP NAVIGATION".length
+          );
+      }
     } else {
-      scriptBody = scriptBody.replace(
-        "void (function init() {",
-        `void (function init() { \n ${skipNavigationMethod}`
-      );
+      scriptBody = String(scriptBody)
+        .trimLeft()
+        .replace(
+          "void function init() {",
+          `void function init() { \n ${skipNavigationMethod}`
+        );
     }
   }
 
