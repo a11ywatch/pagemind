@@ -5,7 +5,6 @@ import {
   missingAltText,
   imgAltMissing,
 } from "../../../strings";
-import { getFirstItemBySplit } from "../utils/extract-first";
 import { INVALID_HTML_PROPS } from "../../engine/models/issue-type";
 import { Page } from "puppeteer";
 import { networkBlock } from "./go-to-page";
@@ -97,8 +96,8 @@ export const getAltImage = async ({
   if (img) {
     if ("className" in img && "probability" in img) {
       // TODO: allow user to determine score
-      if (img.probability >= Number(0.75)) {
-        alt = getFirstItemBySplit(img.className);
+      if (img.probability >= Number(0.5)) {
+        alt = img.className;
       }
     }
   }

@@ -17,7 +17,7 @@
     "fastq": "^1.13.0",
     "get-page-speed": "^1.0.1",
     "lighthouse": "9.6.1",
-    "litepa11y": "0.5.8",
+    "litepa11y": "0.5.10",
     "pb-util": "^1.0.3",
     "puppeteer": "14.1.1"
   },
