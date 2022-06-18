@@ -9,17 +9,23 @@ import type {
 
 type GRPC = GrpcObject | ServiceClientConstructor | ProtobufTypeDefinition;
 
+// the generic unwrapping of the gRPC service
+type RpcService = typeof Client & {
+  service?: any;
+};
+
 export interface Service {
-  WebsiteService?: typeof Client & {
-    service?: any;
+  WebsiteService?: RpcService;
+  health?: {
+    HealthCheck?: RpcService;
   };
 }
 
 export const getProto = async (
-  target: string = "pagemind.proto"
+  target: string = "/pagemind.proto"
 ): Promise<Service & GRPC> => {
   try {
-    const packageDef = await load(`${__dirname}/${target}`, {
+    const packageDef = await load(__dirname + target, {
       keepCase: true,
       longs: String,
       enums: String,

@@ -17,10 +17,16 @@ const createPuppeteerFactory = () => ({
 
     // retry and wait for ws endpoint
     if (!browser) {
+      let browserWSEndpoint;
       try {
-        const browserWSEndpoint = await getWsEndPoint();
+        browserWSEndpoint = await getWsEndPoint();
+      } catch (e) {
+        console.error(e);
+      }
+
+      try {
         browser = await puppeteer.connect({
-          browserWSEndpoint: browserWSEndpoint,
+          browserWSEndpoint,
           ignoreHTTPSErrors: true,
         });
       } catch (e) {

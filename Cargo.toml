@@ -1,0 +1,23 @@
+[package]
+name = "pagemind"
+version = "0.1.0"
+authors = ["jeffreymendez <jeff@a11ywatch.com>"]
+edition = "2018"
+description = "image rec with ai"
+license = "MIT"
+readme = "README.md"
+repository = "https://github.com/A11yWatch/pagemind"
+keywords = ["ai"]
+categories = ["asynchronous"]
+
+[dependencies]
+prost = "0.10"
+tokio = { version = "^1.17.0", features = [ "rt-multi-thread", "net", "macros", "sync", "time" ] }
+tonic = "0.7"
+
+[[bin]]
+name = "health_client"
+path = "hc_client.rs"
+
+[build-dependencies]
+tonic-build = "0.7"

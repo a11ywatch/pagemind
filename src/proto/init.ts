@@ -13,19 +13,18 @@ export const startClientsGRPC = async (retry?: boolean) => {
   return new Promise(async (resolve) => {
     // external rpc servers TODO: mock via test
     if (process.env.NODE_ENV !== "test") {
-      setTimeout(async () => {
-        try {
-          await createMavClient();
-          await createCdnClient();
-        } catch (e) {
-          console.error(e);
-          if (!retry) {
-            return await startClientsGRPC(true);
-          }
-
-          resolve(true);
+      try {
+        await createMavClient();
+        await createCdnClient();
+      } catch (e) {
+        console.error(e);
+        if (!retry) {
+          setTimeout(async () => {
+            await startClientsGRPC(true);
+            resolve(true);
+          }, 25);
         }
-      }, 60);
+      }
     }
 
     resolve(true);

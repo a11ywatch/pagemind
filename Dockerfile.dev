@@ -1,18 +1,26 @@
-FROM --platform=$BUILDPLATFORM node:17.8-alpine3.14 AS BUILD_IMAGE
+FROM --platform=$BUILDPLATFORM rustlang/rust:nightly AS rustbuilder
+
+WORKDIR /app
+COPY . .
+
+ENV GRPC_HOST=0.0.0.0:50052
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+    gcc cmake libc6
+
+RUN cargo install --no-default-features --path .
+
+FROM --platform=$BUILDPLATFORM node:17-buster-slim AS BUILD_IMAGE
 
 ENV CHROME_BIN="/usr/bin/chromium-browser" \
 	PUPPETEER_SKIP_CHROMIUM_DOWNLOAD="true" \ 
 	NODE_ENV="development"
 
-RUN set -x \
-	&& apk update \
-	&& apk upgrade \
-	&& apk add --no-cache \
-	curl
-
 WORKDIR /usr/src/app
 
 COPY package*.json ./
+COPY --from=rustbuilder /usr/local/cargo/bin/health_client /usr/local/bin/health_client
 
 RUN npm ci
 

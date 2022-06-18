@@ -23,6 +23,7 @@ const getWs = (host?: string): Promise<string> => {
           let data;
           try {
             data = JSON.parse(rawData);
+            console.log(data);
           } catch (e) {
             console.error(e);
           }
@@ -38,7 +39,6 @@ const getWs = (host?: string): Promise<string> => {
     // add dns lookup from network
     if (!chromeHost) {
       dns.lookup("chrome", (_err, address, family) => {
-        console.log("address: %j family: IPv%s", address, family);
         chromeHost = address;
         lookupChromeHost(address);
       });
@@ -53,21 +53,26 @@ export const getWsEndPoint = async (retry?: boolean) => {
     let retryHost = !retry ? "host.docker.internal" : "";
     // retry connection on as mac localhost
     wsChromeEndpointurl = await getWs(retryHost);
+    return wsChromeEndpointurl;
   } catch (e) {
     console.error(e);
   }
 
-  try {
-    if (!wsChromeEndpointurl && retry) {
-      setTimeout(async () => {
-        await getWsEndPoint();
-      }, 250);
+  return new Promise((resolve) => {
+    if (retry) {
+      try {
+        setTimeout(async () => {
+          wsChromeEndpointurl = await getWs();
+          resolve(wsChromeEndpointurl);
+        }, 100);
+      } catch (e) {
+        console.error(e);
+        resolve("");
+      }
+    } else {
+      resolve(wsChromeEndpointurl);
     }
-  } catch (e) {
-    console.error(e);
-  }
-
-  return wsChromeEndpointurl;
+  });
 };
 
 export { wsChromeEndpointurl, chromeHost };

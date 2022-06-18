@@ -40,3 +40,7 @@ dist
 
 # private.key
 # public.key
+
+#rust
+/target
+**/*.rs.bk

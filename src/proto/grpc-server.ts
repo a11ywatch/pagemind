@@ -8,7 +8,15 @@ let server: Server;
 
 export const createServer = async () => {
   const websiteProto = await getProto();
+  const healthProto = await getProto("/health.proto");
+
   server = new Server();
+
+  server.addService(healthProto.health.HealthCheck.service, {
+    check: (_call, callback) => {
+      callback(null, { healthy: true });
+    },
+  });
 
   server.addService(websiteProto.WebsiteService.service, {
     // crawl page via puppeteer for issues
@@ -31,6 +39,10 @@ export const createServer = async () => {
 
 export const killServer = async () => {
   const websiteProto = await getProto();
+  const healthProto = await getProto("/health.proto");
+
   server.removeService(websiteProto.WebsiteService.service);
+  server.removeService(healthProto.health.HealthCheck.service);
+
   server.forceShutdown();
 };
