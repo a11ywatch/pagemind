@@ -82,8 +82,6 @@ export const networkBlock = (request: HTTPRequest, allowImage?: boolean) => {
 };
 
 const goToPage = async (page: Page, url: string): Promise<boolean> => {
-  let hasPage = true;
-
   try {
     await page?.setRequestInterception(true);
     page.on("request", networkBlock);
@@ -91,17 +89,18 @@ const goToPage = async (page: Page, url: string): Promise<boolean> => {
     console.error(e);
   }
 
-  try {
-    await page?.goto(url, {
-      timeout: pa11yConfig.timeout,
-      waitUntil: "domcontentloaded",
-    });
-  } catch (e) {
-    console.error(e);
-    hasPage = false;
-  }
-
-  return hasPage;
+  return new Promise(async (resolve) => {
+    try {
+      await page?.goto(url, {
+        timeout: pa11yConfig.timeout,
+        waitUntil: "domcontentloaded",
+      });
+      resolve(true);
+    } catch (e) {
+      console.error(e);
+      resolve(false);
+    }
+  });
 };
 
 export { goToPage };

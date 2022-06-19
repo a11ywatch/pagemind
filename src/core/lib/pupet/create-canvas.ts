@@ -16,8 +16,8 @@ const createCanvasPupet = (selector) => {
       return value / softScale;
     };
 
-    var width = scaleDown(img.width) || 0;
-    var height = scaleDown(img.height) || 0;
+    var width = Math.max(scaleDown(img.width), 50);
+    var height = Math.max(scaleDown(img.height), 50);
 
     canvas.width = width;
     canvas.height = height;
