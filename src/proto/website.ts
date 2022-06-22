@@ -16,6 +16,9 @@ type RpcService = typeof Client & {
 
 export interface Service {
   WebsiteService?: RpcService;
+  Pagemind?: RpcService;
+  Cdn?: RpcService;
+  Mav?: RpcService;
   health?: {
     HealthCheck?: RpcService;
   };

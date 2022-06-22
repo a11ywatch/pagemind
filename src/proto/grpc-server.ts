@@ -18,7 +18,7 @@ export const createServer = async () => {
     },
   });
 
-  server.addService(websiteProto.WebsiteService.service, {
+  server.addService(websiteProto.Pagemind.service, {
     // crawl page via puppeteer for issues
     scan: async (call, callback) => {
       const page = await crawlWebsite(call.request);
@@ -41,7 +41,7 @@ export const killServer = async () => {
   const websiteProto = await getProto();
   const healthProto = await getProto("/health.proto");
 
-  server.removeService(websiteProto.WebsiteService.service);
+  server.removeService(websiteProto.Pagemind.service);
   server.removeService(healthProto.health.HealthCheck.service);
 
   server.forceShutdown();

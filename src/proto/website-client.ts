@@ -13,8 +13,8 @@ export const killClient = () => {
 // mav service server client for testing
 const createMavClient = async () => {
   try {
-    const { WebsiteService } = await getProto("/mav.proto");
-    mavClient = new WebsiteService(GRPC_HOST_MAV, credentials.createInsecure());
+    const { Mav } = await getProto("/mav.proto");
+    mavClient = new Mav(GRPC_HOST_MAV, credentials.createInsecure());
   } catch (e) {
     console.error(e);
   }
@@ -23,8 +23,8 @@ const createMavClient = async () => {
 // cdn service server client for testing
 const createCdnClient = async () => {
   try {
-    const { WebsiteService } = await getProto("/cdn.proto");
-    cdnClient = new WebsiteService(GRPC_HOST_CDN, credentials.createInsecure());
+    const { Cdn } = await getProto("/cdn.proto");
+    cdnClient = new Cdn(GRPC_HOST_CDN, credentials.createInsecure());
   } catch (e) {
     console.error(e);
   }
