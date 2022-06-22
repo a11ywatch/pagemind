@@ -28,7 +28,7 @@ export const getProto = async (
   target: string = "/pagemind.proto"
 ): Promise<Service & GRPC> => {
   try {
-    const packageDef = await load(__dirname + target, {
+    const packageDef = await load(`node_modules/@a11ywatch/protos${target}`, {
       keepCase: true,
       longs: String,
       enums: String,

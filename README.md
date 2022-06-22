@@ -1,14 +1,10 @@
 # pagemind
 
-HTTP API for accessibility insights
+gRPC API for accessibility insights and metrics
 
 ## Getting Started
 
 For more information checkout [pagemind](https://a11ywatch.github.io/docs/documentation/pagemind)
-
-## Docker
-
-if using this service in a docker env make sure to create a .env file and add the env var DOCKER_ENV=true
 
 ## Installation
 
@@ -22,7 +18,9 @@ npm install
 npm run dev
 ```
 
-The server will run on port 8040.
+## Healthcheck
+
+You can generate a health check client by running `cargo build`. It requires that you first installed the app via `npm i`.
 
 ## LICENSE
 

@@ -1,15 +1,16 @@
 {
-  "name": "pagemind",
-  "version": "0.0.2",
+  "name": "@a11ywatch/pagemind",
+  "version": "0.1.0",
   "description": "Get metrics on your web page with inclusion",
   "main": "./dist/server.js",
   "scripts": {
     "dev": "ts-node-dev --transpile-only -r tsconfig-paths/register src/server.ts",
     "test": "jest",
-    "build": "tsc && tsc-alias && cp -R src/proto/*.proto dist/proto/",
+    "build": "tsc && tsc-alias",
     "start": "node dist/server.js"
   },
   "dependencies": {
+    "@a11ywatch/protos": "^0.1.4",
     "@a11ywatch/website-source-builder": "^0.0.28",
     "@grpc/grpc-js": "1.6.2",
     "@grpc/proto-loader": "0.6.9",

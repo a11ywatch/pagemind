@@ -1,13 +1,16 @@
 FROM --platform=$BUILDPLATFORM rustlang/rust:nightly AS rustbuilder
 
 WORKDIR /app
-COPY . .
 
 ENV GRPC_HOST=0.0.0.0:50052
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
-    gcc cmake libc6
+    gcc cmake libc6 npm
+
+RUN npm install @a11ywatch/protos
+
+COPY . .
 
 RUN cargo install --no-default-features --path .
 
