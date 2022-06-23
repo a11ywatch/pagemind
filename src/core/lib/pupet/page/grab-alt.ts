@@ -47,7 +47,9 @@ export const getAltImage = async ({
       try {
         page.off("request", networkBlock);
         page.removeAllListeners("request");
-        await page.setRequestInterception(false);
+
+        // allow images to run
+        page.on("request", (req) => networkBlock(req, true));
         await page.reload();
       } catch (e) {
         console.error(e);
