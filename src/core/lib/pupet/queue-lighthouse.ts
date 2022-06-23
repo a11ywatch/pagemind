@@ -70,7 +70,7 @@ export const queueLighthouseUntilResults = ({ urlMap, apiKey }: Task) => {
 
       // no errors exist process results.
       if (data && "lighthouseResult" in data && "error" in data === false) {
-        resolve(struct.encode(data));
+        resolve(struct.encode(data.lighthouseResult));
         return;
       }
     }

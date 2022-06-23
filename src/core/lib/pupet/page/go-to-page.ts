@@ -51,6 +51,12 @@ export const networkBlock = (request: HTTPRequest, allowImage?: boolean) => {
 
   const resourceType = request.resourceType();
 
+  // allow images upon reload intercepting.
+  if (resourceType === "image" && allowImage) {
+    request.continue();
+    return;
+  }
+
   // abort all video request
   if (
     resourceType == "media" ||
@@ -61,12 +67,6 @@ export const networkBlock = (request: HTTPRequest, allowImage?: boolean) => {
     url.endsWith(".wmv")
   ) {
     request.abort();
-    return;
-  }
-
-  // allow images upon reload intercepting.
-  if (resourceType === "image" && allowImage) {
-    request.continue();
     return;
   }
 

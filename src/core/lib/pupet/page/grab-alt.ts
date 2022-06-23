@@ -37,11 +37,7 @@ export const getAltImage = async ({
   index,
   cv,
 }: AltProps): Promise<Alt> => {
-  let imageToBase64;
-  let width;
-  let height;
   let alt = "";
-  let url = ""; // image url
 
   const selector = element?.selector; // the selector to use for the page
 
@@ -58,46 +54,37 @@ export const getAltImage = async ({
       }
     }
 
+    let canvas;
     try {
-      const image = (await page.evaluate(
+      canvas = (await page.evaluate(
         createCanvasPupet,
         element.selector
       )) as any;
+    } catch (e) {
+      console.error(e);
+    }
 
-      if (image) {
-        imageToBase64 = image?.imageToBase64;
-        width = image?.width;
-        height = image?.height;
-        url = image?.url;
+    if (canvas) {
+      const { imageToBase64, width, height, url } = canvas ?? {};
+      let img;
+
+      try {
+        img = await detectImageModel(
+          imageToBase64,
+          {
+            width,
+            height,
+          },
+          url,
+          cv
+        );
+      } catch (e) {
+        console.error(e);
       }
-    } catch (e) {
-      console.error(e);
-    }
-  }
-
-  let img;
-
-  if (imageToBase64) {
-    try {
-      img = await detectImageModel(
-        imageToBase64,
-        {
-          width,
-          height,
-        },
-        url,
-        cv
-      );
-    } catch (e) {
-      console.error(e);
-    }
-  }
-
-  if (img) {
-    if ("className" in img && "probability" in img) {
-      // TODO: allow user to determine score
-      if (img.probability >= Number(0.5)) {
-        alt = img.className;
+      if (img && "className" in img && "probability" in img) {
+        if (img.probability >= Number(0.5)) {
+          alt = img.className; // TODO: allow user to determine score
+        }
       }
     }
   }
