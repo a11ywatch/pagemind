@@ -10,7 +10,7 @@
     "start": "node dist/server.js"
   },
   "dependencies": {
-    "@a11ywatch/protos": "^0.1.4",
+    "@a11ywatch/protos": "^0.1.5",
     "@a11ywatch/website-source-builder": "^0.0.28",
     "@grpc/grpc-js": "1.6.2",
     "@grpc/proto-loader": "0.6.9",
@@ -19,7 +19,7 @@
     "lighthouse": "9.6.1",
     "litepa11y": "0.5.10",
     "pb-util": "^1.0.3",
-    "puppeteer": "14.1.1"
+    "puppeteer": "15.0.0"
   },
   "devDependencies": {
     "@swc/core": "^1.2.117",
