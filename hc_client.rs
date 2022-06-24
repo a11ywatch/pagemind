@@ -8,7 +8,7 @@ pub mod health {
 }
 
 /// basic health check to see system online.
-#[tokio::main]
+#[tokio::main(flavor = "current_thread")]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut client = HealthCheckClient::connect("http://127.0.0.1:50052").await?;
     let response = client

@@ -12,7 +12,7 @@ categories = ["asynchronous"]
 
 [dependencies]
 prost = "0.10"
-tokio = { version = "^1.17.0", features = [ "rt-multi-thread", "net", "macros", "sync", "time" ] }
+tokio = { version = "^1.17.0", features = [ "rt", "net", "macros" ] }
 tonic = "0.7"
 
 [[bin]]

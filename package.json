@@ -12,8 +12,8 @@
   "dependencies": {
     "@a11ywatch/protos": "^0.1.5",
     "@a11ywatch/website-source-builder": "^0.0.28",
-    "@grpc/grpc-js": "1.6.2",
-    "@grpc/proto-loader": "0.6.9",
+    "@grpc/grpc-js": "1.6.7",
+    "@grpc/proto-loader": "0.6.12",
     "fastq": "^1.13.0",
     "get-page-speed": "^1.0.1",
     "lighthouse": "9.6.1",
