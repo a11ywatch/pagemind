@@ -14,7 +14,7 @@ COPY . .
 
 RUN cargo install --no-default-features --path .
 
-FROM --platform=$BUILDPLATFORM node:17-buster-slim AS BUILD_IMAGE
+FROM --platform=$BUILDPLATFORM node:18.4-buster-slim AS BUILD_IMAGE
 
 ENV CHROME_BIN="/usr/bin/chromium-browser" \
 	PUPPETEER_SKIP_CHROMIUM_DOWNLOAD="true" \ 
@@ -31,4 +31,4 @@ COPY . .
 
 EXPOSE 50052
 
-CMD [ "npm", "run", "dev" ]
+CMD ["node_modules/ts-node-dev/lib/bin.js", "--no-experimental-fetch", "--transpile-only", "-r", "tsconfig-paths/register", "src/server.ts"]
