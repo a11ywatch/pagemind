@@ -7,7 +7,7 @@ let chromeHost = process.env.CHROME_HOST;
 let wsChromeEndpointurl = process.env.CHROME_SOCKET_URL;
 
 const getWs = (host?: string): Promise<string> => {
-  return new Promise(async (resolve, reject) => {
+  return new Promise((resolve, reject) => {
     const defaultHost = host || chromeHost || "127.0.0.1";
 
     const lookupChromeHost = (target?: string) => {
@@ -36,14 +36,19 @@ const getWs = (host?: string): Promise<string> => {
       });
     };
 
-    // add dns lookup from network
-    if (!chromeHost) {
-      dns.lookup("chrome", (_err, address, family) => {
-        chromeHost = address;
-        lookupChromeHost(address);
-      });
-    } else {
-      lookupChromeHost();
+    try {
+      // add dns lookup from network
+      if (!chromeHost) {
+        dns.lookup("chrome", (_err, address, family) => {
+          chromeHost = address;
+          lookupChromeHost(address);
+        });
+      } else {
+        lookupChromeHost();
+      }
+    } catch (e) {
+      console.error(e);
+      resolve("");
     }
   });
 };

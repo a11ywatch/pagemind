@@ -14,7 +14,7 @@ COPY . .
 
 RUN cargo install --no-default-features --path .
 
-FROM --platform=$BUILDPLATFORM node:18.4-buster-slim AS BUILD_IMAGE
+FROM node:17-buster-slim AS BUILD_IMAGE
 
 ENV CHROME_BIN="/usr/bin/chromium-browser" \
 	PUPPETEER_SKIP_CHROMIUM_DOWNLOAD="true" \ 
