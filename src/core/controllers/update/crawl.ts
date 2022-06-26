@@ -35,6 +35,7 @@ export const crawlWebsite = async ({
   standard,
   ua,
   cv,
+  pageSpeedApiKey,
 }) => {
   let page: Page;
   let browser: Browser;
@@ -155,9 +156,10 @@ export const crawlWebsite = async ({
 
   // light house pageinsights
   if (pageInsights) {
-    insight = await queueLighthouseUntilResults({ urlMap }).catch((e) =>
-      console.error(e)
-    );
+    insight = await queueLighthouseUntilResults({
+      urlMap,
+      apiKey: pageSpeedApiKey,
+    }).catch((e) => console.error(e));
   }
 
   return {

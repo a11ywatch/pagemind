@@ -52,13 +52,14 @@ export const queueLighthouse: queueAsPromised<Task> = fastq.promise(
 export const queueLighthouseUntilResults = ({ urlMap, apiKey }: Task) => {
   // queue and wait for results
   return new Promise(async (resolve) => {
-    const key = apiKey ?? process.env.PAGESPEED_API_KEY;
+    const key = apiKey || process.env.PAGESPEED_API_KEY;
     const API_KEY = key ? `&key=${String(key).trim()}` : "";
     const categories =
       "&category=accessibility&category=best-practices&category=performance&category=seo";
 
     // if item in queue use rest api for pageinsights to speed up process. SWAP between queue and network.
     if (
+      apiKey ||
       (!queueLighthouse.idle() && key) ||
       (!key && !queueLighthouse.idle() && queueLighthouse.length() === 1)
     ) {
@@ -84,6 +85,7 @@ export const queueLighthouseUntilResults = ({ urlMap, apiKey }: Task) => {
       }
     });
 
+    // internal queue for single process lighthouse devtools
     queueLighthouse.push({ urlMap }).catch((e) => {
       console.error(e);
       // exit the method

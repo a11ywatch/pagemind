@@ -10,7 +10,7 @@
     "start": "node dist/server.js"
   },
   "dependencies": {
-    "@a11ywatch/protos": "^0.1.6",
+    "@a11ywatch/protos": "^0.1.7",
     "@a11ywatch/website-source-builder": "0.0.30",
     "@grpc/grpc-js": "1.6.7",
     "@grpc/proto-loader": "0.6.13",
