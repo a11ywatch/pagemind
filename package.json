@@ -1,6 +1,6 @@
 {
   "name": "@a11ywatch/pagemind",
-  "version": "0.1.1",
+  "version": "0.1.7",
   "description": "Get metrics on your web page with inclusion",
   "main": "./dist/server.js",
   "scripts": {
@@ -8,7 +8,7 @@
     "test": "jest",
     "build": "tsc && tsc-alias",
     "start": "node dist/server.js",
-    "prepare": "tsc --build && cp -R types/ ./dist"
+    "prepublishOnly": "tsc && tsc-alias"
   },
   "dependencies": {
     "@a11ywatch/protos": "^0.1.7",
@@ -50,5 +50,10 @@
     "accessibility",
     "testing",
     "WCAG"
+  ],
+  "files": [
+    "package.json",
+    "package-lock.json",
+    "dist"
   ]
 }
