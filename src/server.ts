@@ -11,7 +11,10 @@ export const coreServer = async () => {
     // launch chrome and get endpoint
     if (!endpoint) {
       const puppeteer = await import("puppeteer");
-      const browser = await puppeteer.launch({ devtools: true });
+      const browser = await puppeteer.launch({
+        devtools: true,
+        headless: true,
+      });
       const browserWSEndpoint = await browser.wsEndpoint();
 
       if (browserWSEndpoint) {

@@ -1,14 +1,14 @@
 {
   "name": "@a11ywatch/pagemind",
-  "version": "0.1.8",
+  "version": "0.3.1",
   "description": "Get metrics on your web page with inclusion",
-  "main": "./dist/server.js",
+  "main": "./server.js",
   "scripts": {
     "dev": "ts-node-dev --transpile-only -r tsconfig-paths/register src/server.ts",
     "test": "jest",
     "build": "tsc && tsc-alias",
     "start": "node dist/server.js",
-    "prepublishOnly": "tsc && tsc-alias"
+    "pub": "tsc && tsc-alias && cp package.json dist && cp package-lock.json dist && cp README.md dist && cp LICENSE dist && cd dist && npm publish"
   },
   "dependencies": {
     "@a11ywatch/protos": "^0.1.7",
@@ -50,10 +50,5 @@
     "accessibility",
     "testing",
     "WCAG"
-  ],
-  "files": [
-    "package.json",
-    "package-lock.json",
-    "dist"
   ]
 }

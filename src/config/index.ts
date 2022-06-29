@@ -6,3 +6,4 @@ export {
   SCRIPTS_CDN_URL,
 } from "./config";
 export { pa11yConfig } from "./pa11y-config";
+export { getWsEndPoint } from "./chrome";

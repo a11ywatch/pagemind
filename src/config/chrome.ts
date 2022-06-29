@@ -87,4 +87,4 @@ const setWsEndPoint = (endpoint: string) => {
   wsChromeEndpointurl = endpoint;
 };
 
-export { wsChromeEndpointurl, chromeHost, setWsEndPoint, getWsEndPoint };
+export { wsChromeEndpointurl, chromeHost, getWs, setWsEndPoint, getWsEndPoint };
