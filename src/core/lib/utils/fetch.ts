@@ -1,9 +1,12 @@
 import { get } from "https";
+import { get as getHttp } from "http";
 
 // fetch wrapper using http
-export const fetchUrl = (url: string): Promise<any> => {
+export const fetchUrl = (url: string, http?: boolean): Promise<any> => {
+  const getMethod = http ? getHttp : get;
+
   return new Promise(async (resolve, reject) => {
-    get(url, (res) => {
+    getMethod(url, (res) => {
       res.setEncoding("utf8");
       let rawData = "";
 

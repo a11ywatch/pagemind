@@ -15,3 +15,4 @@ export {
   skipContentCheck,
   puppetPool,
 } from "./pupet";
+export { fetchUrl } from "./utils/fetch";
