@@ -65,7 +65,7 @@ export const getPageMeta = ({
 
         if (altFix) {
           // if alt exist apply recommendation.
-          element.message = `${element.message} Recommendation: set the alt prop to - ${altFix}.`;
+          element.message = `${element.message} Recommendation: change alt to ${altFix}.`;
         }
 
         index++;
