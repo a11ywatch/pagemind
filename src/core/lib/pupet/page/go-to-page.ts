@@ -26,6 +26,8 @@ const skippedResources = [
   "https://www.facebook.com/sharer.php?", // authenticated facebook page
   "googlesyndication.com",
   "adservice.google.com",
+  "client.crisp.chat",
+  "widget.intercom.io",
 ];
 
 const blockedResourceTypes = [
