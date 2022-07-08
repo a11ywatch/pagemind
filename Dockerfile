@@ -16,8 +16,7 @@ RUN cargo install --no-default-features --path .
 
 FROM node:17.8-alpine3.14 AS BUILD_IMAGE
 
-ENV CHROME_BIN="/usr/bin/chromium-browser" \
-	PUPPETEER_SKIP_CHROMIUM_DOWNLOAD="true"
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD="true"
 
 WORKDIR /usr/src/app
 

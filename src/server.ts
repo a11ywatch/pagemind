@@ -14,6 +14,7 @@ export const coreServer = async () => {
       const browser = await puppeteer.launch({
         devtools: true,
         headless: true,
+        args: ["--no-sandbox", "--disable-setuid-sandbox"],
       });
       const browserWSEndpoint = await browser.wsEndpoint();
 
