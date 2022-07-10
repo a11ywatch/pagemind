@@ -75,7 +75,7 @@ const getWsEndPoint = async (retry?: boolean) => {
           console.error(e);
         });
         resolve(wsChromeEndpointurl || "");
-      }, 10);
+      }, 13);
     } else {
       resolve(wsChromeEndpointurl);
     }

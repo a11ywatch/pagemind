@@ -14,7 +14,7 @@ COPY . .
 
 RUN cargo install --no-default-features --path .
 
-FROM node:17.8-alpine3.14 AS BUILD_IMAGE
+FROM node:17.9-buster-slim AS BUILD_IMAGE
 
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD="true"
 
@@ -28,7 +28,7 @@ RUN rm -R ./node_modules
 RUN npm install --production
 
 # final image
-FROM  node:17-buster-slim
+FROM node:17.9-buster-slim
 
 WORKDIR /usr/src/app
 
@@ -38,4 +38,4 @@ COPY --from=rustbuilder /usr/local/cargo/bin/health_client /usr/local/bin/health
 
 EXPOSE 50052
 
-CMD [ "node", "./dist/server.js"]
+CMD [ "node", "--no-experimental-fetch", "./dist/server.js"]

@@ -44,9 +44,7 @@ export const getPageMeta = ({
     }
 
     let issueIndex = 0;
-
     let index = 0;
-
     for (let element of pageIssues) {
       let extraConfig;
 
@@ -78,13 +76,12 @@ export const getPageMeta = ({
         includeDomainCheck = true;
       }
 
-      // get the js fix for the page
-      const getFix = getIssueFixScript(element, issueIndex, extraConfig);
+      if (scriptsEnabled) {
+        // get the js fix for the page
+        const getFix = getIssueFixScript(element, issueIndex, extraConfig);
 
-      if (getFix) {
-        possibleIssuesFixedByCdn++;
-
-        if (scriptsEnabled) {
+        if (getFix) {
+          possibleIssuesFixedByCdn++;
           scriptChildren += getFix;
         }
       }
