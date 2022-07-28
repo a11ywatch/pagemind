@@ -17,7 +17,9 @@ RUN cargo install --no-default-features --path .
 FROM node:17.9-buster-slim
 
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD="true" \ 
-	NODE_ENV="development"
+	NODE_ENV="development" \
+    GRPC_HOST_MAV="mav:50053" \
+    GRPC_HOST_CDN="cdn-server:50054"
 
 WORKDIR /usr/src/app
 

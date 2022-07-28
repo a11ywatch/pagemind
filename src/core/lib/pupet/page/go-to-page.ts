@@ -86,7 +86,7 @@ export const networkBlock = (request: HTTPRequest, allowImage?: boolean) => {
 const goToPage = async (page: Page, url: string): Promise<boolean> => {
   try {
     await page?.setRequestInterception(true);
-    page.on("request", networkBlock);
+    page?.on("request", networkBlock);
   } catch (e) {
     console.error(e);
   }

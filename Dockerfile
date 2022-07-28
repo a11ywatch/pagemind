@@ -30,6 +30,10 @@ RUN npm install --production
 # final image
 FROM node:17.9-buster-slim
 
+ENV GRPC_HOST_MAV="mav:50053" \
+    GRPC_HOST_CDN="cdn-server:50054" \
+    NODE_ENV=production
+
 WORKDIR /usr/src/app
 
 COPY --from=BUILD_IMAGE /usr/src/app/dist ./dist
