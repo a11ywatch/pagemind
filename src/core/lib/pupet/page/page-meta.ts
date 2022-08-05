@@ -1,8 +1,8 @@
-import { getIssueFixScript } from "../..";
 import { getHostAsString } from "@a11ywatch/website-source-builder";
-import { getAltImage, isAltMissing } from "./grab-alt";
+import { getIssueFixScript } from "../../engine/fix-script";
 import { getPageIssueScore } from "../utils/page-issue-score";
 import { getIncludesDomain } from "../utils/page-includes-domain";
+import { getAltImage, isAltMissing } from "./grab-alt";
 
 interface IssueInfo {
   errorCount: number;
@@ -14,6 +14,9 @@ interface IssueInfo {
   scriptsEnabled?: boolean;
   cv?: boolean; // can use computer vision
 }
+
+// disable AI for getting page alt images
+const AI_DISABLED = process.env.AI_DISABLED === "true";
 
 export const getPageMeta = ({
   issues,
@@ -49,7 +52,7 @@ export const getPageMeta = ({
       let extraConfig;
 
       // element contains alt tag related error message and reload the page if issues exist.
-      if (isAltMissing(element.message)) {
+      if (!AI_DISABLED && isAltMissing(element.message)) {
         extraConfig = await getAltImage({
           element,
           page,
@@ -61,8 +64,8 @@ export const getPageMeta = ({
 
         const altFix = extraConfig?.alt;
 
+        // if alt exist apply recommendation.
         if (altFix) {
-          // if alt exist apply recommendation.
           element.message = `${element.message} Recommendation: change alt to ${altFix}.`;
         }
 

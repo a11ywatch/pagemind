@@ -18,6 +18,12 @@ npm install
 npm run dev
 ```
 
+## ENV
+
+```
+AI_DISABLED=false
+```
+
 ## Healthcheck
 
 You can generate a health check client by running `cargo build`. It requires that you first installed the app via `npm i`.

@@ -3,6 +3,7 @@ import { getWsEndPoint, setWsEndPoint } from "./config/chrome";
 
 export const coreServer = async () => {
   await startGRPC();
+  // attempt to get chrome ws endpoint
   let endpoint = await getWsEndPoint(true).catch((e) => {
     console.error(e);
   });
@@ -35,7 +36,7 @@ export const coreServer = async () => {
           console.error("could not start chrome", e);
         }
       }
-    }, 25);
+    }, 30);
   }
 };
 

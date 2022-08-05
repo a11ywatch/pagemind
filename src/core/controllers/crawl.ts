@@ -8,7 +8,7 @@ import {
   goToPage,
   getPageMeta,
 } from "@app/core/lib";
-import { storeCDNValues } from "./cdn_worker";
+import { storeCDNValues } from "./update/cdn_worker";
 import type { Browser, Page } from "puppeteer";
 import type { IssueData } from "@app/types";
 import { queueLighthouseUntilResults } from "@app/core/lib/pupet/queue-lighthouse";
@@ -37,16 +37,8 @@ export const crawlWebsite = async ({
   cv,
   pageSpeedApiKey,
 }) => {
+  const browser: Browser = await puppetPool.acquire();
   let page: Page;
-  let browser: Browser;
-  let insight;
-  const urlMap = decodeURIComponent(uri);
-
-  try {
-    browser = await puppetPool.acquire();
-  } catch (e) {
-    console.error(e);
-  }
 
   try {
     page = await browser?.newPage();
@@ -54,22 +46,18 @@ export const crawlWebsite = async ({
     console.error(e);
   }
 
-  let hasPage = true;
+  let insight; // page insights
+  const urlMap = decodeURIComponent(uri);
+
   let duration = Date.now(); // page ttl
-  try {
-    hasPage = await goToPage(page, urlMap);
-  } catch (e) {
-    console.error(e);
-  }
+
+  const hasPage = await goToPage(page, urlMap); // does the page exist
+
   duration = Math.floor(Date.now() - duration); // set the duration to time it takes to load page for ttyl
 
   // if page did not succeed exit.
   if (!hasPage) {
-    try {
-      await cleanPool(browser, page);
-    } catch (e) {
-      console.error(e);
-    }
+    await cleanPool(browser, page);
 
     return {
       ...EMPTY_RESPONSE,
@@ -80,39 +68,21 @@ export const crawlWebsite = async ({
   const { domain, pageUrl, cdnSourceStripped, cdnJsPath, cdnMinJsPath } =
     sourceBuild(urlMap, userId);
 
-  let pageIssues = [];
-
-  try {
-    pageIssues = await getPageIssues({
-      urlPage: pageUrl,
-      page,
-      browser,
-      pageHeaders,
-      mobile,
-      actions,
-      standard,
-      ua,
-    });
-  } catch (e) {
-    console.error(e);
-  }
+  const pageIssues = await getPageIssues({
+    urlPage: pageUrl,
+    page,
+    browser,
+    pageHeaders,
+    mobile,
+    actions,
+    standard,
+    ua,
+  });
 
   const [issues, issueMeta] = pageIssues ?? [];
 
-  let pageHasCdn;
-  let pageMeta;
-
-  try {
-    pageHasCdn = await checkCdn({ page, cdnMinJsPath, cdnJsPath });
-  } catch (e) {
-    console.error(e);
-  }
-
-  try {
-    pageMeta = await getPageMeta({ page, issues, scriptsEnabled, cv });
-  } catch (e) {
-    console.error(e);
-  }
+  const pageHasCdn = await checkCdn({ page, cdnMinJsPath, cdnJsPath });
+  const pageMeta = await getPageMeta({ page, issues, scriptsEnabled, cv });
 
   const {
     errorCount,
@@ -135,24 +105,16 @@ export const crawlWebsite = async ({
     scriptBody = scriptBuild(scriptProps, true);
   }
 
+  // Store the js script
   if (!noStore) {
-    // TODO: move to stream
-    try {
-      await storeCDNValues({
-        cdnSourceStripped,
-        domain,
-        scriptBody,
-      });
-    } catch (e) {
-      console.error(e);
-    }
+    await storeCDNValues({
+      cdnSourceStripped,
+      domain,
+      scriptBody,
+    });
   }
 
-  try {
-    await cleanPool(browser, page);
-  } catch (e) {
-    console.error(e);
-  }
+  await cleanPool(browser, page);
 
   // light house pageinsights
   if (pageInsights) {
