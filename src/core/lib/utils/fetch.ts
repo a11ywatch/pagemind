@@ -1,9 +1,13 @@
-import { get } from "https";
-import { get as getHttp } from "http";
+import Https from "https";
+import Http from "http";
 
 // fetch wrapper using http
 export const fetchUrl = (url: string, http?: boolean): Promise<any> => {
-  const getMethod = http ? getHttp : get;
+  if (!url) {
+    return null;
+  }
+
+  const getMethod = http && !url?.includes("https://") ? Http.get : Https.get;
 
   return new Promise(async (resolve, reject) => {
     getMethod(url, (res) => {
@@ -24,7 +28,7 @@ export const fetchUrl = (url: string, http?: boolean): Promise<any> => {
         resolve(data);
       });
     }).on("error", (err) => {
-      reject(`${err.message}.`);
+      reject(err);
     });
   });
 };

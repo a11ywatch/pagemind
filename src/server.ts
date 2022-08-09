@@ -11,11 +11,11 @@ export const coreServer = async () => {
   // retry again with minor delay
   if (!endpoint) {
     setTimeout(async () => {
-      let endpoint = await getWsEndPoint(true).catch((e) => {
+      endpoint = await getWsEndPoint(true).catch((e) => {
         console.error(e);
       });
 
-      // launch chrome and get endpoint
+      // Launch  pupeteer locally
       if (!endpoint) {
         try {
           const puppeteer = await import("puppeteer");
@@ -36,7 +36,7 @@ export const coreServer = async () => {
           console.error("could not start chrome", e);
         }
       }
-    }, 30);
+    }, 11);
   }
 };
 

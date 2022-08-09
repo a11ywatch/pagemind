@@ -25,32 +25,20 @@ const getWs = (host?: string): Promise<string> => {
     const defaultHost = host || "127.0.0.1";
 
     try {
-      // add dns lookup from network
+      // Attempt to find chrome host through DNS docker
       if (!chromeHost && !attemptedChromeHost) {
         attemptedChromeHost = true;
         dns.lookup("chrome", (_err, address) => {
           if (address) {
             chromeHost = address;
-            // attempt to find in chrome host
-            lookupChromeHost(chromeHost)
-              .then((v) => {
-                resolve(v);
-              })
-              .catch((e) => reject(e));
-          } else {
-            lookupChromeHost(defaultHost)
-              .then((v) => {
-                resolve(v);
-              })
-              .catch((e) => reject(e));
           }
+          // attempt to find in chrome host
+          lookupChromeHost(address ? chromeHost : defaultHost)
+            .then(resolve)
+            .catch(reject);
         });
       } else {
-        lookupChromeHost(defaultHost)
-          .then((v) => {
-            resolve(v);
-          })
-          .catch((_) => {});
+        lookupChromeHost(defaultHost).then(resolve).catch(reject);
       }
     } catch (e) {
       reject(e);
@@ -58,12 +46,23 @@ const getWs = (host?: string): Promise<string> => {
   });
 };
 
-// get the chrome web socket
-const getWsEndPoint = async (retry?: boolean) => {
+/*
+ * Determine the chrome web socket connection resolved.
+ * @param retry - retry connection on docker dns
+ *
+ * @return Promise<string> - the socket connection
+ */
+const getWsEndPoint = async (retry?: boolean, reconnect?: boolean) => {
+  if (wsChromeEndpointurl && !reconnect) {
+    return wsChromeEndpointurl;
+  }
+
   try {
     let retryHost = !retry ? "host.docker.internal" : "";
-    // retry connection on as mac localhost
+
+    // re-establish chrome socket
     await getWs(retryHost);
+
     return wsChromeEndpointurl;
   } catch (_) {}
 
@@ -74,8 +73,8 @@ const getWsEndPoint = async (retry?: boolean) => {
         await getWs().catch((e) => {
           console.error(e);
         });
-        resolve(wsChromeEndpointurl || "");
-      }, 13);
+        resolve(wsChromeEndpointurl);
+      }, 11);
     } else {
       resolve(wsChromeEndpointurl);
     }
