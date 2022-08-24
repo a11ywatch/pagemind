@@ -1,6 +1,6 @@
 {
   "name": "@a11ywatch/pagemind",
-  "version": "0.4.11",
+  "version": "0.4.13",
   "description": "Get metrics on your web page with inclusion",
   "main": "./server.js",
   "scripts": {
@@ -13,8 +13,8 @@
   "dependencies": {
     "@a11ywatch/protos": "^0.3.1",
     "@a11ywatch/website-source-builder": "0.0.31",
-    "@grpc/grpc-js": "1.6.7",
-    "@grpc/proto-loader": "0.7.0",
+    "@grpc/grpc-js": "1.6.10",
+    "@grpc/proto-loader": "0.7.2",
     "fastq": "1.13.0",
     "get-page-speed": "1.0.1",
     "lighthouse": "9.6.2",

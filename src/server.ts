@@ -23,6 +23,7 @@ export const coreServer = async () => {
             devtools: true,
             headless: true,
             args: ["--no-sandbox", "--disable-setuid-sandbox"],
+            waitForInitialPage: false,
           });
           const browserWSEndpoint = await browser.wsEndpoint();
 

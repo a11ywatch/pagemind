@@ -12,13 +12,9 @@ export const storeCDNValues = async ({
   cdnSourceStripped,
   domain,
 }: Resource) => {
-  try {
-    await controller.addScript({
-      scriptBuffer,
-      cdnSourceStripped,
-      domain,
-    });
-  } catch (e) {
-    console.log(e);
-  }
+  await controller.addScript({
+    scriptBuffer,
+    cdnSourceStripped,
+    domain,
+  });
 };
