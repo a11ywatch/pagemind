@@ -1,17 +1,11 @@
 import puppeteer from "puppeteer";
 import type { Browser, Page } from "puppeteer";
-import { getWsEndPoint } from "@app/config/chrome";
+import { getWsEndPoint } from "../../../config/chrome";
 
 const createPuppeteerFactory = () => ({
   async create(): Promise<Browser> {
     let browser;
-    let browserWSEndpoint;
-
-    try {
-      browserWSEndpoint = await getWsEndPoint();
-    } catch (e) {
-      console.error(e);
-    }
+    let browserWSEndpoint = await getWsEndPoint();
 
     try {
       browser = await puppeteer.connect({
@@ -24,11 +18,7 @@ const createPuppeteerFactory = () => ({
 
     if (!browser) {
       // retry and wait for ws endpoint
-      try {
-        browserWSEndpoint = await getWsEndPoint(false, true);
-      } catch (e) {
-        console.error(e);
-      }
+      browserWSEndpoint = await getWsEndPoint(false, true);
 
       try {
         // reconnect to browser

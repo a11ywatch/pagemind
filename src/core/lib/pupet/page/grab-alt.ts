@@ -1,3 +1,4 @@
+import type { Page } from "puppeteer";
 import { detectImageModel } from "../../../ai";
 import { createCanvasPupet } from "../create-canvas";
 import {
@@ -6,7 +7,6 @@ import {
   imgAltMissing,
 } from "../../../strings";
 import { INVALID_HTML_PROPS } from "../../engine/models/issue-type";
-import { Page } from "puppeteer";
 import { networkBlock } from "./go-to-page";
 
 interface Alt {

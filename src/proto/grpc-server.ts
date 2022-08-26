@@ -1,7 +1,7 @@
 import { Server, ServerCredentials } from "@grpc/grpc-js";
-import { GRPC_HOST, GRPC_PORT } from "@app/config/rpc";
-import { crawlWebsite } from "@app/core/controllers/crawl";
-import { mutateScript } from "@app/core/controllers/mutate";
+import { GRPC_HOST, GRPC_PORT } from "../config/rpc";
+import { crawlWebsite } from "../core/controllers/crawl";
+import { mutateScript } from "../core/controllers/mutate";
 import { getProto } from "./website";
 
 let server: Server;
@@ -43,6 +43,5 @@ export const killServer = async () => {
 
   server.removeService(websiteProto.Pagemind.service);
   server.removeService(healthProto.health.HealthCheck.service);
-
   server.forceShutdown();
 };

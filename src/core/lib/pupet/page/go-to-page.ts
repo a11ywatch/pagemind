@@ -1,4 +1,4 @@
-import { pa11yConfig } from "@app/config/pa11y-config";
+import { pa11yConfig } from "../../../../config/pa11y-config";
 import type { Page, HTTPRequest } from "puppeteer";
 
 const skippedResources = [

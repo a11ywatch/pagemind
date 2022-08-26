@@ -1,4 +1,4 @@
-// use this method in PAGE evaluations to get imgs from dom ONLY USE PLAIN JS HERE: NO LET, CONST
+// use this method in PAGE evaluations to get imgs from dom ONLY USE es5 JS HERE: NO LET, CONST
 const createCanvasPupet = (selector) => {
   var img = document.querySelector(selector);
   if (img) {

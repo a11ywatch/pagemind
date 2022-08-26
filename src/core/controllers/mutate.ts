@@ -14,13 +14,5 @@ export const mutateScript = async (body) => {
     }
   );
 
-  try {
-    if (edit) {
-      return await editScript(props);
-    } else {
-      return await adjustScript(props);
-    }
-  } catch (e) {
-    console.error(e);
-  }
+  return edit ? await editScript(props) : await adjustScript(props);
 };

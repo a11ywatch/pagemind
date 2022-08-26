@@ -1,4 +1,4 @@
-import { controller } from "@app/proto/website-client";
+import { controller } from "../../../proto/website-client";
 
 export interface Resource {
   scriptBody?: string;

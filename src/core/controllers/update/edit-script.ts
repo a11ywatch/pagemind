@@ -1,5 +1,5 @@
 import { sourceBuild } from "@a11ywatch/website-source-builder";
-import { scriptBuild } from "@app/core/lib/engine/build";
+import { scriptBuild } from "../../lib/engine/build";
 import { storeCDNValues } from "./cdn_worker";
 
 export const editScript = async ({
@@ -12,24 +12,20 @@ export const editScript = async ({
 
   resolver.script = newScript;
 
-  try {
-    await storeCDNValues({
-      cdnSourceStripped,
-      scriptBody: scriptBuild(
-        {
-          scriptChildren: newScript
-            .replace("<script defer>", "")
-            .replace("</script>", ""),
-          domain,
-          cdnSrc: cdnSourceStripped,
-        },
-        true
-      ),
-      domain: domain || resolver?.domain,
-    });
-  } catch (e) {
-    console.error(e);
-  }
+  await storeCDNValues({
+    cdnSourceStripped,
+    scriptBody: scriptBuild(
+      {
+        scriptChildren: newScript
+          .replace("<script defer>", "")
+          .replace("</script>", ""),
+        domain,
+        cdnSrc: cdnSourceStripped,
+      },
+      true
+    ),
+    domain: domain || resolver?.domain,
+  });
 
   return resolver;
 };

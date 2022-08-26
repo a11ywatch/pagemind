@@ -20,10 +20,7 @@
     "emitDecoratorMetadata": true,
     "skipLibCheck": true,
     "resolveJsonModule": true,
-    "removeComments": true,
-    "paths": {
-      "@app/*": ["./src/*"]
-    }
+    "removeComments": true
   },
   "include": ["./src"],
   "exclude": ["build", "dist", "node_modules", "**/*.test.tsx", "**/*.spec.tsx"]

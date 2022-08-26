@@ -13,6 +13,7 @@ export {
   checkCdn,
   createPuppeteerPool,
   skipContentCheck,
+  queueLighthouseUntilResults,
   puppetPool,
 } from "./pupet";
 export { fetchUrl } from "./utils/fetch";

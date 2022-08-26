@@ -1,5 +1,5 @@
-import { skipNavigationMethod, scriptBuild } from "@app/core/lib";
 import { sourceBuild } from "@a11ywatch/website-source-builder";
+import { skipNavigationMethod, scriptBuild } from "../../../core/lib";
 import { storeCDNValues } from "./cdn_worker";
 
 export const adjustScript = async ({ url: urlMap, script: resolver }) => {
@@ -22,7 +22,7 @@ export const adjustScript = async ({ url: urlMap, script: resolver }) => {
       }
     } else {
       scriptBody = String(scriptBody)
-        .trimLeft()
+        .trim()
         .replace(
           "void function init() {",
           `void function init() { \n ${skipNavigationMethod}`

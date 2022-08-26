@@ -24,24 +24,21 @@ const getWs = (host?: string): Promise<string> => {
   return new Promise((resolve, reject) => {
     const defaultHost = host || "127.0.0.1";
 
-    try {
-      // Attempt to find chrome host through DNS docker
-      if (!chromeHost && !attemptedChromeHost) {
-        attemptedChromeHost = true;
-        dns.lookup("chrome", (_err, address) => {
-          if (address) {
-            chromeHost = address;
-          }
-          // attempt to find in chrome host
-          lookupChromeHost(address ? chromeHost : defaultHost)
-            .then(resolve)
-            .catch(reject);
-        });
-      } else {
-        lookupChromeHost(defaultHost).then(resolve).catch(reject);
-      }
-    } catch (e) {
-      reject(e);
+    // Attempt to find chrome host through DNS docker
+    if (!chromeHost && !attemptedChromeHost) {
+      attemptedChromeHost = true;
+      // TODO: remove DNS lookup
+      dns.lookup("chrome", (_err, address) => {
+        if (address) {
+          chromeHost = address;
+        }
+        // attempt to find in chrome host
+        lookupChromeHost(address ? chromeHost : defaultHost)
+          .then(resolve)
+          .catch(reject);
+      });
+    } else {
+      lookupChromeHost(defaultHost).then(resolve).catch(reject);
     }
   });
 };
@@ -52,21 +49,21 @@ const getWs = (host?: string): Promise<string> => {
  *
  * @return Promise<string> - the socket connection
  */
-const getWsEndPoint = async (retry?: boolean, reconnect?: boolean) => {
+const getWsEndPoint = async (
+  retry?: boolean,
+  reconnect?: boolean
+): Promise<string> => {
   if (wsChromeEndpointurl && !reconnect) {
     return wsChromeEndpointurl;
   }
 
   try {
     let retryHost = !retry ? "host.docker.internal" : "";
-
-    // re-establish chrome socket
-    await getWs(retryHost);
-
-    return wsChromeEndpointurl;
+    await getWs(retryHost); // re-establish chrome socket
+    return wsChromeEndpointurl; // returns singleton if succeeds
   } catch (_) {}
 
-  // continue and attempt again in a timeout
+  // continue and attempt again in a small delayed timeout
   return new Promise((resolve) => {
     if (retry) {
       setTimeout(async () => {
@@ -74,14 +71,14 @@ const getWsEndPoint = async (retry?: boolean, reconnect?: boolean) => {
           console.error(e);
         });
         resolve(wsChromeEndpointurl);
-      }, 11);
+      }, 4);
     } else {
       resolve(wsChromeEndpointurl);
     }
   });
 };
 
-// set the chrome web socket
+// set the chrome web socket directly
 const setWsEndPoint = (endpoint: string) => {
   wsChromeEndpointurl = endpoint;
 };

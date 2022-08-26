@@ -1,4 +1,4 @@
-import { ASSETS_CDN } from "@app/config";
+import { ASSETS_CDN } from "../../../../config/config";
 
 interface ScriptSource {
   domain?: string;

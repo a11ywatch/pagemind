@@ -1,5 +1,6 @@
 import getPageSpeed from "get-page-speed";
 import { sourceBuild } from "@a11ywatch/website-source-builder";
+import type { Browser, Page } from "puppeteer";
 import {
   puppetPool,
   checkCdn,
@@ -7,11 +8,9 @@ import {
   getPageIssues,
   goToPage,
   getPageMeta,
-} from "@app/core/lib";
+  queueLighthouseUntilResults,
+} from "../lib";
 import { storeCDNValues } from "./update/cdn_worker";
-import type { Browser, Page } from "puppeteer";
-import type { IssueData } from "@app/types";
-import { queueLighthouseUntilResults } from "@app/core/lib/pupet/queue-lighthouse";
 
 const EMPTY_RESPONSE = {
   webPage: null,
@@ -39,6 +38,7 @@ export const crawlWebsite = async ({
 }) => {
   const browser: Browser = await puppetPool.acquire();
   let page: Page;
+  let insight; // page insights
 
   try {
     page = await browser?.newPage();
@@ -46,13 +46,9 @@ export const crawlWebsite = async ({
     console.error(e);
   }
 
-  let insight; // page insights
   const urlMap = decodeURIComponent(uri);
-
   let duration = Date.now(); // page ttl
-
   const hasPage = await goToPage(page, urlMap); // does the page exist
-
   duration = Math.floor(Date.now() - duration); // set the duration to time it takes to load page for ttyl
 
   // if page did not succeed exit.
@@ -118,10 +114,11 @@ export const crawlWebsite = async ({
 
   // light house pageinsights
   if (pageInsights) {
+    // TODO: use stream to prevent blocking
     insight = await queueLighthouseUntilResults({
       urlMap,
       apiKey: pageSpeedApiKey,
-    }).catch((e) => console.error(e));
+    });
   }
 
   return {
@@ -149,8 +146,8 @@ export const crawlWebsite = async ({
         noticeCount,
         adaScore,
         issueMeta,
-      } as IssueData,
-      lastScanDate: new Date().toUTCString(),
+      },
+      lastScanDate: new Date().toUTCString(), // TODO: send iso
     },
     issues: Object.assign({}, issues, {
       domain,

@@ -1,10 +1,10 @@
 import fastq from "fastq";
 import type { queueAsPromised } from "fastq";
 import lighthouse from "lighthouse";
-import { chromeHost } from "@app/config/chrome";
 import { struct } from "pb-util";
-import { lighthouseEmitter } from "@app/core/event/lh";
-import { CHROME_PORT } from "@app/config/config";
+import { chromeHost } from "../../../config/chrome";
+import { CHROME_PORT } from "../../../config/config";
+import { lighthouseEmitter } from "../../event/lh";
 import { fetchUrl } from "../utils/fetch";
 
 interface Task {
@@ -37,11 +37,7 @@ export const promisifyLighthouse = async ({ urlMap }: any) => {
 
 // the async worker to use for completed crawl actions.
 async function asyncWorker(arg: Task): Promise<any> {
-  try {
-    return await promisifyLighthouse(arg);
-  } catch (e) {
-    console.error(e);
-  }
+  return await promisifyLighthouse(arg);
 }
 
 export const queueLighthouse: queueAsPromised<Task> = fastq.promise(

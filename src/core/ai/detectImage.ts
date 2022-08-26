@@ -1,4 +1,4 @@
-import { controller } from "@app/proto/website-client";
+import { controller } from "../../proto/website-client";
 
 export interface ClassifyModelType {
   className: string;
@@ -20,17 +20,16 @@ export const detectImageModel = async (
   }
 
   try {
-    const data = (await controller.parseImg({
+    return (await controller.parseImg({
       img,
       width: Number(config.width),
       height: Number(config.height),
       url,
       cv,
     })) as any;
-
-    return data;
   } catch (e) {
     console.error(e);
   }
+
   return null;
 };

@@ -32,4 +32,4 @@ COPY . .
 
 EXPOSE 50052
 
-CMD ["node_modules/ts-node-dev/lib/bin.js", "--no-experimental-fetch", "--transpile-only", "-r", "tsconfig-paths/register", "src/server.ts"]
+CMD ["node_modules/ts-node-dev/lib/bin.js", "--no-experimental-fetch", "--transpile-only", "src/server.ts"]
