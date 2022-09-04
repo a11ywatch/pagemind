@@ -85,23 +85,27 @@ export const networkBlock = (request: HTTPRequest, allowImage?: boolean) => {
 
 const goToPage = async (page: Page, url: string): Promise<boolean> => {
   try {
-    await page?.setRequestInterception(true);
-    page?.on("request", networkBlock);
+    await page.setRequestInterception(true);
+    page.on("request", networkBlock);
   } catch (e) {
     console.error(e);
   }
 
   return new Promise(async (resolve) => {
+    let code = null;
+
     try {
-      await page?.goto(url, {
+      code = await page?.goto(url, {
         timeout: pa11yConfig.timeout,
         waitUntil: "domcontentloaded",
       });
-      resolve(true);
     } catch (e) {
       console.error(e);
-      resolve(false);
     }
+
+    const hasPage = code?.status() === 304 || code?.ok();
+
+    resolve(hasPage);
   });
 };
 

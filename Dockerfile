@@ -14,7 +14,7 @@ COPY . .
 
 RUN cargo install --no-default-features --path .
 
-FROM node:18.7-buster-slim AS BUILD_IMAGE
+FROM node:18.8.0-alpine AS BUILD_IMAGE
 
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD="true"
 
@@ -28,7 +28,7 @@ RUN rm -R ./node_modules
 RUN npm install --production
 
 # final image
-FROM node:18.7-buster-slim
+FROM node:18.8.0-alpine
 
 ENV GRPC_HOST_MAV="mav:50053" \
     GRPC_HOST_CDN="cdn-server:50054" \

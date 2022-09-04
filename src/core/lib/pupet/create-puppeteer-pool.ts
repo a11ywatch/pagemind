@@ -36,10 +36,10 @@ const createPuppeteerFactory = () => ({
   async destroy(page: Page, browser: Browser) {
     try {
       if (!page?.isClosed()) {
-        await page?.close({ runBeforeUnload: true });
+        await page?.close();
       }
       if (browser?.isConnected()) {
-        await browser?.disconnect();
+        browser?.disconnect();
       }
     } catch (e) {
       console.error(e);

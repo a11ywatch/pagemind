@@ -10,12 +10,16 @@ let attemptedChromeHost = false;
 
 const lookupChromeHost = async (target?: string) => {
   const url = `http://${target}:9222/json/version`;
-  const data = await fetchUrl(url, true).catch((_) => {});
+
+  const data = !wsChromeEndpointurl
+    ? await fetchUrl(url, true).catch((_) => {})
+    : wsChromeEndpointurl;
 
   if (data && data?.webSocketDebuggerUrl) {
     wsChromeEndpointurl = data.webSocketDebuggerUrl;
     console.log(`chrome connected on ${data.webSocketDebuggerUrl}`);
   }
+
   return wsChromeEndpointurl;
 };
 

@@ -13,7 +13,7 @@ export const getPageIssues = async ({
   mobile,
   actions: pageActions,
   standard: wcagStandard,
-  ua,
+  ua = "",
 }): Promise<[PageIssues | null, IssueMeta]> => {
   const pa11yHeaders = pageHeaders?.length
     ? {
@@ -25,8 +25,8 @@ export const getPageIssues = async ({
       }
     : {};
 
-  let results;
   let viewport;
+  let results = null;
 
   if (mobile) {
     viewport = {
@@ -37,9 +37,9 @@ export const getPageIssues = async ({
     };
   }
 
-  let standard;
-  let actions;
-  let userAgent;
+  let standard = "WCAG2AA";
+  let actions = [];
+  let userAgent = ua;
 
   // pass wcag standard
   if (
@@ -47,10 +47,6 @@ export const getPageIssues = async ({
     ["WCAG2A", "WCAG2AA", "WCAG2AAAA"].includes(wcagStandard)
   ) {
     standard = wcagStandard;
-  }
-
-  if (ua) {
-    userAgent = ua;
   }
 
   // pass in actions if they exist
@@ -72,25 +68,18 @@ export const getPageIssues = async ({
       })
     );
   } catch (e) {
-    // TODO: fallback to linter
     console.error(e);
   }
 
-  let skipContentIncluded = false;
-
-  try {
-    skipContentIncluded = await skipContentCheck({ page });
-  } catch (e) {
-    console.error(e);
-  }
+  // TODO: handle expensive function without xpath
+  const skipContentIncluded = await skipContentCheck({ page });
 
   if (results) {
     const issueLength = results.issues?.length;
 
     if (!skipContentIncluded) {
-      // containers issues add skip content to end
       if (issueLength) {
-        results.issues.push(skipContentTemplate);
+        results.issues.push(skipContentTemplate); // containers issues add skip content to end
       } else {
         results.issues = [skipContentTemplate];
       }

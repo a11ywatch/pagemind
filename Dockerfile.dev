@@ -14,7 +14,7 @@ COPY . .
 
 RUN cargo install --no-default-features --path .
 
-FROM node:18.7-buster-slim
+FROM node:18.8.0-alpine
 
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD="true" \ 
 	NODE_ENV="development" \
