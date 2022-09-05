@@ -1,12 +1,11 @@
-FROM --platform=$BUILDPLATFORM rustlang/rust:nightly AS rustbuilder
+FROM --platform=$BUILDPLATFORM rust:alpine3.15 AS rustbuilder
 
 WORKDIR /app
 
 ENV GRPC_HOST=0.0.0.0:50052
 
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends \
-    gcc cmake libc6 npm
+RUN apk upgrade --update-cache --available && \
+	apk add npm gcc cmake make g++
 
 RUN npm install @a11ywatch/protos
 
@@ -29,6 +28,9 @@ RUN npm install --production
 
 # final image
 FROM node:18.8.0-alpine
+
+RUN apk upgrade --update-cache --available && \
+	apk add openssl
 
 ENV GRPC_HOST_MAV="mav:50053" \
     GRPC_HOST_CDN="cdn-server:50054" \

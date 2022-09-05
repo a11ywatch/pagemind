@@ -2,38 +2,37 @@ import puppeteer from "puppeteer";
 import type { Browser, Page } from "puppeteer";
 import { getWsEndPoint } from "../../../config/chrome";
 
-const createPuppeteerFactory = () => ({
-  async create(): Promise<Browser> {
-    let browser;
-    let browserWSEndpoint = await getWsEndPoint();
+// const browserPool = [];
+// let counter = 0;
 
-    try {
-      browser = await puppeteer.connect({
-        browserWSEndpoint,
-        ignoreHTTPSErrors: true,
-      });
-    } catch (e) {
+// retry and wait for ws endpoint
+const getConnnection = async (retry?: boolean): Promise<puppeteer.Browser> => {
+  const browserWSEndpoint = await (retry
+    ? getWsEndPoint(false, true)
+    : getWsEndPoint());
+
+  try {
+    return await puppeteer.connect({
+      browserWSEndpoint,
+      ignoreHTTPSErrors: true,
+    });
+  } catch (e) {
+    // retry connection once
+    if (!retry) {
+      return await getConnnection(true);
+    } else {
       console.error(e);
     }
+  }
+};
 
-    if (!browser) {
-      // retry and wait for ws endpoint
-      browserWSEndpoint = await getWsEndPoint(false, true);
-
-      try {
-        // reconnect to browser
-        browser = await puppeteer.connect({
-          browserWSEndpoint,
-          ignoreHTTPSErrors: true,
-        });
-      } catch (e) {
-        console.error(e);
-      }
-    }
+const createPuppeteerFactory = () => ({
+  async acquire(): Promise<Browser> {
+    const browser = await getConnnection();
 
     return browser;
   },
-  async destroy(page: Page, browser: Browser) {
+  async clean(page: Page, browser: Browser) {
     try {
       if (!page?.isClosed()) {
         await page?.close();
@@ -47,6 +46,4 @@ const createPuppeteerFactory = () => ({
   },
 });
 
-export function createPuppeteerPool() {
-  return createPuppeteerFactory();
-}
+export const puppetPool = createPuppeteerFactory();

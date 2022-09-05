@@ -83,19 +83,24 @@ export const networkBlock = (request: HTTPRequest, allowImage?: boolean) => {
   request.continue();
 };
 
-const goToPage = async (page: Page, url: string): Promise<boolean> => {
+const setNetwork = async (page: Page): Promise<boolean> => {
   try {
     await page.setRequestInterception(true);
     page.on("request", networkBlock);
+    return true;
   } catch (e) {
     console.error(e);
+    return false;
   }
+};
 
+// lazy go to page
+const goToPage = async (page: Page, url: string): Promise<boolean> => {
+  let code = null;
+  await setNetwork(page);
   return new Promise(async (resolve) => {
-    let code = null;
-
     try {
-      code = await page?.goto(url, {
+      code = await page.goto(url, {
         timeout: pa11yConfig.timeout,
         waitUntil: "domcontentloaded",
       });
