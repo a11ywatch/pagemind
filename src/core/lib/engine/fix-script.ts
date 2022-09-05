@@ -7,7 +7,7 @@ import {
 } from "./models/issue-type";
 import { fixInvalid } from "./fix/js";
 import { getSelectorType } from "./get-selector-type";
-import { isAltMissing } from "../pupet";
+import { isAltMissing } from "../puppet";
 
 type ExtraConfig = {
   alt?: string;

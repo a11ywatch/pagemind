@@ -68,21 +68,15 @@ export const getAltImage = async ({
 
     if (canvas) {
       const { imageToBase64, width, height, url } = canvas ?? {};
-      let img;
-
-      try {
-        img = await detectImageModel(
-          imageToBase64,
-          {
-            width,
-            height,
-          },
-          url,
-          cv
-        );
-      } catch (e) {
-        console.error(e);
-      }
+      const img = await detectImageModel(
+        imageToBase64,
+        {
+          width,
+          height,
+        },
+        url,
+        cv
+      );
       if (img && "className" in img && "probability" in img) {
         if (img.probability >= Number(0.5)) {
           alt = img.className; // TODO: allow user to determine score

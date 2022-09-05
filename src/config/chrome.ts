@@ -62,8 +62,7 @@ const getWsEndPoint = async (
   }
 
   try {
-    let retryHost = !retry ? "host.docker.internal" : "";
-    await getWs(retryHost); // re-establish chrome socket
+    await getWs(!retry ? "host.docker.internal" : ""); // re-establish chrome socket
     return wsChromeEndpointurl; // returns singleton if succeeds
   } catch (_) {}
 
@@ -75,7 +74,7 @@ const getWsEndPoint = async (
           console.error(e);
         });
         resolve(wsChromeEndpointurl);
-      }, 4);
+      }, 1);
     } else {
       resolve(wsChromeEndpointurl);
     }

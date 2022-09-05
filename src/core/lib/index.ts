@@ -14,5 +14,5 @@ export {
   skipContentCheck,
   queueLighthouseUntilResults,
   puppetPool,
-} from "./pupet";
+} from "./puppet";
 export { fetchUrl } from "./utils/fetch";

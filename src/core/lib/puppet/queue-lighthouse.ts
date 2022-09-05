@@ -67,8 +67,7 @@ export const queueLighthouseUntilResults = ({ urlMap, apiKey }: Task) => {
 
       // no errors exist process results.
       if (data && "lighthouseResult" in data && "error" in data === false) {
-        resolve(struct.encode(data.lighthouseResult));
-        return;
+        return resolve(struct.encode(data.lighthouseResult));
       }
     }
 
@@ -82,7 +81,7 @@ export const queueLighthouseUntilResults = ({ urlMap, apiKey }: Task) => {
     });
 
     // internal queue for single process lighthouse devtools
-    queueLighthouse.push({ urlMap }).catch((e) => {
+    await queueLighthouse.unshift({ urlMap }).catch((e) => {
       console.error(e);
       // exit the method
       resolve(null);

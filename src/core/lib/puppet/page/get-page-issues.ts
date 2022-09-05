@@ -2,7 +2,7 @@ import litepa11y from "litepa11y";
 import { pa11yConfig } from "../../../../config";
 import { skipContentCheck } from "../skip-content-check";
 import { skipContentTemplate } from "../../../controllers/update/templates";
-import { issueSort } from "../../../lib/utils/sort";
+import { issueSort } from "../../utils/sort";
 import type { PageIssues, IssueMeta } from "../../../../types";
 
 export const getPageIssues = async ({

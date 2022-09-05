@@ -2,9 +2,6 @@ import puppeteer from "puppeteer";
 import type { Browser, Page } from "puppeteer";
 import { getWsEndPoint } from "../../../config/chrome";
 
-// const browserPool = [];
-// let counter = 0;
-
 // retry and wait for ws endpoint
 const getConnnection = async (retry?: boolean): Promise<puppeteer.Browser> => {
   const browserWSEndpoint = await (retry
@@ -27,21 +24,17 @@ const getConnnection = async (retry?: boolean): Promise<puppeteer.Browser> => {
 };
 
 const createPuppeteerFactory = () => ({
-  async acquire(): Promise<Browser> {
-    const browser = await getConnnection();
-
-    return browser;
-  },
+  acquire: getConnnection,
   async clean(page: Page, browser: Browser) {
-    try {
-      if (!page?.isClosed()) {
-        await page?.close();
+    if (!page?.isClosed()) {
+      try {
+        await page.close();
+      } catch (e) {
+        console.error(e);
       }
-      if (browser?.isConnected()) {
-        browser?.disconnect();
-      }
-    } catch (e) {
-      console.error(e);
+    }
+    if (browser?.isConnected()) {
+      browser.disconnect();
     }
   },
 });
