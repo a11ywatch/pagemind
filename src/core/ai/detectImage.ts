@@ -15,15 +15,11 @@ export const detectImageModel = async (
   url = "",
   cv = true
 ): Promise<ClassifyModelType> => {
-  if (img) {
-    return await controller.parseImg({
-      img,
-      width: config.width,
-      height: config.height,
-      url,
-      cv,
-    });
-  }
-
-  return null;
+  return await controller.parseImg({
+    img,
+    width: config.width,
+    height: config.height,
+    url,
+    cv,
+  });
 };

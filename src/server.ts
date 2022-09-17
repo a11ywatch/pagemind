@@ -1,39 +1,29 @@
 import { startGRPC } from "./proto/init";
 import { getWsEndPoint, setWsEndPoint } from "./config/chrome";
+import { chromeArgs } from "./config/chrome-args";
 
 export const coreServer = async () => {
-  await startGRPC();
-  // attempt to get chrome ws endpoint
-  let endpoint = await getWsEndPoint(true);
+  const [_, endpoint] = await Promise.all([startGRPC(), getWsEndPoint(true)]);
 
-  // retry again with minor delay
+  // launch locally
   if (!endpoint) {
-    setTimeout(async () => {
-      endpoint = await getWsEndPoint(true);
+    try {
+      const puppeteer = await import("puppeteer");
+      const browser = await puppeteer.launch({
+        devtools: true,
+        headless: true,
+        args: chromeArgs,
+        waitForInitialPage: false,
+      });
+      const browserWSEndpoint = await browser.wsEndpoint();
 
-      // Launch  pupeteer locally
-      if (!endpoint) {
-        try {
-          const puppeteer = await import("puppeteer");
-          const browser = await puppeteer.launch({
-            devtools: true,
-            headless: true,
-            args: ["--no-sandbox", "--disable-setuid-sandbox"],
-            waitForInitialPage: false,
-          });
-          const browserWSEndpoint = await browser.wsEndpoint();
-
-          if (browserWSEndpoint) {
-            setWsEndPoint(browserWSEndpoint);
-            console.log(
-              `chrome launched and connected on: ${browserWSEndpoint}`
-            );
-          }
-        } catch (e) {
-          console.error("could not start chrome", e);
-        }
+      if (browserWSEndpoint) {
+        setWsEndPoint(browserWSEndpoint);
+        console.log(`chrome launched and connected on: ${browserWSEndpoint}`);
       }
-    }, 11);
+    } catch (e) {
+      console.error("could not start chrome", e);
+    }
   }
 };
 
