@@ -19,7 +19,7 @@ export const createServer = async () => {
   });
 
   server.addService(websiteProto.Pagemind.service, {
-    // crawl page via puppeteer for issues
+    // crawl page via puppeteer for issues todo: stream
     scan: async (call, callback) => {
       const page = await crawlWebsite(call.request);
       callback(null, page);

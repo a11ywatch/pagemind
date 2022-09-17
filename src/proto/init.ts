@@ -3,26 +3,16 @@ import { createServer } from "./grpc-server";
 
 export const startGRPC = async () => {
   return new Promise(async (resolve) => {
-    await createServer();
-    await startClientsGRPC();
+    await Promise.all([createServer(), startClientsGRPC()]);
+
     resolve(true);
   });
 };
 
-export const startClientsGRPC = async (retry?: boolean) => {
+export const startClientsGRPC = async () => {
   return new Promise(async (resolve) => {
-    try {
-      await createMavClient();
-      await createCdnClient();
-    } catch (e) {
-      console.error(e);
-      if (!retry) {
-        setTimeout(async () => {
-          await startClientsGRPC(true);
-          resolve(true);
-        }, 11);
-      }
-    }
+    await createMavClient();
+    await createCdnClient();
 
     resolve(true);
   });

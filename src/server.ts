@@ -37,4 +37,6 @@ export const coreServer = async () => {
   }
 };
 
-coreServer();
+(async () => {
+  await coreServer();
+})();

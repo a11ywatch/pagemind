@@ -30,7 +30,12 @@ const createCdnClient = async () => {
   }
 };
 
-const parseImg = (website = {}) => {
+const parseImg = (
+  website = {}
+): Promise<{
+  className: string;
+  probability: number;
+}> => {
   return new Promise((resolve, reject) => {
     mavClient.parseImg(website, (error, res) => {
       if (!error) {
