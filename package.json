@@ -17,7 +17,7 @@
     "@grpc/proto-loader": "0.7.3",
     "fastq": "1.13.0",
     "get-page-speed": "1.0.1",
-    "lighthouse": "9.6.2",
+    "lighthouse": "9.6.7",
     "litepa11y": "0.5.12",
     "pb-util": "1.0.3",
     "puppeteer": "15.5.0"
