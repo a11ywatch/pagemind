@@ -4,9 +4,7 @@ import { getWsEndPoint } from "../../../config/chrome";
 
 // retry and wait for ws endpoint
 const getConnnection = async (retry?: boolean): Promise<puppeteer.Browser> => {
-  const browserWSEndpoint = await (retry
-    ? getWsEndPoint(false, true)
-    : getWsEndPoint());
+  const browserWSEndpoint = await getWsEndPoint(!retry, retry);
 
   try {
     return await puppeteer.connect({

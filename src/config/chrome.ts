@@ -8,42 +8,54 @@ let wsChromeEndpointurl = process.env.CHROME_SOCKET_URL;
 // did attempt to get chrome dns
 let attemptedChromeHost = false;
 
-const lookupChromeHost = async (target?: string) => {
-  const url = `http://${target}:9222/json/version`;
+const lookupChromeHost = async (target: string) => {
+  if (!wsChromeEndpointurl) {
+    const url = `http://${target || "127.0.0.1"}:9222/json/version`;
+    const data = await fetchUrl(url, true).catch((_) => {});
 
-  const data = !wsChromeEndpointurl
-    ? await fetchUrl(url, true).catch((_) => {})
-    : wsChromeEndpointurl;
-
-  if (data && data?.webSocketDebuggerUrl) {
-    wsChromeEndpointurl = data.webSocketDebuggerUrl;
-    console.log(`chrome connected on ${data.webSocketDebuggerUrl}`);
+    if (data && data?.webSocketDebuggerUrl) {
+      wsChromeEndpointurl = data.webSocketDebuggerUrl;
+    }
   }
 
-  return wsChromeEndpointurl;
+  if (wsChromeEndpointurl) {
+    console.log(`chrome connected on ${wsChromeEndpointurl}`);
+    return Promise.resolve(wsChromeEndpointurl);
+  }
+
+  return Promise.reject("Chrome socket url not found.");
+};
+
+// bind top level chrome address
+const bindChromeDns = (ad: string): Promise<string> => {
+  return new Promise((resolve) => {
+    dns.lookup(ad, (_err, address) => {
+      // set top level address
+      if (address) {
+        chromeHost = address;
+      }
+
+      resolve(address || "");
+    });
+  });
 };
 
 // get the chrome websocket endpoint via dns lookup
-const getWs = (host?: string): Promise<string> => {
-  return new Promise((resolve, reject) => {
-    const defaultHost = host || "127.0.0.1";
+const getWs = async (host?: string): Promise<string> => {
+  const validateDNS = chromeHost === "chrome" || !chromeHost;
 
-    // Attempt to find chrome host through DNS docker
-    if (!chromeHost && !attemptedChromeHost) {
-      attemptedChromeHost = true;
-      // TODO: remove DNS lookup
-      dns.lookup("chrome", (_err, address) => {
-        if (address) {
-          chromeHost = address;
-        }
-        // attempt to find in chrome host
-        lookupChromeHost(address ? chromeHost : defaultHost)
-          .then(resolve)
-          .catch(reject);
-      });
-    } else {
-      lookupChromeHost(defaultHost).then(resolve).catch(reject);
-    }
+  let target = "";
+
+  // Attempt to find chrome host through DNS [todo: dns outside]
+  if (validateDNS && !attemptedChromeHost) {
+    attemptedChromeHost = true;
+    target = await bindChromeDns("chrome");
+  }
+
+  return new Promise((resolve, reject) => {
+    lookupChromeHost(target || host)
+      .then(resolve)
+      .catch(reject);
   });
 };
 
@@ -62,22 +74,18 @@ const getWsEndPoint = async (
   }
 
   try {
-    await getWs(!retry ? "host.docker.internal" : ""); // re-establish chrome socket
-    return wsChromeEndpointurl; // returns singleton if succeeds
+    await getWs(chromeHost);
   } catch (_) {}
 
-  // continue and attempt again in a small delayed timeout
-  return new Promise((resolve) => {
-    if (retry) {
-      setTimeout(async () => {
-        await getWs().catch((e) => {
-          console.error(e);
-        });
-        resolve(wsChromeEndpointurl);
-      }, 0);
-    } else {
-      resolve(wsChromeEndpointurl);
+  // continue and attempt again next
+  return new Promise(async (resolve) => {
+    if (retry && !wsChromeEndpointurl) {
+      try {
+        await getWs();
+      } catch (_) {}
     }
+
+    resolve(wsChromeEndpointurl);
   });
 };
 
@@ -86,4 +94,11 @@ const setWsEndPoint = (endpoint: string) => {
   wsChromeEndpointurl = endpoint;
 };
 
-export { wsChromeEndpointurl, chromeHost, getWs, setWsEndPoint, getWsEndPoint };
+export {
+  bindChromeDns,
+  wsChromeEndpointurl,
+  chromeHost,
+  getWs,
+  setWsEndPoint,
+  getWsEndPoint,
+};
