@@ -11,6 +11,8 @@ export interface Issue {
 
 export interface PageIssues {
   issues?: Issue[];
+  documentTitle?: string;
+  pageUrl?: string;
 }
 
 export interface IssueMeta {

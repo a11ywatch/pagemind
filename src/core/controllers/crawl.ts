@@ -11,6 +11,7 @@ import {
   queueLighthouseUntilResults,
 } from "../lib";
 import { storeCDNValues } from "./update/cdn_worker";
+import { performance } from "perf_hooks";
 
 const EMPTY_RESPONSE = {
   webPage: null,
@@ -51,9 +52,9 @@ export const crawlWebsite = async ({
     };
   }
 
-  let duration = Date.now(); // page ttl
+  let duration = performance.now(); // page ttl
   const hasPage = await goToPage(page, urlMap); // does the page exist
-  duration = Math.floor(Date.now() - duration); // set the duration to time it takes to load page for ttyl
+  duration = performance.now() - duration; // set the duration to time it takes to load page for ttyl
 
   // if page did not succeed exit.
   if (!hasPage) {
@@ -96,7 +97,7 @@ export const crawlWebsite = async ({
   } = pageMeta ?? {};
 
   let scriptProps = {};
-  let scriptBody;
+  let scriptBody = "";
 
   if (scriptsEnabled) {
     scriptProps = {
@@ -128,6 +129,8 @@ export const crawlWebsite = async ({
     });
   }
 
+  const issueList = issues?.issues;
+
   return {
     webPage: {
       domain,
@@ -146,7 +149,7 @@ export const crawlWebsite = async ({
       insight,
       issuesInfo: {
         possibleIssuesFixedByCdn: possibleIssuesFixedByCdn,
-        totalIssues: issues?.issues?.length || 0,
+        totalIssues: issueList?.length || 0,
         issuesFixedByCdn: possibleIssuesFixedByCdn || 0, // TODO: update confirmation
         errorCount,
         warningCount,
@@ -156,10 +159,12 @@ export const crawlWebsite = async ({
       },
       lastScanDate: new Date().toUTCString(), // TODO: send iso
     },
-    issues: Object.assign({}, issues, {
+    issues: {
       domain,
       pageUrl,
-    }),
+      issues: issueList,
+      documentTitle: issues?.documentTitle,
+    },
     script: scriptsEnabled
       ? {
           pageUrl,
