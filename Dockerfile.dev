@@ -1,4 +1,4 @@
-FROM --platform=$BUILDPLATFORM rust:alpine3.15 AS rustbuilder
+FROM rust:alpine3.15 AS rustbuilder
 
 WORKDIR /app
 
@@ -13,7 +13,7 @@ COPY . .
 
 RUN cargo install --no-default-features --path .
 
-FROM node:18.10-alpine
+FROM node:19.0-alpine
 
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD="true" \ 
 	NODE_ENV="development" \

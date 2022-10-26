@@ -1,19 +1,18 @@
 import puppeteer from "puppeteer";
 import type { Browser, Page } from "puppeteer";
-import { getWsEndPoint } from "../../../config/chrome";
+import { getWsEndPoint, wsChromeEndpointurl } from "../../../config/chrome";
 
 // retry and wait for ws endpoint
 const getConnnection = async (retry?: boolean): Promise<puppeteer.Browser> => {
-  const browserWSEndpoint = await getWsEndPoint(!retry, retry);
-
   try {
     return await puppeteer.connect({
-      browserWSEndpoint,
+      browserWSEndpoint: wsChromeEndpointurl,
       ignoreHTTPSErrors: true,
     });
   } catch (e) {
     // retry connection once
     if (!retry) {
+      await getWsEndPoint(false, true);
       return await getConnnection(true);
     } else {
       console.error(e);

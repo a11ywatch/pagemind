@@ -1,4 +1,4 @@
-FROM --platform=$BUILDPLATFORM rust:alpine3.15 AS rustbuilder
+FROM rust:alpine3.15 AS rustbuilder
 
 WORKDIR /app
 
@@ -13,7 +13,7 @@ COPY . .
 
 RUN cargo install --no-default-features --path .
 
-FROM node:18.10-alpine AS BUILD_IMAGE
+FROM node:19.0-alpine AS BUILD_IMAGE
 
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD="true"
 
@@ -27,7 +27,7 @@ RUN rm -R ./node_modules
 RUN npm install --production
 
 # final image
-FROM node:18.10-alpine
+FROM node:19.0-alpine
 
 RUN apk upgrade --update-cache --available && \
 	apk add openssl

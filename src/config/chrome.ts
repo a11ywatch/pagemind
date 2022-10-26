@@ -9,13 +9,11 @@ let wsChromeEndpointurl = process.env.CHROME_SOCKET_URL;
 let attemptedChromeHost = false;
 
 const lookupChromeHost = async (target: string) => {
-  if (!wsChromeEndpointurl) {
-    const url = `http://${target || "127.0.0.1"}:9222/json/version`;
-    const data = await fetchUrl(url, true).catch((_) => {});
+  const url = `http://${target || "127.0.0.1"}:9222/json/version`;
+  const data = await fetchUrl(url, true).catch((_) => {});
 
-    if (data && data?.webSocketDebuggerUrl) {
-      wsChromeEndpointurl = data.webSocketDebuggerUrl;
-    }
+  if (data && data?.webSocketDebuggerUrl) {
+    wsChromeEndpointurl = data.webSocketDebuggerUrl;
   }
 
   if (wsChromeEndpointurl) {
@@ -70,7 +68,7 @@ const getWsEndPoint = async (
   reconnect?: boolean
 ): Promise<string> => {
   if (wsChromeEndpointurl && !reconnect) {
-    return wsChromeEndpointurl;
+    return Promise.resolve(wsChromeEndpointurl);
   }
 
   try {
@@ -80,11 +78,12 @@ const getWsEndPoint = async (
   // continue and attempt again next
   return new Promise(async (resolve) => {
     if (retry && !wsChromeEndpointurl) {
-      try {
-        await getWs();
-      } catch (_) {}
+      setTimeout(async () => {
+        try {
+          await getWs();
+        } catch (_) {}
+      }, 50);
     }
-
     resolve(wsChromeEndpointurl);
   });
 };
