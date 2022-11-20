@@ -4,6 +4,7 @@ import { adjustScript, editScript } from "./update";
 export const mutateScript = async (body) => {
   const { editScript: edit, url, userId, script, newScript } = body ?? {};
 
+  // todo: prevent mutation of props
   const props = Object.assign(
     {},
     {

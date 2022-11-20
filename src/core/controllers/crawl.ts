@@ -1,6 +1,7 @@
 import getPageSpeed from "get-page-speed";
 import { sourceBuild } from "@a11ywatch/website-source-builder";
 import type { Browser, Page } from "puppeteer";
+import { performance } from "perf_hooks";
 import {
   puppetPool,
   checkCdn,
@@ -11,8 +12,8 @@ import {
   queueLighthouseUntilResults,
 } from "../lib";
 import { storeCDNValues } from "./update/cdn_worker";
-import { performance } from "perf_hooks";
 
+// default empty response
 const EMPTY_RESPONSE = {
   webPage: null,
   issues: null,
@@ -20,6 +21,7 @@ const EMPTY_RESPONSE = {
   userId: null,
 };
 
+// disc the browser socket req
 const cleanPool = async (browser?: Browser, page?: Page) =>
   await puppetPool.clean(page, browser);
 
@@ -38,19 +40,7 @@ export const crawlWebsite = async ({
   pageSpeedApiKey,
 }) => {
   const browser: Browser = await puppetPool.acquire();
-  let page: Page = null;
-
-  try {
-    page = await browser.newPage();
-  } catch (e) {
-    console.error(e);
-    await cleanPool(browser, page);
-
-    return {
-      ...EMPTY_RESPONSE,
-      userId,
-    };
-  }
+  const page: Page = await browser.newPage();
 
   let duration = performance.now(); // page ttl
   const hasPage = await goToPage(page, urlMap); // does the page exist
@@ -66,8 +56,6 @@ export const crawlWebsite = async ({
     };
   }
 
-  let insight = null; // page insights
-
   const { domain, pageUrl, cdnSourceStripped, cdnJsPath, cdnMinJsPath } =
     sourceBuild(urlMap, userId);
 
@@ -82,7 +70,7 @@ export const crawlWebsite = async ({
     ua,
   });
 
-  const [issues, issueMeta] = pageIssues ?? [];
+  const [issues, issueMeta] = pageIssues;
 
   const pageHasCdn = await checkCdn({ page, cdnMinJsPath, cdnJsPath });
   const pageMeta = await getPageMeta({ page, issues, scriptsEnabled, cv });
@@ -96,9 +84,12 @@ export const crawlWebsite = async ({
     possibleIssuesFixedByCdn,
   } = pageMeta ?? {};
 
-  let scriptProps = {};
-  let scriptBody = "";
+  let insight = null; // page insights (light house)
 
+  let scriptProps = {}; // js script props
+  let scriptBody = ""; // js script body
+
+  // get script from accessibility engine
   if (scriptsEnabled) {
     scriptProps = {
       scriptChildren,
@@ -119,17 +110,18 @@ export const crawlWebsite = async ({
     });
   }
 
-  await cleanPool(browser, page);
-
   // light house pageinsights TODO: use stream to prevent blocking
   if (pageInsights) {
+    // todo send url, domain, and insight to rpc core call
     insight = await queueLighthouseUntilResults({
       urlMap,
       apiKey: pageSpeedApiKey,
     });
   }
 
-  const issueList = issues?.issues;
+  await cleanPool(browser, page);
+
+  const issueList = issues.issues;
 
   return {
     webPage: {
@@ -149,7 +141,7 @@ export const crawlWebsite = async ({
       insight,
       issuesInfo: {
         possibleIssuesFixedByCdn: possibleIssuesFixedByCdn,
-        totalIssues: issueList?.length || 0,
+        totalIssues: issueList.length || 0,
         issuesFixedByCdn: possibleIssuesFixedByCdn || 0, // TODO: update confirmation
         errorCount,
         warningCount,
@@ -157,7 +149,7 @@ export const crawlWebsite = async ({
         adaScore,
         issueMeta,
       },
-      lastScanDate: new Date().toUTCString(), // TODO: send iso
+      lastScanDate: new Date().toISOString(),
     },
     issues: {
       domain,

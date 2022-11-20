@@ -42,9 +42,10 @@ async function asyncWorker(arg: Task): Promise<any> {
 
 export const queueLighthouse: queueAsPromised<Task> = fastq.promise(
   asyncWorker,
-  1
+  1 // only one allowed per instance
 );
 
+// slow queue lighthouse one by one on devtool instance
 export const queueLighthouseUntilResults = ({ urlMap, apiKey }: Task) => {
   // queue and wait for results
   return new Promise(async (resolve) => {
