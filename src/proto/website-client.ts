@@ -1,33 +1,35 @@
 import { credentials } from "@grpc/grpc-js";
-import { GRPC_HOST_MAV, GRPC_HOST_CDN } from "../config/rpc";
+import { GRPC_HOST_CORE, GRPC_HOST_MAV, GRPC_HOST_CDN } from "../config/rpc";
 import { Service, getProto } from "./website";
 
-let mavClient: Service["WebsiteService"]["service"];
-let cdnClient: Service["WebsiteService"]["service"];
+let mavClient: Service["Mav"]["service"];
+let cdnClient: Service["Cdn"]["service"];
+let websiteClient: Service["website"]["WebsiteService"]["service"];
 
 export const killClient = () => {
   mavClient?.close();
   cdnClient?.close();
 };
 
+// core service server client
+const createWebsiteClient = async () => {
+  const { website } = await getProto("website.proto");
+  websiteClient = new website.WebsiteService(
+    GRPC_HOST_CORE,
+    credentials.createInsecure()
+  );
+};
+
 // mav service server client for testing
 const createMavClient = async () => {
-  try {
-    const { Mav } = await getProto("/mav.proto");
-    mavClient = new Mav(GRPC_HOST_MAV, credentials.createInsecure());
-  } catch (e) {
-    console.error(e);
-  }
+  const { Mav } = await getProto("mav.proto");
+  mavClient = new Mav(GRPC_HOST_MAV, credentials.createInsecure());
 };
 
 // cdn service server client for testing
 const createCdnClient = async () => {
-  try {
-    const { Cdn } = await getProto("/cdn.proto");
-    cdnClient = new Cdn(GRPC_HOST_CDN, credentials.createInsecure());
-  } catch (e) {
-    console.error(e);
-  }
+  const { Cdn } = await getProto("cdn.proto");
+  cdnClient = new Cdn(GRPC_HOST_CDN, credentials.createInsecure());
 };
 
 const parseImg = (
@@ -71,10 +73,31 @@ const addScript = (website = {}) => {
   });
 };
 
+// store lighthouse results
+const addLighthouse = (website = {}) => {
+  return new Promise((resolve, reject) => {
+    websiteClient.pageSet(website, (error, res) => {
+      if (!error) {
+        resolve(res);
+      } else {
+        reject(error);
+      }
+    });
+  });
+};
+
 export const controller = {
   parseImg,
   addScript,
   addScreenshot,
+  addLighthouse,
 };
 
-export { mavClient, cdnClient, createCdnClient, createMavClient };
+export {
+  mavClient,
+  cdnClient,
+  websiteClient,
+  createCdnClient,
+  createMavClient,
+  createWebsiteClient,
+};

@@ -15,7 +15,7 @@ type RpcService = typeof Client & {
 };
 
 export interface Service {
-  WebsiteService?: RpcService;
+  website?: { WebsiteService?: RpcService };
   Pagemind?: RpcService;
   Cdn?: RpcService;
   Mav?: RpcService;
@@ -25,10 +25,10 @@ export interface Service {
 }
 
 export const getProto = async (
-  target: string = "/pagemind.proto"
+  target: string = "pagemind.proto"
 ): Promise<Service & GRPC> => {
   try {
-    const packageDef = await load(`node_modules/@a11ywatch/protos${target}`, {
+    const packageDef = await load(`node_modules/@a11ywatch/protos/${target}`, {
       keepCase: true,
       longs: String,
       enums: String,

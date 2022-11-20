@@ -12,6 +12,7 @@ import {
   queueLighthouseUntilResults,
 } from "../lib";
 import { storeCDNValues } from "./update/cdn_worker";
+import { controller } from "../../proto/website-client";
 
 // default empty response
 const EMPTY_RESPONSE = {
@@ -72,8 +73,15 @@ export const crawlWebsite = async ({
 
   const [issues, issueMeta] = pageIssues;
 
-  const pageHasCdn = await checkCdn({ page, cdnMinJsPath, cdnJsPath });
-  const pageMeta = await getPageMeta({ page, issues, scriptsEnabled, cv });
+  // cdn for active acts
+  const [pageHasCdn, pageMeta] = await Promise.all([
+    !noStore
+      ? checkCdn({ page, cdnMinJsPath, cdnJsPath })
+      : Promise.resolve(false),
+    getPageMeta({ page, issues, scriptsEnabled, cv }),
+  ]);
+
+  await cleanPool(browser, page);
 
   const {
     errorCount,
@@ -83,8 +91,6 @@ export const crawlWebsite = async ({
     scriptChildren,
     possibleIssuesFixedByCdn,
   } = pageMeta ?? {};
-
-  let insight = null; // page insights (light house)
 
   let scriptProps = {}; // js script props
   let scriptBody = ""; // js script body
@@ -110,16 +116,22 @@ export const crawlWebsite = async ({
     });
   }
 
-  // light house pageinsights TODO: use stream to prevent blocking
+  // light house pageinsights
   if (pageInsights) {
-    // todo send url, domain, and insight to rpc core call
-    insight = await queueLighthouseUntilResults({
-      urlMap,
-      apiKey: pageSpeedApiKey,
+    setImmediate(async () => {
+      const insight = await queueLighthouseUntilResults({
+        urlMap,
+        apiKey: pageSpeedApiKey,
+      });
+
+      await controller.addLighthouse({
+        user_id: userId,
+        insight,
+        domain,
+        url: urlMap,
+      });
     });
   }
-
-  await cleanPool(browser, page);
 
   const issueList = issues.issues;
 
@@ -138,7 +150,7 @@ export const crawlWebsite = async ({
             ? "#E6EE9C"
             : "#EF9A9A",
       },
-      insight,
+      insight: null,
       issuesInfo: {
         possibleIssuesFixedByCdn: possibleIssuesFixedByCdn,
         totalIssues: issueList.length || 0,
@@ -155,7 +167,7 @@ export const crawlWebsite = async ({
       domain,
       pageUrl,
       issues: issueList,
-      documentTitle: issues?.documentTitle,
+      documentTitle: issues.documentTitle,
     },
     script: scriptsEnabled
       ? {
