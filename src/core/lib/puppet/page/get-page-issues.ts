@@ -1,19 +1,32 @@
-import litepa11y from "litepa11y";
+import { pa11y } from "litepa11y";
 import { pa11yConfig } from "../../../../config";
 import { skipContentCheck } from "../skip-content-check";
 import { skipContentTemplate } from "../../../controllers/update/templates";
 import { issueSort } from "../../utils/sort";
 import type { PageIssues, IssueMeta } from "../../../../types";
 
+// desktop viewport
+export const desktopViewport = {
+  width: 1280,
+  height: 1024,
+  deviceScaleFactor: undefined,
+  isMobile: false,
+};
+
+// mobile viewpoer
+export const mobileViewport = {
+  width: 320,
+  height: 480,
+  deviceScaleFactor: 2,
+  isMobile: true,
+};
+
 export const getPageIssues = async ({
-  urlPage,
   page,
   browser,
   pageHeaders,
-  mobile,
-  actions: pageActions,
+  actions = [],
   standard: wcagStandard,
-  ua = "",
 }): Promise<[PageIssues | null, IssueMeta]> => {
   const pa11yHeaders = pageHeaders?.length
     ? {
@@ -25,21 +38,7 @@ export const getPageIssues = async ({
       }
     : {};
 
-  let viewport;
-  let results = null;
-
-  if (mobile) {
-    viewport = {
-      width: 320,
-      height: 480,
-      deviceScaleFactor: 2,
-      isMobile: true,
-    };
-  }
-
   let standard = "WCAG2AA";
-  let actions = [];
-  let userAgent = ua;
 
   // pass wcag standard
   if (
@@ -49,33 +48,20 @@ export const getPageIssues = async ({
     standard = wcagStandard;
   }
 
-  // pass in actions if they exist
-  if (pageActions && pageActions.length) {
-    actions = pageActions;
-  }
-
-  try {
-    results = await litepa11y(
-      urlPage,
-      Object.assign({}, pa11yConfig, pa11yHeaders, {
-        ignoreUrl: true,
-        page,
-        browser,
-        viewport,
-        actions,
-        standard,
-        userAgent,
-      })
-    );
-  } catch (e) {
-    console.error(e);
-  }
+  const results = await pa11y(
+    Object.assign({}, pa11yConfig, pa11yHeaders, {
+      page,
+      browser,
+      actions,
+      standard,
+    })
+  );
 
   // TODO: handle expensive function without xpath
   const skipContentIncluded = await skipContentCheck({ page });
 
   if (results) {
-    const issueLength = results.issues?.length;
+    const issueLength = results?.issues?.length;
 
     if (!skipContentIncluded) {
       if (issueLength) {

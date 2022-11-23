@@ -31,7 +31,7 @@ const createPuppeteerFactory = () => ({
       }
     }
     if (browser?.isConnected()) {
-      browser.disconnect();
+      browser?.disconnect();
     }
   },
 });

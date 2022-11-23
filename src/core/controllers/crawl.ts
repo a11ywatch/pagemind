@@ -6,13 +6,17 @@ import {
   puppetPool,
   checkCdn,
   scriptBuild,
-  getPageIssues,
   goToPage,
   getPageMeta,
   queueLighthouseUntilResults,
 } from "../lib";
 import { storeCDNValues } from "./update/cdn_worker";
 import { controller } from "../../proto/website-client";
+import {
+  mobileViewport,
+  desktopViewport,
+  getPageIssues,
+} from "../lib/puppet/page/get-page-issues";
 
 // default empty response
 const EMPTY_RESPONSE = {
@@ -25,6 +29,10 @@ const EMPTY_RESPONSE = {
 // disc the browser socket req
 const cleanPool = async (browser?: Browser, page?: Page) =>
   await puppetPool.clean(page, browser);
+
+// duration color
+const getCrawlDurationColor = (duration: number) =>
+  duration <= 1500 ? "#A5D6A7" : duration <= 3000 ? "#E6EE9C" : "#EF9A9A";
 
 export const crawlWebsite = async ({
   userId,
@@ -42,6 +50,11 @@ export const crawlWebsite = async ({
 }) => {
   const browser: Browser = await puppetPool.acquire();
   const page: Page = await browser.newPage();
+
+  await Promise.all([
+    ua ? page.setUserAgent(ua) : Promise.resolve(null),
+    page.setViewport(mobile ? mobileViewport : desktopViewport),
+  ]);
 
   let duration = performance.now(); // page ttl
   const hasPage = await goToPage(page, urlMap); // does the page exist
@@ -61,25 +74,30 @@ export const crawlWebsite = async ({
     sourceBuild(urlMap, userId);
 
   const pageIssues = await getPageIssues({
-    urlPage: pageUrl,
     page,
     browser,
     pageHeaders,
-    mobile,
     actions,
     standard,
-    ua,
   });
 
   const [issues, issueMeta] = pageIssues;
 
-  // cdn for active acts
-  const [pageHasCdn, pageMeta] = await Promise.all([
-    !noStore
-      ? checkCdn({ page, cdnMinJsPath, cdnJsPath })
-      : Promise.resolve(false),
-    getPageMeta({ page, issues, scriptsEnabled, cv }),
-  ]);
+  let pageHasCdn = false;
+  let pageMeta = null;
+
+  // valid page
+  if (issues) {
+    // cdn for active acts
+    const v = await Promise.all([
+      !noStore
+        ? checkCdn({ page, cdnMinJsPath, cdnJsPath })
+        : Promise.resolve(null),
+      getPageMeta({ page, issues, scriptsEnabled, cv }),
+    ]);
+    pageHasCdn = v[0];
+    pageMeta = v[1];
+  }
 
   await cleanPool(browser, page);
 
@@ -94,6 +112,7 @@ export const crawlWebsite = async ({
 
   let scriptProps = {}; // js script props
   let scriptBody = ""; // js script body
+  let scriptData = {}; // script object
 
   // get script from accessibility engine
   if (scriptsEnabled) {
@@ -102,7 +121,16 @@ export const crawlWebsite = async ({
       domain,
       cdnSrc: cdnSourceStripped,
     };
-    scriptBody = scriptBuild(scriptProps, true);
+    scriptBody = scriptBuild(scriptProps, true); // store body for cdn
+    scriptData = {
+      cdnUrlMinified: cdnMinJsPath,
+      cdnUrl: cdnJsPath,
+      cdnConnected: pageHasCdn,
+      pageUrl,
+      domain,
+      script: scriptBody,
+      issueMeta,
+    };
   }
 
   // Store the js script
@@ -117,7 +145,7 @@ export const crawlWebsite = async ({
   }
 
   // light house pageinsights
-  if (pageInsights) {
+  if (issues && pageInsights) {
     setImmediate(async () => {
       const insight = await queueLighthouseUntilResults({
         urlMap,
@@ -133,7 +161,8 @@ export const crawlWebsite = async ({
     });
   }
 
-  const issueList = issues.issues;
+  // default to blank array
+  const { issues: issueList = [], documentTitle = "" } = issues ?? {};
 
   return {
     webPage: {
@@ -143,12 +172,7 @@ export const crawlWebsite = async ({
       pageLoadTime: {
         duration,
         durationFormated: getPageSpeed(duration),
-        color:
-          duration <= 1500
-            ? "#A5D6A7"
-            : duration <= 3000
-            ? "#E6EE9C"
-            : "#EF9A9A",
+        color: getCrawlDurationColor(duration),
       },
       insight: null,
       issuesInfo: {
@@ -167,19 +191,9 @@ export const crawlWebsite = async ({
       domain,
       pageUrl,
       issues: issueList,
-      documentTitle: issues.documentTitle,
+      documentTitle,
     },
-    script: scriptsEnabled
-      ? {
-          pageUrl,
-          domain,
-          script: scriptBody,
-          cdnUrlMinified: cdnMinJsPath,
-          cdnUrl: cdnJsPath,
-          cdnConnected: pageHasCdn,
-          issueMeta,
-        }
-      : null,
+    script: scriptData,
     userId,
   };
 };

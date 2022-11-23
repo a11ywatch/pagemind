@@ -8,8 +8,8 @@ let wsChromeEndpointurl = process.env.CHROME_SOCKET_URL;
 // did attempt to get chrome dns
 let attemptedChromeHost = false;
 
-const lookupChromeHost = async (target: string) => {
-  const url = `http://${target || "127.0.0.1"}:9222/json/version`;
+export const lookupChromeHost = async (target?: string, staticUrl?: string) => {
+  const url = staticUrl ?? `http://${target || "127.0.0.1"}:9222/json/version`;
   const data = await fetchUrl(url, true).catch((_) => {});
 
   if (data && data?.webSocketDebuggerUrl) {
@@ -25,18 +25,16 @@ const lookupChromeHost = async (target: string) => {
 };
 
 // bind top level chrome address
-const bindChromeDns = (ad: string): Promise<string> => {
-  return new Promise((resolve) => {
-    dns.lookup(ad, (_err, address) => {
-      // set top level address
-      if (address) {
-        chromeHost = address;
-      }
+const bindChromeDns = (ad: string): Promise<string> => new Promise((resolve) => {
+  dns.lookup(ad, (_err, address) => {
+    // set top level address
+    if (address) {
+      chromeHost = address;
+    }
 
-      resolve(address || "");
-    });
+    resolve(address || "");
   });
-};
+})
 
 // get the chrome websocket endpoint via dns lookup
 const getWs = async (host?: string): Promise<string> => {
