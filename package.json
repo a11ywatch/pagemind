@@ -1,6 +1,6 @@
 {
   "name": "@a11ywatch/pagemind",
-  "version": "0.5.41",
+  "version": "0.5.43",
   "description": "Get metrics on your web page with inclusion",
   "main": "./server.js",
   "author": "Jeff Mendez",
@@ -29,7 +29,7 @@
     "lighthouse": "9.6.2",
     "litepa11y": "0.6.15",
     "pb-util": "1.0.3",
-    "puppeteer": "19.2.0"
+    "puppeteer": "19.3.0"
   },
   "devDependencies": {
     "@swc/core": "^1.3.19",

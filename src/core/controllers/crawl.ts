@@ -18,14 +18,6 @@ import {
   getPageIssues,
 } from "../lib/puppet/page/get-page-issues";
 
-// default empty response
-const EMPTY_RESPONSE = {
-  webPage: null,
-  issues: null,
-  script: null,
-  userId: null,
-};
-
 // disc the browser socket req
 const cleanPool = async (browser?: Browser, page?: Page) =>
   await puppetPool.clean(page, browser);
@@ -58,20 +50,34 @@ export const crawlWebsite = async ({
 
   let duration = performance.now(); // page ttl
   const hasPage = await goToPage(page, urlMap); // does the page exist
-  duration = performance.now() - duration; // set the duration to time it takes to load page for ttyl
+
+  // todo: opt into getting cdn paths
+  const { domain, pageUrl, cdnSourceStripped, cdnJsPath, cdnMinJsPath } =
+    sourceBuild(urlMap, userId);
 
   // if page did not succeed exit.
   if (!hasPage) {
+    duration = performance.now() - duration; // set the duration to time it takes to load page for ttyl
     await cleanPool(browser, page);
 
     return {
-      ...EMPTY_RESPONSE,
+      script: null,
+      issues: null,
+      webPage: {
+        pageLoadTime: {
+          duration,
+          durationFormated: getPageSpeed(duration),
+          color: getCrawlDurationColor(duration),
+        },
+        domain,
+        url: urlMap,
+        insight: null,
+        issuesInfo: null,
+        lastScanDate: new Date().toISOString(),
+      },
       userId,
     };
   }
-
-  const { domain, pageUrl, cdnSourceStripped, cdnJsPath, cdnMinJsPath } =
-    sourceBuild(urlMap, userId);
 
   const pageIssues = await getPageIssues({
     page,
@@ -80,6 +86,9 @@ export const crawlWebsite = async ({
     actions,
     standard,
   });
+
+  // calculate duration after gathering page insight and running custom cmds
+  duration = performance.now() - duration;
 
   const [issues, issueMeta] = pageIssues;
 

@@ -3,9 +3,11 @@ import { getWsEndPoint, setWsEndPoint } from "./config/chrome";
 import { chromeArgs } from "./config/chrome-args";
 
 export const coreServer = async () => {
-  const [_, endpoint] = await Promise.all([startGRPC(), getWsEndPoint(true)]);
+  const [_, endpoints] = await Promise.all([startGRPC(), getWsEndPoint(true)]);
 
-  // launch locally
+  const [__, endpoint] = endpoints;
+
+  // launch chrome instance local
   if (!endpoint) {
     try {
       const puppeteer = await import("puppeteer");

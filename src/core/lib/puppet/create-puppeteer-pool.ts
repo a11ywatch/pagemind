@@ -2,8 +2,8 @@ import puppeteer from "puppeteer";
 import type { Browser, Page } from "puppeteer";
 import { getWsEndPoint, wsChromeEndpointurl } from "../../../config/chrome";
 
-// retry and wait for ws endpoint
-const getConnnection = async (retry?: boolean): Promise<puppeteer.Browser> => {
+// retry and wait for ws endpoint [todo: update endpoint to perform lb request gathering external hostname]
+const getConnnection = async (retry?: boolean): Promise<Browser> => {
   try {
     return await puppeteer.connect({
       browserWSEndpoint: wsChromeEndpointurl,
@@ -12,7 +12,7 @@ const getConnnection = async (retry?: boolean): Promise<puppeteer.Browser> => {
   } catch (e) {
     // retry connection once
     if (!retry) {
-      await getWsEndPoint(false, true);
+      await getWsEndPoint(false);
       return await getConnnection(true);
     } else {
       console.error(e);
@@ -20,7 +20,8 @@ const getConnnection = async (retry?: boolean): Promise<puppeteer.Browser> => {
   }
 };
 
-const createPuppeteerFactory = () => ({
+// puppeteer handling
+export const puppetPool = {
   acquire: getConnnection,
   async clean(page: Page, browser: Browser) {
     if (!page?.isClosed()) {
@@ -34,6 +35,4 @@ const createPuppeteerFactory = () => ({
       browser?.disconnect();
     }
   },
-});
-
-export const puppetPool = createPuppeteerFactory();
+};

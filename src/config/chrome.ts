@@ -1,6 +1,9 @@
 import dns from "dns";
 import { fetchUrl } from "../core/lib";
 
+// chrome load balancer
+const CHROME_LB = process.env.CHROME_LB;
+
 // the chrome hostname dns to connect to with lighthouse sockets
 let chromeHost = process.env.CHROME_HOST;
 // the chrome socket connection to connect to
@@ -8,33 +11,43 @@ let wsChromeEndpointurl = process.env.CHROME_SOCKET_URL;
 // did attempt to get chrome dns
 let attemptedChromeHost = false;
 
-export const lookupChromeHost = async (target?: string, staticUrl?: string) => {
-  const url = staticUrl ?? `http://${target || "127.0.0.1"}:9222/json/version`;
+export const lookupChromeHost = async (
+  target?: string,
+  rp?: boolean,
+  nosave?: boolean
+) => {
+  const url = `http://${target || "127.0.0.1"}:9222/json/version`;
   const data = await fetchUrl(url, true).catch((_) => {});
 
   if (data && data?.webSocketDebuggerUrl) {
-    wsChromeEndpointurl = data.webSocketDebuggerUrl;
+    const targetUrl = rp
+      ? data.webSocketDebuggerUrl.replace("127.0.0.1", target)
+      : data.webSocketDebuggerUrl;
+
+    console.log(`chrome connected on ${targetUrl}`);
+
+    if (!nosave) {
+      wsChromeEndpointurl = targetUrl;
+    } else {
+      return Promise.resolve(targetUrl);
+    }
   }
 
-  if (wsChromeEndpointurl) {
-    console.log(`chrome connected on ${wsChromeEndpointurl}`);
-    return Promise.resolve(wsChromeEndpointurl);
-  }
-
-  return Promise.reject("Chrome socket url not found.");
+  // resolve instance url
+  return Promise.resolve(wsChromeEndpointurl);
 };
 
-// bind top level chrome address
-const bindChromeDns = (ad: string): Promise<string> => new Promise((resolve) => {
-  dns.lookup(ad, (_err, address) => {
-    // set top level address
-    if (address) {
-      chromeHost = address;
-    }
-
-    resolve(address || "");
+// bind top level chrome address hostname
+const bindChromeDns = (ad: string, nosave?: boolean): Promise<string> =>
+  new Promise((resolve) => {
+    dns.lookup(ad, (_err, address) => {
+      // set top level address
+      if (!nosave && address) {
+        chromeHost = address;
+      }
+      resolve(address || "");
+    });
   });
-})
 
 // get the chrome websocket endpoint via dns lookup
 const getWs = async (host?: string): Promise<string> => {
@@ -48,10 +61,28 @@ const getWs = async (host?: string): Promise<string> => {
     target = await bindChromeDns("chrome");
   }
 
-  return new Promise((resolve, reject) => {
-    lookupChromeHost(target || host)
-      .then(resolve)
-      .catch(reject);
+  return new Promise(async (resolve) => {
+    resolve(await lookupChromeHost(target || host));
+  });
+};
+
+// resolve lb instance
+const getLbInstance = (nosave?: boolean): Promise<[string, string]> => {
+  let address = "";
+  let source = "";
+
+  return new Promise(async (resolve) => {
+    try {
+      address = await bindChromeDns(CHROME_LB, nosave);
+    } catch (e) {
+      console.error(e);
+    }
+
+    if (address) {
+      source = await lookupChromeHost(address, true, nosave);
+    }
+
+    resolve([address, source]);
   });
 };
 
@@ -59,30 +90,28 @@ const getWs = async (host?: string): Promise<string> => {
  * Determine the chrome web socket connection resolved.
  * @param retry - retry connection on docker dns
  *
- * @return Promise<string> - the socket connection
+ * @return Promise<[string, string]> - the socket connection
  */
-const getWsEndPoint = async (
-  retry?: boolean,
-  reconnect?: boolean
-): Promise<string> => {
-  if (wsChromeEndpointurl && !reconnect) {
-    return Promise.resolve(wsChromeEndpointurl);
+const getWsEndPoint = async (retry?: boolean): Promise<[string, string]> => {
+  // return the load balancer instance of chrome
+  if (CHROME_LB) {
+    return new Promise((resolve) => {
+      getLbInstance().then(resolve);
+    });
   }
 
-  try {
-    await getWs(chromeHost);
-  } catch (_) {}
+  await getWs(chromeHost);
 
   // continue and attempt again next
   return new Promise(async (resolve) => {
     if (retry && !wsChromeEndpointurl) {
       setTimeout(async () => {
-        try {
-          await getWs();
-        } catch (_) {}
-      }, 50);
+        await getWs();
+        resolve([chromeHost, wsChromeEndpointurl]);
+      }, 33);
+    } else {
+      resolve([chromeHost, wsChromeEndpointurl]);
     }
-    resolve(wsChromeEndpointurl);
   });
 };
 
