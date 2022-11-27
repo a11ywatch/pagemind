@@ -32,15 +32,15 @@ export const crawlWebsite = async ({
   pageHeaders,
   pageInsights,
   noStore, // do not store any data
-  scriptsEnabled,
-  mobile,
+  scriptsEnabled, // gather js script
+  mobile, // mobile view port
   actions,
   standard,
   ua,
   cv,
   pageSpeedApiKey,
 }) => {
-  const browser: Browser = await puppetPool.acquire();
+  const { browser, host } = await puppetPool.acquire();
   const page: Page = await browser.newPage();
 
   await Promise.all([
@@ -159,6 +159,7 @@ export const crawlWebsite = async ({
       const insight = await queueLighthouseUntilResults({
         urlMap,
         apiKey: pageSpeedApiKey,
+        host
       });
 
       await controller.addLighthouse({

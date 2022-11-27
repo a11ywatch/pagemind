@@ -20,8 +20,11 @@ npm run dev
 
 ## ENV
 
+Add a http/https load balancer url using the env `CHROME_LB` to enable high performance load balancing.
+
 ```
 AI_DISABLED=false
+CHROME_LB=
 ```
 
 ## Healthcheck

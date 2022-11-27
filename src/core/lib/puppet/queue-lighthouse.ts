@@ -8,26 +8,31 @@ import { lighthouseEmitter } from "../../event/lh";
 import { fetchUrl } from "../utils/fetch";
 
 interface Task {
+  // the url
   urlMap: string;
+  // lighthouse api key
   apiKey?: string;
+  // the hostname for the request
+  host: string;
 }
 
-export const promisifyLighthouse = async ({ urlMap }: any) => {
+export const promisifyLighthouse = async ({ urlMap, host }: Task) => {
   let data;
 
   try {
     const { lhr } = (await lighthouse(urlMap, {
       port: CHROME_PORT,
-      hostname: chromeHost,
+      hostname: host ?? chromeHost,
       output: "json",
       disableStorageReset: true,
       onlyCategories: ["accessibility", "best-practices", "performance", "seo"],
       saveAssets: false,
     })) ?? { lhr: null };
+
     if (lhr) {
-      // convert to gRPC Struct
       data = lhr;
     }
+  
   } catch (_) {}
 
   lighthouseEmitter.emit(`lh-processing-${urlMap}`, data);
@@ -46,7 +51,7 @@ export const queueLighthouse: queueAsPromised<Task> = fastq.promise(
 );
 
 // slow queue lighthouse one by one on devtool instance
-export const queueLighthouseUntilResults = ({ urlMap, apiKey }: Task) => {
+export const queueLighthouseUntilResults = ({ urlMap, apiKey, host }: Task) => {
   // queue and wait for results
   return new Promise(async (resolve) => {
     const key = apiKey || process.env.PAGESPEED_API_KEY;
@@ -82,7 +87,7 @@ export const queueLighthouseUntilResults = ({ urlMap, apiKey }: Task) => {
     });
 
     // internal queue for single process lighthouse devtools
-    await queueLighthouse.unshift({ urlMap }).catch((e) => {
+    await queueLighthouse.unshift({ urlMap, host }).catch((e) => {
       console.error(e);
       // exit the method
       resolve(null);

@@ -1,7 +1,9 @@
+import type { Page } from "puppeteer";
+
 export const skipContentCheck = async ({
   page,
 }: {
-  page: any;
+  page: Page;
 }): Promise<boolean> => {
   let hasSkipContent = false;
   try {
@@ -18,7 +20,7 @@ export const skipContentCheck = async ({
         "SKIP NAVIGATION",
       ];
 
-      var matchFound: Node | boolean = false;
+      let matchFound: Node | boolean = false;
 
       void (function skipAll(index = 0, type = "button") {
         const xpath = `//${type}[translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz')='${skipNameList[index]}']`;
@@ -31,13 +33,15 @@ export const skipContentCheck = async ({
         ).singleNodeValue;
 
         if (!matchingElement) {
-          if (index + 1 === skipNameList.length && type === "button") {
+          let nextIndex = index + 1;
+
+          if (nextIndex === skipNameList.length && type === "button") {
             index = -1;
             type = "a";
           }
 
-          if (skipNameList[index + 1]) {
-            skipAll(index + 1, type);
+          if (skipNameList[nextIndex]) {
+            skipAll(nextIndex, type);
           }
         } else {
           matchFound = matchingElement;
