@@ -1,5 +1,5 @@
-import { pa11y } from "litepa11y";
-import { pa11yConfig } from "../../../../config";
+import { a11y } from "a11y-puppeteer";
+import { a11yConfig } from "../../../../config";
 import { skipContentCheck } from "../skip-content-check";
 import { skipContentTemplate } from "../../../controllers/update/templates";
 import { issueSort } from "../../utils/sort";
@@ -28,7 +28,7 @@ export const getPageIssues = async ({
   actions = [],
   standard: wcagStandard,
 }): Promise<[PageIssues | null, IssueMeta]> => {
-  const pa11yHeaders = pageHeaders?.length
+  const a11yHeaders = pageHeaders?.length
     ? {
         headers: pageHeaders.map((item: any) => {
           return {
@@ -48,8 +48,8 @@ export const getPageIssues = async ({
     standard = wcagStandard;
   }
 
-  const results = await pa11y(
-    Object.assign({}, pa11yConfig, pa11yHeaders, {
+  const results = await a11y(
+    Object.assign({}, a11yConfig, a11yHeaders, {
       page,
       browser,
       actions,
@@ -57,7 +57,6 @@ export const getPageIssues = async ({
     })
   );
 
-  // TODO: handle expensive function without xpath
   const skipContentIncluded = await skipContentCheck({ page });
 
   if (results) {

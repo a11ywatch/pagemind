@@ -32,7 +32,6 @@ export const promisifyLighthouse = async ({ urlMap, host }: Task) => {
     if (lhr) {
       data = lhr;
     }
-  
   } catch (_) {}
 
   lighthouseEmitter.emit(`lh-processing-${urlMap}`, data);
@@ -66,7 +65,8 @@ export const queueLighthouseUntilResults = ({ urlMap, apiKey, host }: Task) => {
       (!key && !queueLighthouse.idle() && queueLighthouse.length() === 1)
     ) {
       const data = await fetchUrl(
-        `https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=${urlMap}${categories}${API_KEY}`
+        `https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=${urlMap}${categories}${API_KEY}`,
+        false
       ).catch((e) => {
         console.error(e);
       });

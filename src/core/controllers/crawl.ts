@@ -159,7 +159,7 @@ export const crawlWebsite = async ({
       const insight = await queueLighthouseUntilResults({
         urlMap,
         apiKey: pageSpeedApiKey,
-        host
+        host,
       });
 
       await controller.addLighthouse({

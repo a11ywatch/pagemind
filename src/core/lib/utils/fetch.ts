@@ -1,25 +1,25 @@
 import Https from "https";
 import Http from "http";
 
-// chrome load balancer
-export const chromeLb = process.env.CHROME_LB;
+// keep alive if chrome load balancer found
+const keepAlive = !!process.env.CHROME_LB;
 
-const agentHttp = new Http.Agent({ keepAlive: !!chromeLb });
-const agentHttps = new Https.Agent({ keepAlive: !!chromeLb });
+const agentHttp = new Http.Agent({ keepAlive });
+const agentHttps = new Https.Agent({ keepAlive });
 
 // network request to http or https parsing json
 export const fetchUrl = (url: string, http?: boolean): Promise<any> => {
-  let getMethod = Https.get;
-  let agent = agentHttps
+   let getMethod = Https.get;
+   let agent = agentHttps;
 
-  // run as http
-  if(http) {
+   // run as http
+   if(http) {
     getMethod = Http.get;
     agent = agentHttp as Https.Agent;
   }
 
   return new Promise(async (resolve, reject) => {
-    getMethod(url, { agent }, (res) => {
+    getMethod(url, {agent}, (res) => {
       const { statusCode } = res;
       const contentType = res.headers["content-type"];
 

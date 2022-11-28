@@ -1,8 +1,13 @@
 import dns from "dns";
-import { chromeLb, fetchUrl } from "../core/lib/utils/fetch";
+import { URL } from "url";
+import { fetchUrl } from "../core/lib/utils/fetch";
+
+export const chromeLb = process.env.CHROME_LB;
 
 // the chrome hostname dns to connect to with lighthouse sockets
 let chromeHost = process.env.CHROME_HOST;
+let chromeLbHost = ""; // load balancer host name
+
 // the chrome socket connection to connect to
 let wsChromeEndpointurl = process.env.CHROME_SOCKET_URL;
 // did attempt to get chrome dns
@@ -10,22 +15,37 @@ let attemptedChromeHost = false;
 
 // default to http
 let defaultTPTHttp = true;
-let tpt = "http"
+let tpt = "http";
 
-// todo: allow prep for https
-if(chromeLb && chromeLb.includes("https://")) {
-  defaultTPTHttp = false;
-  tpt = "https"
+// get hostname for load balancer
+if (chromeLb) {
+  if (chromeLb.startsWith("https")) {
+    defaultTPTHttp = false;
+    tpt = "https";
+  }
+
+  try {
+    const hs = new URL(chromeLb.startsWith("http") ? chromeLb : `${tpt}://${chromeLb}`);
+
+    if (hs) {
+      chromeLbHost = hs.hostname;
+    }
+  } catch (e) {
+    console.error(e);
+  }
+
 }
 
 // determine chrome websocket host connection
 export const lookupChromeHost = async (
   target?: string,
   rp?: boolean,
-  nosave?: boolean,
+  nosave?: boolean
 ) => {
-  const url = `${tpt}://${target || "127.0.0.1"}:9222/json/version`;
-  const data = await fetchUrl(url, defaultTPTHttp).catch((_) => {});
+  const data = await fetchUrl(
+    `${tpt}://${target || "127.0.0.1"}:9222/json/version`,
+    defaultTPTHttp
+  ).catch((_) => {});
 
   if (data && data?.webSocketDebuggerUrl) {
     // todo: exact match trim
@@ -80,7 +100,7 @@ const getLbInstance = (nosave?: boolean): Promise<[string, string]> => {
 
   return new Promise(async (resolve) => {
     try {
-      address = await bindChromeDns(chromeLb, nosave);
+      address = await bindChromeDns(chromeLbHost, nosave);
     } catch (e) {
       console.error(e);
     }

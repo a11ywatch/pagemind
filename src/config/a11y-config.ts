@@ -1,4 +1,4 @@
-export const pa11yConfig = {
+export const a11yConfig = {
   includeNotices: false,
   includeWarnings: true,
   chromeLaunchConfig: { ignoreHTTPSErrors: true, executablePath: undefined },

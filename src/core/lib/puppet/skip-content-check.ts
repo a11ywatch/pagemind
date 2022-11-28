@@ -14,15 +14,12 @@ export const skipContentCheck = async ({
         "skip navigation",
         "skip content",
         "skip navigation links",
-        "skip to bottom nav",
         "skip main navigation",
-        "Skip navigation",
-        "SKIP NAVIGATION",
       ];
 
-      let matchFound: Node | boolean = false;
+      var matchFound = false;
 
-      void (function skipAll(index = 0, type = "button") {
+      void (function skipAll(index = 0, type = "a") {
         const xpath = `//${type}[translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz')='${skipNameList[index]}']`;
         const matchingElement = document.evaluate(
           xpath,
@@ -33,22 +30,22 @@ export const skipContentCheck = async ({
         ).singleNodeValue;
 
         if (!matchingElement) {
-          let nextIndex = index + 1;
+          var nextIndex = index + 1;
 
-          if (nextIndex === skipNameList.length && type === "button") {
-            index = -1;
-            type = "a";
+          if (nextIndex === skipNameList.length && type === "a") {
+            index = 0;
+            type = "button";
           }
 
           if (skipNameList[nextIndex]) {
             skipAll(nextIndex, type);
           }
         } else {
-          matchFound = matchingElement;
+          matchFound = !!matchingElement;
         }
       })();
 
-      return !!matchFound;
+      return matchFound;
     });
   } catch (e) {
     console.error(e);

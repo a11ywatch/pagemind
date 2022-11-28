@@ -4,11 +4,10 @@ import {
   chromeHost,
   getWsEndPoint,
   wsChromeEndpointurl,
+  chromeLb
 } from "../../../config/chrome";
 
-import { chromeLb } from '../../../core/lib/utils/fetch'
-
-import os from "os"
+import os from "os";
 
 // return the valid connection for request
 type ConnectionResponse = {
@@ -127,7 +126,9 @@ let puppetPool = {
 
 // handle load balance connection req high performance hybrid robin sequence
 if (chromeLb) {
-  const mem = Math.round(Math.round((os.totalmem() || 1) / 1024 / 1024 * 100) / 100000);
+  const mem = Math.round(
+    Math.round(((os.totalmem() || 1) / 1024 / 1024) * 100) / 100000
+  );
 
   puppetPool = {
     acquire: getLbConnnection,

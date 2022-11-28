@@ -1,3 +1,3 @@
 export { DEV, ASSETS_CDN } from "./config";
-export { pa11yConfig } from "./pa11y-config";
+export { a11yConfig } from "./a11y-config";
 export { getWsEndPoint } from "./chrome";

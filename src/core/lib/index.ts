@@ -15,4 +15,4 @@ export {
   queueLighthouseUntilResults,
   puppetPool,
 } from "./puppet";
-export { fetchUrl, chromeLb } from "./utils/fetch";
+export { fetchUrl } from "./utils/fetch";

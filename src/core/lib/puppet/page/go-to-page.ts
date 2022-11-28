@@ -1,4 +1,4 @@
-import { pa11yConfig } from "../../../../config/pa11y-config";
+import { a11yConfig } from "../../../../config/a11y-config";
 import type { Page, HTTPRequest } from "puppeteer";
 
 const skippedResources = [
@@ -101,7 +101,7 @@ const goToPage = async (page: Page, url: string): Promise<boolean> => {
   return new Promise(async (resolve) => {
     try {
       await page.goto(url, {
-        timeout: pa11yConfig.timeout,
+        timeout: a11yConfig.timeout,
         waitUntil: "domcontentloaded",
       });
     } catch (e) {
