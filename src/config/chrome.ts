@@ -25,7 +25,9 @@ if (chromeLb) {
   }
 
   try {
-    const hs = new URL(chromeLb.startsWith("http") ? chromeLb : `${tpt}://${chromeLb}`);
+    const hs = new URL(
+      chromeLb.startsWith("http") ? chromeLb : `${tpt}://${chromeLb}`
+    );
 
     if (hs) {
       chromeLbHost = hs.hostname;
@@ -33,7 +35,6 @@ if (chromeLb) {
   } catch (e) {
     console.error(e);
   }
-
 }
 
 // determine chrome websocket host connection

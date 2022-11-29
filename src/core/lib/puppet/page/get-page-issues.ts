@@ -7,8 +7,8 @@ import type { PageIssues, IssueMeta } from "../../../../types";
 
 // desktop viewport
 export const desktopViewport = {
-  width: 1280,
-  height: 1024,
+  width: 800,
+  height: 600,
   deviceScaleFactor: undefined,
   isMobile: false,
 };

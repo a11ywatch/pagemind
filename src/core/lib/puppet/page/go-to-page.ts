@@ -97,7 +97,7 @@ const setNetwork = async (page: Page): Promise<boolean> => {
 // lazy go to page
 const goToPage = async (page: Page, url: string): Promise<boolean> => {
   let valid = false;
-  
+
   await setNetwork(page);
   return new Promise(async (resolve) => {
     try {

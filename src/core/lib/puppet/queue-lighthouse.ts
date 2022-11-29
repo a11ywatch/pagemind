@@ -28,7 +28,7 @@ export const promisifyLighthouse = async ({ urlMap, host }: Task) => {
       onlyCategories: ["accessibility", "best-practices", "performance", "seo"],
       saveAssets: false,
     })) ?? { lhr: null };
-    
+
     if (lhr) {
       data = lhr;
     }
@@ -49,14 +49,15 @@ export const queueLighthouse: queueAsPromised<Task> = fastq.promise(
   1 // only one allowed per instance
 );
 
+const categories =
+  "&category=accessibility&category=best-practices&category=performance&category=seo";
+
 // slow queue lighthouse one by one on devtool instance
 export const queueLighthouseUntilResults = ({ urlMap, apiKey, host }: Task) => {
   // queue and wait for results
   return new Promise(async (resolve) => {
     const key = apiKey || process.env.PAGESPEED_API_KEY;
     const API_KEY = key ? `&key=${String(key).trim()}` : "";
-    const categories =
-      "&category=accessibility&category=best-practices&category=performance&category=seo";
 
     // if item in queue use rest API for pageinsights to speed up process. SWAP between queue and network.
     if (

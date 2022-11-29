@@ -5,9 +5,8 @@ import {
   chromeHost,
   getWsEndPoint,
   wsChromeEndpointurl,
-  chromeLb
+  chromeLb,
 } from "../../../config/chrome";
-
 
 // return the valid connection for request
 type ConnectionResponse = {

@@ -1,6 +1,6 @@
 import getPageSpeed from "get-page-speed";
 import { sourceBuild } from "@a11ywatch/website-source-builder";
-import type { Browser, Page } from "puppeteer";
+import type { Page } from "puppeteer";
 import { performance } from "perf_hooks";
 import {
   puppetPool,
@@ -14,13 +14,8 @@ import { storeCDNValues } from "./update/cdn_worker";
 import { controller } from "../../proto/website-client";
 import {
   mobileViewport,
-  desktopViewport,
   getPageIssues,
 } from "../lib/puppet/page/get-page-issues";
-
-// disc the browser socket req
-const cleanPool = async (browser?: Browser, page?: Page) =>
-  await puppetPool.clean(page, browser);
 
 // duration color
 const getCrawlDurationColor = (duration: number) =>
@@ -47,14 +42,14 @@ export const crawlWebsite = async ({
 
   try {
     page = await browser?.newPage();
-  } catch(e) {
-    console.error(e) // issue with creating a new page occured [todo: fallback to outside remote chrome]
+  } catch (e) {
+    console.error(e); // issue with creating a new page occured [todo: fallback to outside remote chrome]
   }
 
-  if(page) {
+  if (page) {
     await Promise.all([
       ua ? page.setUserAgent(ua) : Promise.resolve(null),
-      page.setViewport(mobile ? mobileViewport : desktopViewport),
+      mobile ? page.setViewport(mobileViewport) : Promise.resolve(null),
     ]);
     duration = performance.now(); // page ttl
     hasPage = await goToPage(page, urlMap); // does the page exist
@@ -67,7 +62,7 @@ export const crawlWebsite = async ({
   // if page did not succeed exit.
   if (!hasPage) {
     duration = performance.now() - duration; // set the duration to time it takes to load page for ttyl
-    await cleanPool(browser, page);
+    await puppetPool.clean(page, browser);
 
     return {
       script: undefined,
@@ -117,7 +112,7 @@ export const crawlWebsite = async ({
     pageMeta = v[1];
   }
 
-  await cleanPool(browser, page);
+  await puppetPool.clean(page, browser);
 
   const {
     errorCount,
