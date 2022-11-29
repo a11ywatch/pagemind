@@ -1,4 +1,5 @@
 import puppeteer from "puppeteer";
+import os from "os";
 import type { Browser, Page } from "puppeteer";
 import {
   chromeHost,
@@ -7,7 +8,6 @@ import {
   chromeLb
 } from "../../../config/chrome";
 
-import os from "os";
 
 // return the valid connection for request
 type ConnectionResponse = {
@@ -100,17 +100,7 @@ const clean = async (page: Page, browser: Browser) => {
 
 // clean the connection
 async function cleanLbConnection(page: Page, browser: Browser): Promise<void> {
-  if (!page?.isClosed()) {
-    try {
-      await page.close();
-    } catch (e) {
-      console.error(e);
-    }
-  }
-  if (browser?.isConnected()) {
-    browser?.disconnect();
-  }
-
+  await clean(page, browser);
   // remove workload counter
   this.counter--;
 }

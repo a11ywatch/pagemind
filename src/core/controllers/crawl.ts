@@ -41,15 +41,24 @@ export const crawlWebsite = async ({
   pageSpeedApiKey,
 }) => {
   const { browser, host } = await puppetPool.acquire();
-  const page: Page = await browser.newPage();
+  let page: Page = null;
+  let hasPage = false;
+  let duration = 0;
 
-  await Promise.all([
-    ua ? page.setUserAgent(ua) : Promise.resolve(null),
-    page.setViewport(mobile ? mobileViewport : desktopViewport),
-  ]);
+  try {
+    page = await browser?.newPage();
+  } catch(e) {
+    console.error(e) // issue with creating a new page occured [todo: fallback to outside remote chrome]
+  }
 
-  let duration = performance.now(); // page ttl
-  const hasPage = await goToPage(page, urlMap); // does the page exist
+  if(page) {
+    await Promise.all([
+      ua ? page.setUserAgent(ua) : Promise.resolve(null),
+      page.setViewport(mobile ? mobileViewport : desktopViewport),
+    ]);
+    duration = performance.now(); // page ttl
+    hasPage = await goToPage(page, urlMap); // does the page exist
+  }
 
   // todo: opt into getting cdn paths
   const { domain, pageUrl, cdnSourceStripped, cdnJsPath, cdnMinJsPath } =
@@ -61,8 +70,8 @@ export const crawlWebsite = async ({
     await cleanPool(browser, page);
 
     return {
-      script: null,
-      issues: null,
+      script: undefined,
+      issues: undefined,
       webPage: {
         pageLoadTime: {
           duration,
@@ -71,8 +80,8 @@ export const crawlWebsite = async ({
         },
         domain,
         url: urlMap,
-        insight: null,
-        issuesInfo: null,
+        insight: undefined,
+        issuesInfo: undefined,
         lastScanDate: new Date().toISOString(),
       },
       userId,

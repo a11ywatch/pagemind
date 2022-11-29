@@ -96,7 +96,8 @@ const setNetwork = async (page: Page): Promise<boolean> => {
 
 // lazy go to page
 const goToPage = async (page: Page, url: string): Promise<boolean> => {
-  let valid = true;
+  let valid = false;
+  
   await setNetwork(page);
   return new Promise(async (resolve) => {
     try {
@@ -104,9 +105,9 @@ const goToPage = async (page: Page, url: string): Promise<boolean> => {
         timeout: a11yConfig.timeout,
         waitUntil: "domcontentloaded",
       });
+      valid = true;
     } catch (e) {
       console.error(e);
-      valid = false;
     }
 
     resolve(valid);
