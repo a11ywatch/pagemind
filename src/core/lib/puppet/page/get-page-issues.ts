@@ -5,22 +5,6 @@ import { skipContentTemplate } from "../../../controllers/update/templates";
 import { issueSort } from "../../utils/sort";
 import type { PageIssues, IssueMeta } from "../../../../types";
 
-// desktop viewport
-export const desktopViewport = {
-  width: 800,
-  height: 600,
-  deviceScaleFactor: undefined,
-  isMobile: false,
-};
-
-// mobile viewpoer
-export const mobileViewport = {
-  width: 320,
-  height: 480,
-  deviceScaleFactor: 2,
-  isMobile: true,
-};
-
 export const getPageIssues = async ({
   page,
   browser,

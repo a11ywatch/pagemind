@@ -1,10 +1,10 @@
 import { startGRPC } from "./proto/init";
 import { getWsEndPoint, setWsEndPoint } from "./config/chrome";
 import { chromeArgs } from "./config/chrome-args";
+import { generateRandomAgents } from "./core/lib/puppet/agent";
 
 export const coreServer = async () => {
   const [_, endpoints] = await Promise.all([startGRPC(), getWsEndPoint(true)]);
-
   const [__, endpoint] = endpoints;
 
   // launch chrome instance local
@@ -27,8 +27,13 @@ export const coreServer = async () => {
       console.error("could not start chrome", e);
     }
   }
+
+  // generate app agents
+  generateRandomAgents();
 };
 
 (async () => {
   await coreServer();
 })();
+
+// cron daily reset agents

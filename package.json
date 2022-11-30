@@ -1,6 +1,6 @@
 {
   "name": "@a11ywatch/pagemind",
-  "version": "0.5.63",
+  "version": "0.5.64",
   "description": "Get metrics on your web page with inclusion",
   "main": "./server.js",
   "author": "Jeff Mendez",
@@ -24,12 +24,13 @@
     "@a11ywatch/website-source-builder": "^0.0.32",
     "@grpc/grpc-js": "1.7.3",
     "@grpc/proto-loader": "0.7.3",
+    "a11y-puppeteer": "0.0.4",
     "fastq": "1.13.0",
     "get-page-speed": "1.0.1",
     "lighthouse": "9.6.8",
-    "a11y-puppeteer": "0.0.4",
     "pb-util": "1.0.3",
-    "puppeteer": "19.2.0"
+    "puppeteer": "19.2.0",
+    "user-agents": "^1.0.1215"
   },
   "devDependencies": {
     "@swc/core": "^1.3.19",

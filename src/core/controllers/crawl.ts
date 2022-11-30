@@ -13,9 +13,9 @@ import {
 import { storeCDNValues } from "./update/cdn_worker";
 import { controller } from "../../proto/website-client";
 import {
-  mobileViewport,
   getPageIssues,
 } from "../lib/puppet/page/get-page-issues";
+import { spoofPage } from "../lib/puppet/spoof";
 
 // duration color
 const getCrawlDurationColor = (duration: number) =>
@@ -46,11 +46,15 @@ export const crawlWebsite = async ({
     console.error(e); // issue with creating a new page occured [todo: fallback to outside remote chrome]
   }
 
+  // handle the view port and ua for request
   if (page) {
+    const { agent, vp } = spoofPage(mobile, ua);
+
     await Promise.all([
-      ua ? page.setUserAgent(ua) : Promise.resolve(null),
-      mobile ? page.setViewport(mobileViewport) : Promise.resolve(null),
+      page.setUserAgent(agent),
+      page.setViewport(vp),
     ]);
+
     duration = performance.now(); // page ttl
     hasPage = await goToPage(page, urlMap); // does the page exist
   }

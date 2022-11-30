@@ -8,7 +8,11 @@ const agentHttp = new Http.Agent({ keepAlive });
 const agentHttps = new Https.Agent({ keepAlive });
 
 // network request to http or https parsing json
-export const fetchUrl = (url: string, http?: boolean, ua?: boolean): Promise<any> => {
+export const fetchUrl = (
+  url: string,
+  http?: boolean,
+  ua?: boolean
+): Promise<any> => {
   let getMethod = Https.get;
   let agent = agentHttps;
 
