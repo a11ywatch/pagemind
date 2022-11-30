@@ -8,7 +8,7 @@ const agentHttp = new Http.Agent({ keepAlive });
 const agentHttps = new Https.Agent({ keepAlive });
 
 // network request to http or https parsing json
-export const fetchUrl = (url: string, http?: boolean): Promise<any> => {
+export const fetchUrl = (url: string, http?: boolean, ua?: boolean): Promise<any> => {
   let getMethod = Https.get;
   let agent = agentHttps;
 
@@ -19,7 +19,7 @@ export const fetchUrl = (url: string, http?: boolean): Promise<any> => {
   }
 
   return new Promise(async (resolve, reject) => {
-    getMethod(url, { agent }, (res) => {
+    getMethod(url, { agent: ua ? agent : false }, (res) => {
       const { statusCode } = res;
       const contentType = res.headers["content-type"];
 
@@ -35,8 +35,8 @@ export const fetchUrl = (url: string, http?: boolean): Promise<any> => {
       }
 
       if (error) {
-        console.error(error.message);
         res.resume();
+        reject(error.message);
         return;
       }
 

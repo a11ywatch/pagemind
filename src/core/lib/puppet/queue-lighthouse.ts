@@ -67,7 +67,8 @@ export const queueLighthouseUntilResults = ({ urlMap, apiKey, host }: Task) => {
     ) {
       const data = await fetchUrl(
         `https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=${urlMap}${categories}${API_KEY}`,
-        false
+        false,
+        true // add ua keep alive
       ).catch((e) => {
         console.error(e);
       });
