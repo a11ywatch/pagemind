@@ -27,7 +27,7 @@ export const getPageIssues = async ({
       page,
       browser,
       actions,
-      standard: wcagStandard ?? "WCAG2AA",
+      standard: wcagStandard || "WCAG2AA",
     })
   );
 
