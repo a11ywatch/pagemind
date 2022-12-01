@@ -101,11 +101,11 @@ const goToPage = async (page: Page, url: string): Promise<boolean> => {
   await setNetwork(page);
   return new Promise(async (resolve) => {
     try {
-      await page.goto(url, {
+      const res = await page.goto(url, {
         timeout: a11yConfig.timeout,
         waitUntil: "domcontentloaded",
       });
-      valid = true;
+      valid = res.status() === 304 || res.ok();
     } catch (e) {
       console.error(e);
     }
