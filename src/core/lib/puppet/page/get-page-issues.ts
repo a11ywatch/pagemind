@@ -22,22 +22,12 @@ export const getPageIssues = async ({
       }
     : {};
 
-  let standard = "WCAG2AA";
-
-  // pass wcag standard
-  if (
-    wcagStandard &&
-    ["WCAG2A", "WCAG2AA", "WCAG2AAAA"].includes(wcagStandard)
-  ) {
-    standard = wcagStandard;
-  }
-
   const results = await a11y(
     Object.assign({}, a11yConfig, a11yHeaders, {
       page,
       browser,
       actions,
-      standard,
+      standard: wcagStandard ?? "WCAG2AA",
     })
   );
 
