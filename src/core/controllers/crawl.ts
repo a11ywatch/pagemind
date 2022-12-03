@@ -38,13 +38,14 @@ export const crawlWebsite = async ({
   const { browser, host } = await puppetPool.acquire();
   let page: Page = null;
   let hasPage = false;
-  let duration = 0;
-
+  
   try {
     page = await browser?.newPage();
   } catch (e) {
     console.error(e); // issue with creating a new page occured [todo: fallback to outside remote chrome]
   }
+
+  let duration = 0;
 
   // handle the view port and ua for request
   if (page) {
@@ -57,6 +58,7 @@ export const crawlWebsite = async ({
 
     duration = performance.now(); // page ttl
     hasPage = await goToPage(page, urlMap); // does the page exist
+    duration = performance.now() - duration; // set the duration to time it takes to load page for ttyl
   }
 
   // todo: opt into getting cdn paths
@@ -65,7 +67,6 @@ export const crawlWebsite = async ({
 
   // if page did not succeed exit.
   if (!hasPage) {
-    duration = performance.now() - duration; // set the duration to time it takes to load page for ttyl
     await puppetPool.clean(page, browser);
 
     return {
@@ -73,7 +74,7 @@ export const crawlWebsite = async ({
       issues: undefined,
       webPage: {
         pageLoadTime: {
-          duration,
+          duration: duration, // prevent empty durations 
           durationFormated: getPageSpeed(duration),
           color: getCrawlDurationColor(duration),
         },
@@ -94,9 +95,6 @@ export const crawlWebsite = async ({
     actions,
     standard,
   });
-
-  // calculate duration after gathering page insight and running custom cmds
-  duration = performance.now() - duration;
 
   const [issues, issueMeta] = pageIssues;
 
