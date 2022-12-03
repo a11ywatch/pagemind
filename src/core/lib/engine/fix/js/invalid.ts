@@ -15,7 +15,7 @@ export const fixInvalid = (
       }
 `,
     alt: `
-		  var imgElement${index} = document.${domSelector}("${selector}");
+      var imgElement${index} = document.${domSelector}("${selector}");
       if (imgElement${index}) {
         imgElement${index}.alt = ${
       extraConfig.alt

@@ -16,9 +16,7 @@ export const editScript = async ({
     cdnSourceStripped,
     scriptBody: scriptBuild(
       {
-        scriptChildren: newScript
-          .replace("<script defer>", "")
-          .replace("</script>", ""),
+        scriptChildren: newScript,
         domain,
         cdnSrc: cdnSourceStripped,
       },

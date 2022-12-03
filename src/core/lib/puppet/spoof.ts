@@ -22,19 +22,19 @@ export const spoofPage = (mobile: boolean, uua: string = "") => {
   let vp = desktopViewport;
 
   if (mobile) {
-    if(uua) {
+    if (uua) {
       vp = mobileViewport;
     } else {
-        const ua = getRandomDesktopUA();
-        agent = ua.data.userAgent;
-        vp = {
-          height: ua.data.viewportHeight || mobileViewport.height,
-          width: ua.data.viewportWidth || mobileViewport.width,
-          deviceScaleFactor: mobileViewport.deviceScaleFactor,
-          isMobile: true,
-        };
+      const ua = getRandomDesktopUA();
+      agent = ua.data.userAgent;
+      vp = {
+        height: ua.data.viewportHeight || mobileViewport.height,
+        width: ua.data.viewportWidth || mobileViewport.width,
+        deviceScaleFactor: mobileViewport.deviceScaleFactor,
+        isMobile: true,
+      };
     }
-  } else if(!uua) {
+  } else if (!uua) {
     const ua = getRandomMobileUA();
     agent = ua.data?.userAgent;
     vp = {

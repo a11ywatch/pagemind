@@ -12,9 +12,7 @@ import {
 } from "../lib";
 import { storeCDNValues } from "./update/cdn_worker";
 import { controller } from "../../proto/website-client";
-import {
-  getPageIssues,
-} from "../lib/puppet/page/get-page-issues";
+import { getPageIssues } from "../lib/puppet/page/get-page-issues";
 import { spoofPage } from "../lib/puppet/spoof";
 
 // duration color
@@ -38,7 +36,7 @@ export const crawlWebsite = async ({
   const { browser, host } = await puppetPool.acquire();
   let page: Page = null;
   let hasPage = false;
-  
+
   try {
     page = await browser?.newPage();
   } catch (e) {
@@ -51,10 +49,7 @@ export const crawlWebsite = async ({
   if (page) {
     const { agent, vp } = spoofPage(mobile, ua);
 
-    await Promise.all([
-      page.setUserAgent(agent),
-      page.setViewport(vp),
-    ]);
+    await Promise.all([page.setUserAgent(agent), page.setViewport(vp)]);
 
     duration = performance.now(); // page ttl
     hasPage = await goToPage(page, urlMap); // does the page exist
@@ -74,7 +69,7 @@ export const crawlWebsite = async ({
       issues: undefined,
       webPage: {
         pageLoadTime: {
-          duration: duration, // prevent empty durations 
+          duration: duration, // prevent empty durations
           durationFormated: getPageSpeed(duration),
           color: getCrawlDurationColor(duration),
         },

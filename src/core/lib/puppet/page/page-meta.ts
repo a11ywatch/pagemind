@@ -1,8 +1,8 @@
-import { getHostAsString } from "@a11ywatch/website-source-builder";
 import { getIssueFixScript } from "../../engine/fix-script";
 import { getPageIssueScore } from "../utils/page-issue-score";
 import { getIncludesDomain } from "../utils/page-includes-domain";
 import { getAltImage, isAltMissing } from "./grab-alt";
+import { getHostAsString } from "../../engine/templates/host-as-string";
 
 interface IssueInfo {
   errorCount: number;

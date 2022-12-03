@@ -27,5 +27,4 @@ export const skipNavigationMethod: string = `
           document.body.prepend(skipContentButton);      
         }
       }
-      // EO: SKIP NAVIGATION
-	`;
+      // EO: SKIP NAVIGATION`;

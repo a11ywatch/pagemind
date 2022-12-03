@@ -1,10 +1,7 @@
-import { scriptBody } from "./templates";
-
 const buildConfig = {
   scriptEntry: `<script defer>`,
   scriptExit: `</script>`,
-  funcHead: `
-  void function init() {`,
+  funcHead: `void function init() {`,
   funcTail: `}();`,
 };
 
@@ -20,7 +17,7 @@ export const scriptBuild = (
 ) => {
   return `${!cdn ? buildConfig.scriptEntry : ""}
 ${buildConfig.funcHead}
-${scriptBody({ scriptChildren }, "")}
+${scriptChildren}
 ${buildConfig.funcTail}
 ${!cdn ? buildConfig.scriptExit : ""}
 `;

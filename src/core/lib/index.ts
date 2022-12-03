@@ -1,9 +1,4 @@
-export {
-  getIssueFixScript,
-  scriptBody,
-  scriptBuild,
-  skipNavigationMethod,
-} from "./engine";
+export { getIssueFixScript, scriptBuild, skipNavigationMethod } from "./engine";
 export {
   getPageMeta,
   getPageIssues,
