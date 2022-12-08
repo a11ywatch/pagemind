@@ -114,4 +114,24 @@ const goToPage = async (page: Page, url: string): Promise<boolean> => {
   });
 };
 
-export { goToPage };
+// raw html content
+const setHtmlContent = async (page: Page, html: string): Promise<boolean> => {
+  let valid = false;
+
+  await setNetwork(page);
+  return new Promise(async (resolve) => {
+    try {
+      await page.setContent(html, {
+        timeout: a11yConfig.timeout,
+        waitUntil: "domcontentloaded",
+      });
+      valid = true;
+    } catch (e) {
+      console.error(e);
+    }
+
+    resolve(valid);
+  });
+};
+
+export { goToPage, setHtmlContent };

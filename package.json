@@ -1,6 +1,6 @@
 {
   "name": "@a11ywatch/pagemind",
-  "version": "0.5.78",
+  "version": "0.5.79",
   "description": "Get metrics on your web page with inclusion",
   "main": "./server.js",
   "author": "Jeff Mendez",
@@ -20,8 +20,8 @@
     "pub": "tsc && cp package.json dist && cp package-lock.json dist && cp README.md dist && cp LICENSE dist && cd dist && npm publish"
   },
   "dependencies": {
-    "@a11ywatch/protos": "^0.3.6",
-    "@a11ywatch/website-source-builder": "^0.0.32",
+    "@a11ywatch/protos": "^0.3.8",
+    "@a11ywatch/website-source-builder": "^0.0.33",
     "@grpc/grpc-js": "1.7.3",
     "@grpc/proto-loader": "0.7.3",
     "a11y-puppeteer": "0.0.8",

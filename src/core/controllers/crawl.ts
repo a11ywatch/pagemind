@@ -14,6 +14,7 @@ import { storeCDNValues } from "./update/cdn_worker";
 import { controller } from "../../proto/website-client";
 import { getPageIssues } from "../lib/puppet/page/get-page-issues";
 import { spoofPage } from "../lib/puppet/spoof";
+import { setHtmlContent } from "../lib/puppet/page/go-to-page";
 
 // duration color
 const getCrawlDurationColor = (duration: number) =>
@@ -32,6 +33,7 @@ export const crawlWebsite = async ({
   ua,
   cv,
   pageSpeedApiKey,
+  html,
 }) => {
   const { browser, host } = await puppetPool.acquire();
   let page: Page = null;
@@ -44,7 +46,7 @@ export const crawlWebsite = async ({
   }
 
   let duration = 0;
-
+  
   // handle the view port and ua for request
   if (page) {
     const { agent, vp } = spoofPage(mobile, ua);
@@ -52,7 +54,9 @@ export const crawlWebsite = async ({
     await Promise.all([page.setUserAgent(agent), page.setViewport(vp)]);
 
     duration = performance.now(); // page ttl
-    hasPage = await goToPage(page, urlMap); // does the page exist
+    hasPage = await (html
+      ? setHtmlContent(page, html)
+      : goToPage(page, urlMap)); // does the page exist
     duration = performance.now() - duration; // set the duration to time it takes to load page for ttyl
   }
 
