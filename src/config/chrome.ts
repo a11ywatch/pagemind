@@ -80,7 +80,6 @@ const bindChromeDns = (ad: string, nosave?: boolean): Promise<string> =>
 // get the chrome websocket endpoint via dns lookup
 const getWs = async (host?: string): Promise<string> => {
   const validateDNS = chromeHost === "chrome" || !chromeHost;
-
   let target = "";
 
   // Attempt to find chrome host through DNS [todo: dns outside]
@@ -89,8 +88,8 @@ const getWs = async (host?: string): Promise<string> => {
     target = await bindChromeDns("chrome");
   }
 
-  return new Promise(async (resolve) => {
-    resolve(await lookupChromeHost(target || host));
+  return new Promise((resolve) => {
+    lookupChromeHost(target || host).then(resolve)
   });
 };
 
