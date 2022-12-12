@@ -12,7 +12,6 @@ export const coreServer = async () => {
     try {
       const puppeteer = await import("puppeteer");
       const browser = await puppeteer.launch({
-        devtools: true,
         headless: true,
         args: chromeArgs,
         waitForInitialPage: false,

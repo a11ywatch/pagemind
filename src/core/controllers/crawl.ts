@@ -42,7 +42,7 @@ export const crawlWebsite = async ({
   try {
     page = await browser?.newPage();
   } catch (e) {
-    console.error(e); // issue with creating a new page occured [todo: fallback to outside remote chrome]
+    console.error(e); // issue with creating a new page occurred [todo: fallback to outside remote chrome]
   }
 
   let duration = 0;
