@@ -46,18 +46,19 @@ export const crawlWebsite = async ({
   }
 
   let duration = 0;
-  
+  let usage = 0;
+
   // handle the view port and ua for request
   if (page) {
     const { agent, vp } = spoofPage(mobile, ua);
 
     await Promise.all([page.setUserAgent(agent), page.setViewport(vp)]);
 
-    duration = performance.now(); // page ttl
+    usage = performance.now(); // page ttl
     hasPage = await (html
       ? setHtmlContent(page, html)
       : goToPage(page, urlMap)); // does the page exist
-    duration = performance.now() - duration; // set the duration to time it takes to load page for ttyl
+    duration = performance.now() - usage; // set the duration to time it takes to load page for ttyl
   }
 
   // todo: opt into getting cdn paths
@@ -84,6 +85,7 @@ export const crawlWebsite = async ({
         lastScanDate: new Date().toISOString(),
       },
       userId,
+      usage: duration + 0.25
     };
   }
 
@@ -112,6 +114,8 @@ export const crawlWebsite = async ({
     pageHasCdn = v[0];
     pageMeta = v[1];
   }
+
+  usage = performance.now() - usage; // get total uptime used
 
   await puppetPool.clean(page, browser);
 
@@ -210,5 +214,6 @@ export const crawlWebsite = async ({
     },
     script: scriptData,
     userId,
+    usage
   };
 };
