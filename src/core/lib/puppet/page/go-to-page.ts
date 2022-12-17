@@ -105,7 +105,9 @@ const goToPage = async (page: Page, url: string): Promise<boolean> => {
         timeout: a11yConfig.timeout,
         waitUntil: "domcontentloaded",
       });
-      valid = res.status() === 304 || res.ok();
+      if(res) {
+        valid = res.status() === 304 || res.ok();
+      }
     } catch (e) {
       console.error(e);
     }
