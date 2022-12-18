@@ -171,12 +171,17 @@ export const crawlWebsite = async ({
         host,
       });
 
-      await controller.addLighthouse({
-        user_id: userId,
-        insight,
-        domain,
-        url: urlMap,
-      });
+      // catch error incase server is down or restarting for re-client connect
+      try {
+        await controller.addLighthouse({
+          user_id: userId,
+          insight,
+          domain,
+          url: urlMap,
+        });
+      } catch(e) {
+        console.error(e)
+      }
     });
   }
 
