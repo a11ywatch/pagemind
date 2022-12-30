@@ -15,10 +15,8 @@ import { controller } from "../../proto/website-client";
 import { getPageIssues } from "../lib/puppet/page/get-page-issues";
 import { spoofPage } from "../lib/puppet/spoof";
 import { setHtmlContent } from "../lib/puppet/page/go-to-page";
-
-// duration color
-const getCrawlDurationColor = (duration: number) =>
-  duration <= 1500 ? "#A5D6A7" : duration <= 3000 ? "#E6EE9C" : "#EF9A9A";
+import { getCrawlDurationColor } from "../lib/utils/colors";
+import { puppetFirefoxPool } from "../lib/puppet/create-puppeteer-pool-firefox";
 
 export const crawlWebsite = async ({
   userId,
@@ -34,8 +32,11 @@ export const crawlWebsite = async ({
   cv,
   pageSpeedApiKey,
   html,
+  firefox, // experimental
 }) => {
-  const { browser, host } = await puppetPool.acquire();
+  // determine which pool to use
+  const pool = firefox ? puppetFirefoxPool : puppetPool;
+  const { browser, host } = await pool.acquire(false);
   let page: Page = null;
   let hasPage = false;
 
@@ -67,7 +68,7 @@ export const crawlWebsite = async ({
 
   // if page did not succeed exit.
   if (!hasPage) {
-    await puppetPool.clean(page, browser);
+    await pool.clean(page, browser);
 
     return {
       script: undefined,
@@ -85,7 +86,7 @@ export const crawlWebsite = async ({
         lastScanDate: new Date().toISOString(),
       },
       userId,
-      usage: duration + 0.25
+      usage: duration + 0.25,
     };
   }
 
@@ -117,7 +118,7 @@ export const crawlWebsite = async ({
 
   usage = performance.now() - usage; // get total uptime used
 
-  await puppetPool.clean(page, browser);
+  await pool.clean(page, browser);
 
   const {
     errorCount,
@@ -179,8 +180,8 @@ export const crawlWebsite = async ({
           domain,
           url: urlMap,
         });
-      } catch(e) {
-        console.error(e)
+      } catch (e) {
+        console.error(e);
       }
     });
   }
@@ -219,6 +220,6 @@ export const crawlWebsite = async ({
     },
     script: scriptData,
     userId,
-    usage
+    usage,
   };
 };

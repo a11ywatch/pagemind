@@ -2,11 +2,11 @@ import puppeteer from "puppeteer";
 import os from "os";
 import type { Browser, Page } from "puppeteer";
 import {
-  chromeHost,
-  getWsEndPoint,
-  wsChromeEndpointurl,
-  chromeLb,
-} from "../../../config/chrome";
+  firefoxHost,
+  getFireFoxWsEndPoint,
+  wsFirefoxEndpointurl,
+  firefoxLb,
+} from "../../../config/firefox";
 
 // return the valid connection for request
 type ConnectionResponse = {
@@ -18,24 +18,23 @@ type ConnectionResponse = {
 const getConnnection = async (retry?: boolean): Promise<ConnectionResponse> => {
   try {
     const browser = await puppeteer.connect({
-      browserWSEndpoint: wsChromeEndpointurl,
+      browserWSEndpoint: wsFirefoxEndpointurl,
       ignoreHTTPSErrors: true,
     });
 
     return {
-      host: chromeHost,
-      browser,
+      host: firefoxHost,
+      browser: browser,
     };
   } catch (e) {
-    // retry connection once
     if (!retry) {
-      await getWsEndPoint(false);
+      await getFireFoxWsEndPoint(false);
       return await getConnnection(true);
     } else {
       console.error(e);
       return {
         browser: null,
-        host: chromeHost,
+        host: firefoxHost,
       };
     }
   }
@@ -46,12 +45,12 @@ async function getLbConnnection(retry?: boolean): Promise<ConnectionResponse> {
   this.counter++;
 
   // default to main global endpoint
-  let browserWSEndpoint = wsChromeEndpointurl;
-  let host = chromeHost;
+  let browserWSEndpoint = wsFirefoxEndpointurl;
+  let host = firefoxHost;
 
   if (this.counter >= this.scalePoint) {
     this.counter = 1;
-    const connections = await getWsEndPoint();
+    const connections = await getFireFoxWsEndPoint();
 
     // get the next connect if valid
     if (connections[1]) {
@@ -75,13 +74,13 @@ async function getLbConnnection(retry?: boolean): Promise<ConnectionResponse> {
     this.counter = 0;
     // retry connection once
     if (!retry) {
-      await getWsEndPoint(false);
+      await getFireFoxWsEndPoint(false);
       return await getConnnection(true);
     } else {
       console.error(e);
       return {
         browser: null,
-        host: chromeHost,
+        host: host,
       };
     }
   }
@@ -107,7 +106,7 @@ async function cleanLbConnection(page: Page, browser: Browser): Promise<void> {
 }
 
 // puppeteer handling
-let puppetPool = {
+let puppetFirefoxPool = {
   acquire: getConnnection,
   clean,
   // scale prop defaults
@@ -116,12 +115,12 @@ let puppetPool = {
 };
 
 // handle load balance connection req high performance hybrid robin sequence
-if (chromeLb) {
+if (firefoxLb) {
   const mem = Math.round(
     Math.round(((os.totalmem() || 1) / 1024 / 1024) * 100) / 100000
   );
 
-  puppetPool = {
+  puppetFirefoxPool = {
     acquire: getLbConnnection,
     clean: cleanLbConnection,
     // scale props
@@ -130,4 +129,4 @@ if (chromeLb) {
   };
 }
 
-export { puppetPool };
+export { puppetFirefoxPool };

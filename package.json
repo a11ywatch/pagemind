@@ -1,15 +1,19 @@
 {
   "name": "@a11ywatch/pagemind",
-  "version": "0.5.89",
+  "version": "0.5.91",
   "description": "Get metrics on your web page with inclusion",
   "main": "./server.js",
   "author": "Jeff Mendez",
   "contributors": [
-    "Jeff Mendez (https://www.jeffmendez.com)"
+    "Jeff Mendez (jeff@a11ywatch.com)"
   ],
   "homepage": "https://github.com/a11ywatch/pagemind",
   "bugs": "https://github.com/a11ywatch/pagemind/issues",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/a11ywatch/pagemind.git"
+  },
   "scripts": {
     "dev": "ts-node-dev --transpile-only src/server.ts",
     "test": "jest",
@@ -20,7 +24,7 @@
     "pub": "tsc && cp package.json dist && cp package-lock.json dist && cp README.md dist && cp LICENSE dist && cd dist && npm publish"
   },
   "dependencies": {
-    "@a11ywatch/protos": "^0.3.10",
+    "@a11ywatch/protos": "^0.3.11",
     "@a11ywatch/website-source-builder": "^0.0.34",
     "@grpc/grpc-js": "1.8.0",
     "@grpc/proto-loader": "0.7.4",

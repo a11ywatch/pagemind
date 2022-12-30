@@ -1,58 +1,43 @@
 import dns from "dns";
-import { URL } from "url";
 import { fetchUrl } from "../core/lib/utils/fetch";
+import { getLoadBalancerDefaults } from "../core/lib/utils/connection/load-balancer";
 
 export const chromeLb = process.env.CHROME_LB;
 
 // the chrome hostname dns to connect to with lighthouse sockets
 let chromeHost = process.env.CHROME_HOST;
-let chromeLbHost = ""; // load balancer host name
-
 // the chrome socket connection to connect to
 let wsChromeEndpointurl = process.env.CHROME_SOCKET_URL;
 // did attempt to get chrome dns
 let attemptedChromeHost = false;
 
-// default to http
-let defaultTPTHttp = true;
-let tpt = "http";
-
-// get hostname for load balancer
-if (chromeLb) {
-  if (chromeLb.startsWith("https")) {
-    defaultTPTHttp = false;
-    tpt = "https";
-  }
-
-  try {
-    const hs = new URL(
-      chromeLb.startsWith("http") ? chromeLb : `${tpt}://${chromeLb}`
-    );
-
-    if (hs) {
-      chromeLbHost = hs.hostname;
-    }
-  } catch (e) {
-    console.error(e);
-  }
-}
+// default chrome configs
+const {
+  defaultTPTHttp,
+  tpt,
+  host: chromeLbHost,
+} = getLoadBalancerDefaults(chromeLb);
 
 // determine chrome websocket host connection
-export const lookupChromeHost = async (
+const lookupChromeHost = async (
   target?: string,
   rp?: boolean,
   nosave?: boolean
 ) => {
-  const data = await fetchUrl(
+  const { webSocketDebuggerUrl } = await fetchUrl(
     `${tpt}://${target || "127.0.0.1"}:9222/json/version`,
     defaultTPTHttp
-  ).catch((_) => {});
+  ).catch((_) => {
+    return {
+      webSocketDebuggerUrl: "",
+    };
+  });
 
-  if (data && data?.webSocketDebuggerUrl) {
-    // todo: exact match trim
+  if (webSocketDebuggerUrl) {
+    // todo: exact match trim performance
     const targetUrl = rp
-      ? data.webSocketDebuggerUrl.replace("127.0.0.1", target)
-      : data.webSocketDebuggerUrl;
+      ? webSocketDebuggerUrl.replace("127.0.0.1", target)
+      : webSocketDebuggerUrl;
 
     if (!nosave) {
       wsChromeEndpointurl = targetUrl;
@@ -89,11 +74,11 @@ const getWs = async (host?: string): Promise<string> => {
   }
 
   return new Promise((resolve) => {
-    lookupChromeHost(target || host).then(resolve)
+    lookupChromeHost(target || host).then(resolve);
   });
 };
 
-// resolve lb instance
+// resolve chrome lb instance
 const getLbInstance = (nosave?: boolean): Promise<[string, string]> => {
   let address = "";
   let source = "";
@@ -147,11 +132,4 @@ const setWsEndPoint = (endpoint: string) => {
   wsChromeEndpointurl = endpoint;
 };
 
-export {
-  bindChromeDns,
-  wsChromeEndpointurl,
-  chromeHost,
-  getWs,
-  setWsEndPoint,
-  getWsEndPoint,
-};
+export { wsChromeEndpointurl, chromeHost, setWsEndPoint, getWsEndPoint };

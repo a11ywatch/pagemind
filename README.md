@@ -20,11 +20,14 @@ npm run dev
 
 ## ENV
 
-Add a http/https load balancer url using the env `CHROME_LB` to enable high performance load balancing.
+Add a http/https load balancer url using the env `CHROME_LB` or `FIREFOX_LB` to enable high performance load balancing.
+
+In order to enable firefox use the `FIREFOX_ENABLED` env var. You also need to run `PUPPETEER_PRODUCT=firefox npm i` to download puppeteer if you are running locally.
 
 ```
 AI_DISABLED=false
 CHROME_LB=
+FIREFOX_ENABLED=false
 ```
 
 ## Healthcheck

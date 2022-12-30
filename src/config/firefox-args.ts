@@ -1,0 +1,20 @@
+// default chrome arguments if launched internal
+export const firefoxArgs = [
+  "--headless",
+  "--no-sandbox",
+  "--hide-scrollbars",
+  "--no-first-run",
+  "--remote-debugging-address=0.0.0.0",
+  "--remote-debugging-port=5800",
+  "--max-wait-for-load=2500",
+  "--allow-running-insecure-content",
+  "--autoplay-policy=user-gesture-required",
+  "--ignore-certificate-errors",
+  "--disable-storage-reset",
+  "--disable-dev-shm-usage",
+  "--disable-domain-reliability",
+  "--disable-component-update",
+  "--disable-setuid-sandbox",
+  "--disable-features=ScriptStreaming,TranslateUI,BlinkGenPropertyTrees",
+  "--enable-background-thread-pool",
+];
