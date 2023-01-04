@@ -11,6 +11,7 @@ export const getPageIssues = async ({
   pageHeaders,
   actions = [],
   standard: wcagStandard,
+  ignore = []
 }): Promise<[PageIssues | null, IssueMeta]> => {
   const a11yHeaders = pageHeaders?.length
     ? {
@@ -28,6 +29,7 @@ export const getPageIssues = async ({
       browser,
       actions,
       standard: wcagStandard || "WCAG2AA",
+      ignore
     })
   );
 
