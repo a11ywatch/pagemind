@@ -1,4 +1,4 @@
-import { a11y } from "a11y-puppeteer";
+import { a11y } from "a11y-js";
 import { a11yConfig } from "../../../../config";
 import { skipContentCheck } from "../skip-content-check";
 import { skipContentTemplate } from "../../../controllers/update/templates";
@@ -11,7 +11,7 @@ export const getPageIssues = async ({
   pageHeaders,
   actions = [],
   standard: wcagStandard,
-  ignore = []
+  ignore = [],
 }): Promise<[PageIssues | null, IssueMeta]> => {
   const a11yHeaders = pageHeaders?.length
     ? {
@@ -29,7 +29,7 @@ export const getPageIssues = async ({
       browser,
       actions,
       standard: wcagStandard || "WCAG2AA",
-      ignore
+      ignore,
     })
   );
 
