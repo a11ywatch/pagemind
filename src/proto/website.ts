@@ -6,6 +6,9 @@ import type {
   ServiceClientConstructor,
   ProtobufTypeDefinition,
 } from "@grpc/grpc-js";
+import { getNodeModulesPath } from "@a11ywatch/website-source-builder/dist/node-path";
+
+const nodePath = getNodeModulesPath();
 
 type GRPC = GrpcObject | ServiceClientConstructor | ProtobufTypeDefinition;
 
@@ -28,7 +31,7 @@ export const getProto = async (
   target: string = "pagemind.proto"
 ): Promise<Service & GRPC> => {
   try {
-    const packageDef = await load(`node_modules/@a11ywatch/protos/${target}`, {
+    const packageDef = await load(`${nodePath}/@a11ywatch/protos/${target}`, {
       keepCase: true,
       longs: String,
       enums: String,

@@ -8,7 +8,7 @@ let server: Server;
 
 export const createServer = async () => {
   const websiteProto = await getProto();
-  const healthProto = await getProto("/health.proto");
+  const healthProto = await getProto("health.proto");
 
   server = new Server();
 
@@ -39,7 +39,7 @@ export const createServer = async () => {
 
 export const killServer = async () => {
   const websiteProto = await getProto();
-  const healthProto = await getProto("/health.proto");
+  const healthProto = await getProto("health.proto");
 
   server.removeService(websiteProto.Pagemind.service);
   server.removeService(healthProto.health.HealthCheck.service);
