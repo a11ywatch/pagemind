@@ -1,5 +1,3 @@
-import { getRandomDesktopUA, getRandomMobileUA } from "./agent";
-
 // desktop viewport
 export const desktopViewport = {
   width: 800,
@@ -25,21 +23,17 @@ export const spoofPage = (mobile: boolean, uua: string = "") => {
     if (uua) {
       vp = mobileViewport;
     } else {
-      const ua = getRandomDesktopUA();
-      agent = ua.data.userAgent;
       vp = {
-        height: ua.data.viewportHeight || mobileViewport.height,
-        width: ua.data.viewportWidth || mobileViewport.width,
+        height:mobileViewport.height,
+        width: mobileViewport.width,
         deviceScaleFactor: mobileViewport.deviceScaleFactor,
         isMobile: true,
       };
     }
   } else if (!uua) {
-    const ua = getRandomMobileUA();
-    agent = ua.data?.userAgent;
     vp = {
-      height: ua.data.viewportHeight || desktopViewport.height,
-      width: ua.data.viewportWidth || desktopViewport.width,
+      height: desktopViewport.height,
+      width:  desktopViewport.width,
       deviceScaleFactor: desktopViewport.deviceScaleFactor,
       isMobile: false,
     };

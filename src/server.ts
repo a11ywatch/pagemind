@@ -4,7 +4,6 @@ import { getFireFoxWsEndPoint, setFirefoxWsEndPoint } from "./config/firefox";
 
 import { chromeArgs } from "./config/chrome-args";
 import { firefoxArgs } from "./config/firefox-args";
-import { generateRandomAgents } from "./core/lib/puppet/agent";
 
 const firefoxEnabled = process.env.FIREFOX_ENABLED === "true";
 
@@ -57,9 +56,6 @@ export const coreServer = async () => {
       console.error("could not start firefox. Check to see if firefox is downloaded on the system.", e);
     }
   }
-
-  // generate app agents
-  generateRandomAgents();
 };
 
 (async () => {

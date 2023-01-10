@@ -48,7 +48,7 @@ export const getProto = async (
     if (!retry) {
       return await getProto(target, true);
     } else {
-      console.error(e);
+      console.error(["Pagemind protoloader failed:", e]);
     }
   }
 };
