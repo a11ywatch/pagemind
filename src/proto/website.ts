@@ -32,17 +32,20 @@ export const getProto = async (
   retry?: boolean
 ): Promise<Service & GRPC> => {
   try {
-    const packageDef = await load(`${nodePath || "./node_modules"}/@a11ywatch/protos/${target}`, {
-      keepCase: true,
-      longs: String,
-      enums: String,
-      defaults: true,
-      oneofs: true,
-    });
+    const packageDef = await load(
+      `${nodePath || "./node_modules"}/@a11ywatch/protos/${target}`,
+      {
+        keepCase: true,
+        longs: String,
+        enums: String,
+        defaults: true,
+        oneofs: true,
+      }
+    );
 
     return loadPackageDefinition(packageDef);
   } catch (e) {
-    if(!nodePath) {
+    if (!nodePath) {
       nodePath = getNodeModulesPath();
     }
     if (!retry) {

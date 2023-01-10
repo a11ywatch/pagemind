@@ -34,6 +34,8 @@ export const crawlWebsite = async ({
   html,
   firefox, // experimental
   ignore,
+  rules,
+  runners = [],
 }) => {
   // determine which pool to use
   const pool = firefox ? puppetFirefoxPool : puppetPool;
@@ -97,7 +99,9 @@ export const crawlWebsite = async ({
     pageHeaders,
     actions,
     standard,
-    ignore
+    ignore,
+    rules,
+    runners, // set to undefined to use default
   });
 
   const [issues, issueMeta] = pageIssues;

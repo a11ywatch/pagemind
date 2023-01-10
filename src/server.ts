@@ -32,7 +32,10 @@ export const coreServer = async () => {
         console.log(`chrome launched and connected on: ${browserWSEndpoint}`);
       }
     } catch (e) {
-      console.error("could not start chrome. Check to see if chrome is downloaded on the system.", e);
+      console.error(
+        "could not start chrome. Check to see if chrome is downloaded on the system.",
+        e
+      );
     }
   }
 
@@ -53,7 +56,10 @@ export const coreServer = async () => {
         console.log(`firefox launched and connected on: ${browserWSEndpoint}`);
       }
     } catch (e) {
-      console.error("could not start firefox. Check to see if firefox is downloaded on the system.", e);
+      console.error(
+        "could not start firefox. Check to see if firefox is downloaded on the system.",
+        e
+      );
     }
   }
 };

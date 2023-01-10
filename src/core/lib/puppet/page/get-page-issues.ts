@@ -1,5 +1,4 @@
 import { a11y } from "a11y-js";
-import { a11yConfig } from "../../../../config";
 import { skipContentCheck } from "../skip-content-check";
 import { skipContentTemplate } from "../../../controllers/update/templates";
 import { issueSort } from "../../utils/sort";
@@ -11,26 +10,31 @@ export const getPageIssues = async ({
   pageHeaders,
   actions = [],
   standard: wcagStandard,
-  ignore = [],
+  ignore,
+  rules,
+  runners
 }): Promise<[PageIssues | null, IssueMeta]> => {
-  const a11yHeaders = pageHeaders?.length
-    ? {
-        headers: pageHeaders.map((item: any) => {
-          return {
-            [item.key]: item.value,
-          };
-        }),
-      }
-    : {};
+  const headers = pageHeaders?.length
+    ? pageHeaders.map((item: any) => {
+      return {
+        [item.key]: item.value,
+      };
+    })
+    : undefined;
 
   const results = await a11y(
-    Object.assign({}, a11yConfig, a11yHeaders, {
+    {
+      includeNotices: false,
+      includeWarnings: true,
       page,
       browser,
       actions,
       standard: wcagStandard || "WCAG2AA",
       ignore,
-    })
+      rules,
+      runners,
+      headers
+    }
   );
 
   const skipContentIncluded = await skipContentCheck({ page });

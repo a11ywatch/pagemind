@@ -24,7 +24,7 @@ export const spoofPage = (mobile: boolean, uua: string = "") => {
       vp = mobileViewport;
     } else {
       vp = {
-        height:mobileViewport.height,
+        height: mobileViewport.height,
         width: mobileViewport.width,
         deviceScaleFactor: mobileViewport.deviceScaleFactor,
         isMobile: true,
@@ -33,7 +33,7 @@ export const spoofPage = (mobile: boolean, uua: string = "") => {
   } else if (!uua) {
     vp = {
       height: desktopViewport.height,
-      width:  desktopViewport.width,
+      width: desktopViewport.width,
       deviceScaleFactor: desktopViewport.deviceScaleFactor,
       isMobile: false,
     };
