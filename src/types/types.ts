@@ -26,6 +26,6 @@ export interface IssueData {
   errorCount: number;
   warningCount: number;
   noticeCount: number;
-  adaScore: number;
+  accessScore: number;
   issueMeta: IssueMeta;
 }

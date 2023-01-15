@@ -8,7 +8,7 @@ interface IssueInfo {
   errorCount: number;
   warningCount: number;
   noticeCount: number;
-  adaScore: number;
+  accessScore: number;
   scriptChildren: string;
   possibleIssuesFixedByCdn: number;
   scriptsEnabled?: boolean;
@@ -27,7 +27,7 @@ export const getPageMeta = ({
   let errorCount = 0;
   let warningCount = 0;
   let noticeCount = 0;
-  let adaScore = 100;
+  let accessScore = 100;
   let scriptChildren = ``;
   let possibleIssuesFixedByCdn = 0;
   let includeDomainCheck = false;
@@ -40,7 +40,7 @@ export const getPageMeta = ({
         errorCount,
         warningCount,
         noticeCount,
-        adaScore,
+        accessScore,
         scriptChildren,
         possibleIssuesFixedByCdn,
       });
@@ -97,7 +97,7 @@ export const getPageMeta = ({
         noticeCount++;
       }
 
-      adaScore -= getPageIssueScore({ element });
+      accessScore -= getPageIssueScore({ element });
 
       issueIndex++;
     }
@@ -106,7 +106,7 @@ export const getPageMeta = ({
       errorCount,
       warningCount,
       noticeCount,
-      adaScore: Math.max(0, adaScore),
+      accessScore: Math.max(0, accessScore),
       scriptChildren: scriptsEnabled
         ? `${includeDomainCheck ? getHostAsString : ""}${scriptChildren}`
         : null,

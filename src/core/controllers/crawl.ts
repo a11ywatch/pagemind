@@ -130,7 +130,7 @@ export const crawlWebsite = async ({
     errorCount,
     warningCount,
     noticeCount,
-    adaScore,
+    accessScore,
     scriptChildren,
     possibleIssuesFixedByCdn,
   } = pageMeta ?? {};
@@ -213,7 +213,7 @@ export const crawlWebsite = async ({
         errorCount,
         warningCount,
         noticeCount,
-        adaScore,
+        accessScore,
         issueMeta,
       },
       lastScanDate: new Date().toISOString(),
