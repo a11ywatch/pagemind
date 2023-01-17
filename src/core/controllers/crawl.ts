@@ -104,19 +104,19 @@ export const crawlWebsite = async ({
     runners, // set to undefined to use default
   });
 
-  const [issues, issueMeta] = pageIssues;
+  const [report, issueMeta] = pageIssues;
 
   let pageHasCdn = false;
   let pageMeta = null;
 
   // valid page
-  if (issues) {
+  if (report) {
     // cdn for active acts
     const v = await Promise.all([
       !noStore
         ? checkCdn({ page, cdnMinJsPath, cdnJsPath })
         : Promise.resolve(null),
-      getPageMeta({ page, issues, scriptsEnabled, cv }),
+      getPageMeta({ page, issues: report, scriptsEnabled, cv }),
     ]);
     pageHasCdn = v[0];
     pageMeta = v[1];
@@ -170,7 +170,7 @@ export const crawlWebsite = async ({
   }
 
   // light house pageinsights
-  if (issues && pageInsights) {
+  if (report && pageInsights) {
     setImmediate(async () => {
       const insight = await queueLighthouseUntilResults({
         urlMap,
@@ -192,9 +192,6 @@ export const crawlWebsite = async ({
     });
   }
 
-  // default to blank array
-  const { issues: issueList = [], documentTitle = "" } = issues ?? {};
-
   return {
     webPage: {
       domain,
@@ -208,7 +205,7 @@ export const crawlWebsite = async ({
       insight: null,
       issuesInfo: {
         possibleIssuesFixedByCdn: possibleIssuesFixedByCdn,
-        totalIssues: issueList.length || 0,
+        totalIssues: report.issues.length,
         issuesFixedByCdn: possibleIssuesFixedByCdn || 0, // TODO: update confirmation
         errorCount,
         warningCount,
@@ -221,8 +218,8 @@ export const crawlWebsite = async ({
     issues: {
       domain,
       pageUrl,
-      issues: issueList,
-      documentTitle,
+      issues: report.issues,
+      documentTitle: report.documentTitle,
     },
     script: scriptData,
     userId,

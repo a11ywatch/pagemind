@@ -12,42 +12,33 @@ export const getPageIssues = async ({
   standard: wcagStandard,
   ignore,
   rules,
-  runners
+  runners,
 }): Promise<[PageIssues | null, IssueMeta]> => {
-  const headers = pageHeaders?.length
-    ? pageHeaders.map((item: any) => {
-      return {
-        [item.key]: item.value,
-      };
-    })
-    : undefined;
+  const results = await a11y({
+    includeNotices: false,
+    includeWarnings: true,
+    page,
+    browser,
+    actions,
+    standard: wcagStandard || "WCAG2AA",
+    ignore,
+    rules,
+    runners,
+    headers: pageHeaders?.length
+      ? pageHeaders.map((item: any) => ({
+          [item.key]: item.value,
+        }))
+      : undefined,
+  });
 
-  const results = await a11y(
-    {
-      includeNotices: false,
-      includeWarnings: true,
-      page,
-      browser,
-      actions,
-      standard: wcagStandard || "WCAG2AA",
-      ignore,
-      rules,
-      runners,
-      headers
-    }
-  );
-
+  // todo: move this into runner
   const skipContentIncluded = await skipContentCheck({ page });
 
   if (results) {
-    const issueLength = results?.issues?.length;
+    const issueLength = results.issues.length;
 
     if (!skipContentIncluded) {
-      if (issueLength) {
-        results.issues.push(skipContentTemplate); // containers issues add skip content to end
-      } else {
-        results.issues = [skipContentTemplate];
-      }
+      results.issues.push(skipContentTemplate); // containers issues add skip content to end
     }
 
     if (issueLength) {
