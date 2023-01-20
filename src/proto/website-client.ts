@@ -59,9 +59,4 @@ export const controller = {
   addLighthouse,
 };
 
-export {
-  mavClient,
-  websiteClient,
-  createMavClient,
-  createWebsiteClient,
-};
+export { mavClient, websiteClient, createMavClient, createWebsiteClient };

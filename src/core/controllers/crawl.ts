@@ -60,9 +60,8 @@ export const crawlWebsite = async ({
     duration = performance.now() - usage; // set the duration to time it takes to load page for ttyl
   }
 
-  // todo: opt into getting cdn paths
-  const { domain, pageUrl } =
-    sourceBuild(urlMap, userId);
+  // todo: validate if being used twice at router level
+  const { domain, pageUrl } = sourceBuild(urlMap);
 
   // if page did not succeed exit.
   if (!hasPage) {
