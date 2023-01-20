@@ -1,14 +1,12 @@
 import { credentials } from "@grpc/grpc-js";
-import { GRPC_HOST_CORE, GRPC_HOST_MAV, GRPC_HOST_CDN } from "../config/rpc";
+import { GRPC_HOST_CORE, GRPC_HOST_MAV } from "../config/rpc";
 import { Service, getProto } from "./website";
 
 let mavClient: Service["Mav"]["service"];
-let cdnClient: Service["Cdn"]["service"];
 let websiteClient: Service["website"]["WebsiteService"]["service"];
 
 export const killClient = () => {
   mavClient?.close();
-  cdnClient?.close();
 };
 
 // core service server client
@@ -26,12 +24,6 @@ const createMavClient = async () => {
   mavClient = new Mav(GRPC_HOST_MAV, credentials.createInsecure());
 };
 
-// cdn service server client for testing
-const createCdnClient = async () => {
-  const { Cdn } = await getProto("cdn.proto");
-  cdnClient = new Cdn(GRPC_HOST_CDN, credentials.createInsecure());
-};
-
 const parseImg = (
   website = {}
 ): Promise<{
@@ -40,30 +32,6 @@ const parseImg = (
 }> => {
   return new Promise((resolve, reject) => {
     mavClient.parseImg(website, (error, res) => {
-      if (!error) {
-        resolve(res);
-      } else {
-        reject(error);
-      }
-    });
-  });
-};
-
-const addScreenshot = (website = {}) => {
-  return new Promise((resolve, reject) => {
-    cdnClient.addScreenshot(website, (error, res) => {
-      if (!error) {
-        resolve(res);
-      } else {
-        reject(error);
-      }
-    });
-  });
-};
-
-const addScript = (website = {}) => {
-  return new Promise((resolve, reject) => {
-    cdnClient.addScript(website, (error, res) => {
       if (!error) {
         resolve(res);
       } else {
@@ -88,16 +56,12 @@ const addLighthouse = (website = {}) => {
 
 export const controller = {
   parseImg,
-  addScript,
-  addScreenshot,
   addLighthouse,
 };
 
 export {
   mavClient,
-  cdnClient,
   websiteClient,
-  createCdnClient,
   createMavClient,
   createWebsiteClient,
 };

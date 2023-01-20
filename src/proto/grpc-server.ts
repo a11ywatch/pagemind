@@ -1,7 +1,6 @@
 import { Server, ServerCredentials } from "@grpc/grpc-js";
 import { GRPC_HOST, GRPC_PORT } from "../config/rpc";
 import { crawlWebsite } from "../core/controllers/crawl";
-import { mutateScript } from "../core/controllers/mutate";
 import { getProto } from "./website";
 
 let server: Server;
@@ -22,11 +21,6 @@ export const createServer = async () => {
     // get page report
     scan: async (call, callback) => {
       const page = await crawlWebsite(call.request);
-      callback(null, page);
-    },
-    // set scripts for the page
-    setScript: async (call, callback) => {
-      const page = await mutateScript(call.request);
       callback(null, page);
     },
   });

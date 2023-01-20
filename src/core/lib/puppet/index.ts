@@ -1,5 +1,4 @@
 export { createCanvasPupet } from "./create-canvas";
-export { checkCdn } from "./check-cdn";
 export { puppetPool } from "./create-puppeteer-pool";
 export { skipContentCheck } from "./skip-content-check";
 export {

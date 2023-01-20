@@ -1,1 +1,1 @@
-export { crawlWebsite, adjustScript, editScript } from "./update";
+export { crawlWebsite } from "./update";

@@ -1,7 +1,6 @@
 import {
   createWebsiteClient,
   createMavClient,
-  createCdnClient,
 } from "./website-client";
 import { createServer } from "./grpc-server";
 
@@ -10,5 +9,4 @@ export const startGRPC = async () =>
     createServer(),
     createWebsiteClient(),
     createMavClient(),
-    createCdnClient(),
   ]);

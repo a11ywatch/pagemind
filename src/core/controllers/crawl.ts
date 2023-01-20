@@ -4,18 +4,14 @@ import type { Page } from "puppeteer";
 import { performance } from "perf_hooks";
 import {
   puppetPool,
-  checkCdn,
-  scriptBuild,
   goToPage,
   getPageMeta,
   queueLighthouseUntilResults,
 } from "../lib";
-import { storeCDNValues } from "./update/cdn_worker";
 import { controller } from "../../proto/website-client";
 import { getPageIssues } from "../lib/puppet/page/get-page-issues";
 import { spoofPage } from "../lib/puppet/spoof";
 import { setHtmlContent } from "../lib/puppet/page/go-to-page";
-import { getCrawlDurationColor } from "../lib/utils/colors";
 import { puppetFirefoxPool } from "../lib/puppet/create-puppeteer-pool-firefox";
 
 export const crawlWebsite = async ({
@@ -23,7 +19,6 @@ export const crawlWebsite = async ({
   url: urlMap,
   pageHeaders,
   pageInsights,
-  noStore, // do not store any data
   scriptsEnabled, // gather js script
   mobile, // mobile view port
   actions,
@@ -66,7 +61,7 @@ export const crawlWebsite = async ({
   }
 
   // todo: opt into getting cdn paths
-  const { domain, pageUrl, cdnSourceStripped, cdnJsPath, cdnMinJsPath } =
+  const { domain, pageUrl } =
     sourceBuild(urlMap, userId);
 
   // if page did not succeed exit.
@@ -74,13 +69,11 @@ export const crawlWebsite = async ({
     await pool.clean(page, browser);
 
     return {
-      script: undefined,
       issues: undefined,
       webPage: {
         pageLoadTime: {
           duration: duration, // prevent empty durations
           durationFormated: getPageSpeed(duration),
-          color: getCrawlDurationColor(duration),
         },
         domain,
         url: urlMap,
@@ -106,20 +99,12 @@ export const crawlWebsite = async ({
 
   const [report, issueMeta] = pageIssues;
 
-  let pageHasCdn = false;
   let pageMeta = null;
 
   // valid page
   if (report) {
-    // cdn for active acts
-    const v = await Promise.all([
-      !noStore
-        ? checkCdn({ page, cdnMinJsPath, cdnJsPath })
-        : Promise.resolve(null),
-      getPageMeta({ page, issues: report, scriptsEnabled, cv }),
-    ]);
-    pageHasCdn = v[0];
-    pageMeta = v[1];
+    // extra accessibility metrics
+    pageMeta = await getPageMeta({ page, issues: report, scriptsEnabled, cv });
   }
 
   usage = performance.now() - usage; // get total uptime used
@@ -131,43 +116,8 @@ export const crawlWebsite = async ({
     warningCount,
     noticeCount,
     accessScore,
-    scriptChildren,
     possibleIssuesFixedByCdn,
   } = pageMeta ?? {};
-
-  let scriptProps = {}; // js script props
-  let scriptBody = ""; // js script body
-  let scriptData = {}; // script object
-
-  // get script from accessibility engine
-  if (scriptsEnabled) {
-    scriptProps = {
-      scriptChildren,
-      domain,
-      cdnSrc: cdnSourceStripped,
-    };
-    scriptBody = scriptBuild(scriptProps, true); // store body for cdn
-    scriptData = {
-      cdnUrlMinified: cdnMinJsPath,
-      cdnUrl: cdnJsPath,
-      cdnConnected: pageHasCdn,
-      pageUrl,
-      domain,
-      script: scriptBody,
-      issueMeta,
-    };
-  }
-
-  // Store the js script
-  if (!noStore) {
-    setImmediate(async () => {
-      await storeCDNValues({
-        cdnSourceStripped,
-        domain,
-        scriptBody,
-      });
-    });
-  }
 
   // light house pageinsights
   if (report && pageInsights) {
@@ -196,11 +146,9 @@ export const crawlWebsite = async ({
     webPage: {
       domain,
       url: pageUrl,
-      cdnConnected: pageHasCdn,
       pageLoadTime: {
         duration,
         durationFormated: getPageSpeed(duration),
-        color: getCrawlDurationColor(duration),
       },
       insight: null,
       issuesInfo: {
@@ -221,7 +169,6 @@ export const crawlWebsite = async ({
       issues: report.issues,
       documentTitle: report.documentTitle,
     },
-    script: scriptData,
     userId,
     usage,
   };
