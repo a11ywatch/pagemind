@@ -1,7 +1,6 @@
 import { a11y } from "a11y-js";
 import { skipContentCheck } from "../skip-content-check";
 import { skipContentTemplate } from "../../../controllers/update/templates";
-import { issueSort } from "../../utils/sort";
 import type { PageIssues, IssueMeta } from "../../../../types";
 
 export const getPageIssues = async ({
@@ -31,19 +30,10 @@ export const getPageIssues = async ({
       : undefined,
   });
 
-  // todo: move this into runner
-  const skipContentIncluded = await skipContentCheck({ page });
+  const skipContentIncluded = results && (await skipContentCheck({ page }));
 
-  if (results) {
-    const issueLength = results.issues.length;
-
-    if (!skipContentIncluded) {
-      results.issues.push(skipContentTemplate); // containers issues add skip content to end
-    }
-
-    if (issueLength) {
-      results.issues.sort(issueSort);
-    }
+  if (results && !skipContentIncluded) {
+    results.issues.push(skipContentTemplate); // containers issues add skip content to end
   }
 
   return [
