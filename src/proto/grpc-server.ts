@@ -1,6 +1,6 @@
 import { Server, ServerCredentials } from "@grpc/grpc-js";
 import { GRPC_HOST, GRPC_PORT } from "../config/rpc";
-import { crawlWebsite } from "../core/controllers/crawl";
+import { auditWebsite } from "../core/controllers/audit";
 import { getProto } from "./website";
 
 let server: Server;
@@ -20,7 +20,7 @@ export const createServer = async () => {
   server.addService(websiteProto.Pagemind.service, {
     // get page report
     scan: async (call, callback) => {
-      const page = await crawlWebsite(call.request);
+      const page = await auditWebsite(call.request);
       callback(null, page);
     },
   });

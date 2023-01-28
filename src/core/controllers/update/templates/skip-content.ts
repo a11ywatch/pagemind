@@ -6,6 +6,6 @@ export const skipContentTemplate = {
     "Skip to content link not found. Use skip to content links to help shortcut to the main content.",
   context: '<a id="content">Skip Content</a>',
   selector: "a",
-  runner: "a11yWatch",
+  runner: "a11ywatch",
   runnerExtras: {},
 };

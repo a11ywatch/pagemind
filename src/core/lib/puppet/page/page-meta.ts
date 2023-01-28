@@ -1,15 +1,11 @@
-import { getIssueFixScript } from "../../engine/fix-script";
 import { getPageIssueScore } from "../utils/page-issue-score";
-import { getIncludesDomain } from "../utils/page-includes-domain";
 import { getAltImage, isAltMissing } from "./grab-alt";
-import { getHostAsString } from "../../engine/templates/host-as-string";
 
 interface IssueInfo {
   errorCount: number;
   warningCount: number;
   noticeCount: number;
   accessScore: number;
-  scriptChildren: string;
   possibleIssuesFixedByCdn: number;
   scriptsEnabled?: boolean;
   cv?: boolean; // can use computer vision
@@ -21,16 +17,13 @@ const AI_DISABLED = process.env.AI_DISABLED === "true";
 export const getPageMeta = ({
   issues,
   page,
-  scriptsEnabled,
   cv,
 }): Promise<IssueInfo> => {
   let errorCount = 0;
   let warningCount = 0;
   let noticeCount = 0;
   let accessScore = 100;
-  let scriptChildren = ``;
   let possibleIssuesFixedByCdn = 0;
-  let includeDomainCheck = false;
 
   const pageIssues = (issues && issues?.issues) || [];
 
@@ -41,13 +34,12 @@ export const getPageMeta = ({
         warningCount,
         noticeCount,
         accessScore,
-        scriptChildren,
         possibleIssuesFixedByCdn,
       });
     }
 
-    let issueIndex = 0;
     let index = 0;
+
     for (let element of pageIssues) {
       let extraConfig;
 
@@ -72,23 +64,6 @@ export const getPageMeta = ({
         index++;
       }
 
-      // the name of the domain should be used like a Logo. Only run if alt is not returned
-      if (
-        getIncludesDomain({ alt: extraConfig?.alt, message: element.message })
-      ) {
-        includeDomainCheck = true;
-      }
-
-      if (scriptsEnabled) {
-        // get the js fix for the page
-        const getFix = getIssueFixScript(element, issueIndex, extraConfig);
-
-        if (getFix) {
-          possibleIssuesFixedByCdn++;
-          scriptChildren += getFix;
-        }
-      }
-
       if (element.type === "error") {
         errorCount++;
       } else if (element.type === "warning") {
@@ -98,18 +73,13 @@ export const getPageMeta = ({
       }
 
       accessScore -= getPageIssueScore({ element });
-
-      issueIndex++;
     }
 
     resolve({
+      accessScore: Math.max(0, accessScore),
       errorCount,
       warningCount,
       noticeCount,
-      accessScore: Math.max(0, accessScore),
-      scriptChildren: scriptsEnabled
-        ? `${includeDomainCheck ? getHostAsString : ""}${scriptChildren}`
-        : null,
       possibleIssuesFixedByCdn,
     });
   });

@@ -14,12 +14,11 @@ import { spoofPage } from "../lib/puppet/spoof";
 import { setHtmlContent } from "../lib/puppet/page/go-to-page";
 import { puppetFirefoxPool } from "../lib/puppet/create-puppeteer-pool-firefox";
 
-export const crawlWebsite = async ({
+export const auditWebsite = async ({
   userId,
   url: urlMap,
   pageHeaders,
   pageInsights,
-  scriptsEnabled, // gather js script
   mobile, // mobile view port
   actions,
   standard,
@@ -102,7 +101,7 @@ export const crawlWebsite = async ({
   // valid page
   if (report) {
     // extra accessibility metrics
-    pageMeta = await getPageMeta({ page, issues: report, scriptsEnabled, cv });
+    pageMeta = await getPageMeta({ page, issues: report, cv });
   }
 
   usage = performance.now() - usage; // get total uptime used
