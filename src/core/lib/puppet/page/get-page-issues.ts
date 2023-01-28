@@ -30,7 +30,7 @@ export const getPageIssues = async ({
       : undefined,
   });
 
-  const skipContentIncluded = results && (await skipContentCheck({ page }));
+  const skipContentIncluded = results && results.issues && (await skipContentCheck({ page }));
 
   if (results && !skipContentIncluded) {
     results.issues.push(skipContentTemplate); // containers issues add skip content to end

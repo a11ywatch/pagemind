@@ -150,7 +150,7 @@ export const auditWebsite = async ({
       insight: null,
       issuesInfo: {
         possibleIssuesFixedByCdn: possibleIssuesFixedByCdn,
-        totalIssues: report.issues.length,
+        totalIssues: report && report.issues && report.issues.length || 0,
         issuesFixedByCdn: possibleIssuesFixedByCdn || 0, // TODO: update confirmation
         errorCount,
         warningCount,
@@ -163,8 +163,8 @@ export const auditWebsite = async ({
     issues: {
       domain,
       pageUrl,
-      issues: report.issues,
-      documentTitle: report.documentTitle,
+      issues: report && report.issues || [],
+      documentTitle: report && report.documentTitle || "",
     },
     userId,
     usage,
