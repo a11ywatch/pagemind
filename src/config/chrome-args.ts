@@ -15,6 +15,8 @@ export const chromeArgs = [
   "--disable-domain-reliability",
   "--disable-component-update",
   "--disable-setuid-sandbox",
-  "--disable-features=ScriptStreaming,TranslateUI,BlinkGenPropertyTrees",
+  "--disable-backgrounding-occluded-windows",
+  "--disable-partial-raster",
+  "--disable-features=Translate,ScriptStreaming,PaintHolding,InterestFeedContentSuggestions,BlinkGenPropertyTrees",
   "--enable-background-thread-pool",
 ];
