@@ -1,51 +1,31 @@
-import { getPageIssueScore } from "../utils/page-issue-score";
-import { getAltImage, isAltMissing } from "./grab-alt";
-
-interface IssueInfo {
-  errorCount: number;
-  warningCount: number;
-  noticeCount: number;
-  accessScore: number;
-  possibleIssuesFixedByCdn: number;
-  scriptsEnabled?: boolean;
-  cv?: boolean; // can use computer vision
-}
+import { getAltImage } from "./grab-alt";
 
 // disable AI for getting page alt images
 const AI_DISABLED = process.env.AI_DISABLED === "true";
 
-export const getPageMeta = ({
-  issues,
-  page,
-  cv,
-}): Promise<IssueInfo> => {
-  let errorCount = 0;
-  let warningCount = 0;
-  let noticeCount = 0;
-  let accessScore = 100;
-  let possibleIssuesFixedByCdn = 0;
-
-  const pageIssues = (issues && issues?.issues) || [];
+export const getPageMeta = ({ report, page, cv }): Promise<void> => {
+  const pageIssues = (report && report?.issues) || [];
+  const automateable = (report && report?.automateable?.missingAltIndexs) || [];
 
   return new Promise(async (resolve) => {
     if (!pageIssues?.length) {
-      resolve({
-        errorCount,
-        warningCount,
-        noticeCount,
-        accessScore,
-        possibleIssuesFixedByCdn,
-      });
+      resolve();
     }
 
     let index = 0;
 
-    for (let element of pageIssues) {
-      let extraConfig;
+    if (!AI_DISABLED) {
+      for (const eleIndex of automateable) {
+        // exit if over 5000 missing alts exist
+        if (index > 5000) {
+          break;
+        }
 
-      // element contains alt tag related error message and reload the page if issues exist.
-      if (!AI_DISABLED && isAltMissing(element.message)) {
-        extraConfig = await getAltImage({
+        // element from issues array
+        const element = pageIssues[eleIndex];
+
+        // element contains alt tag related error message and reload the page if issues exist.
+        const extraConfig = await getAltImage({
           element,
           page,
           index,
@@ -54,33 +34,17 @@ export const getPageMeta = ({
           console.error(e);
         });
 
-        const altFix = extraConfig?.alt;
+        const altFix = extraConfig && extraConfig?.alt;
 
-        // if alt exist apply recommendation.
+        // if alt exist apply recommendation to element
         if (altFix) {
           element.message = `${element.message} Recommendation: change alt to ${altFix}.`;
         }
 
         index++;
       }
-
-      if (element.type === "error") {
-        errorCount++;
-      } else if (element.type === "warning") {
-        warningCount++;
-      } else if (element.type === "notice") {
-        noticeCount++;
-      }
-
-      accessScore -= getPageIssueScore({ element });
     }
 
-    resolve({
-      accessScore: Math.max(0, accessScore),
-      errorCount,
-      warningCount,
-      noticeCount,
-      possibleIssuesFixedByCdn,
-    });
+    resolve();
   });
 };

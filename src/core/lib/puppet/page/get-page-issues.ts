@@ -1,7 +1,7 @@
-import { a11y } from "a11y-js";
+import { a11y, Audit } from "a11y-js";
 import { skipContentCheck } from "../skip-content-check";
 import { skipContentTemplate } from "../../../controllers/update/templates";
-import type { PageIssues, IssueMeta } from "../../../../types";
+import type { IssueMeta } from "../../../../types";
 
 export const getPageIssues = async ({
   page,
@@ -12,7 +12,7 @@ export const getPageIssues = async ({
   ignore,
   rules,
   runners,
-}): Promise<[PageIssues | null, IssueMeta]> => {
+}): Promise<[Audit | null, IssueMeta]> => {
   const results = await a11y({
     includeNotices: false,
     includeWarnings: true,
@@ -30,9 +30,19 @@ export const getPageIssues = async ({
       : undefined,
   });
 
-  const skipContentIncluded = results && results.issues && (await skipContentCheck({ page }));
+  if (!results) {
+    return [
+      results,
+      {
+        skipContentIncluded: false,
+      },
+    ];
+  }
 
-  if (results && !skipContentIncluded) {
+  const skipContentIncluded =
+    results.issues && (await skipContentCheck({ page }));
+
+  if (!skipContentIncluded && results.issues) {
     results.issues.push(skipContentTemplate); // containers issues add skip content to end
   }
 

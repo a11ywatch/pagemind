@@ -96,12 +96,10 @@ export const auditWebsite = async ({
 
   const [report, issueMeta] = pageIssues;
 
-  let pageMeta = null;
-
   // valid page
   if (report) {
     // extra accessibility metrics
-    pageMeta = await getPageMeta({ page, issues: report, cv });
+    await getPageMeta({ page, report, cv });
   }
 
   usage = performance.now() - usage; // get total uptime used
@@ -114,7 +112,7 @@ export const auditWebsite = async ({
     noticeCount,
     accessScore,
     possibleIssuesFixedByCdn,
-  } = pageMeta ?? {};
+  } = report?.meta ?? {};
 
   // light house pageinsights
   if (report && pageInsights) {
@@ -150,7 +148,7 @@ export const auditWebsite = async ({
       insight: null,
       issuesInfo: {
         possibleIssuesFixedByCdn: possibleIssuesFixedByCdn,
-        totalIssues: report && report.issues && report.issues.length || 0,
+        totalIssues: (report && report.issues && report.issues.length) || 0,
         issuesFixedByCdn: possibleIssuesFixedByCdn || 0, // TODO: update confirmation
         errorCount,
         warningCount,
@@ -163,8 +161,8 @@ export const auditWebsite = async ({
     issues: {
       domain,
       pageUrl,
-      issues: report && report.issues || [],
-      documentTitle: report && report.documentTitle || "",
+      issues: (report && report.issues) || [],
+      documentTitle: (report && report.documentTitle) || "",
     },
     userId,
     usage,

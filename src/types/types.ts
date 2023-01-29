@@ -5,8 +5,9 @@ export interface Issue {
   message: string;
   context: string;
   selector: string;
-  runner?: string;
-  runnerExtras?: any;
+  runner: string;
+  runnerExtras: any;
+  recurrence: number;
 }
 
 export interface PageIssues {
