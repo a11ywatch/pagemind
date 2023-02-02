@@ -33,7 +33,6 @@ RUN apk upgrade --update-cache --available && \
 	apk add openssl
 
 ENV GRPC_HOST_MAV="mav:50053" \
-    GRPC_HOST_CDN="cdn-server:50054" \
     NODE_ENV=production
 
 WORKDIR /usr/src/app

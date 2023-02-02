@@ -17,8 +17,7 @@ FROM node:19.2-alpine
 
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD="true" \ 
 	NODE_ENV="development" \
-    GRPC_HOST_MAV="mav:50053" \
-    GRPC_HOST_CDN="cdn-server:50054"
+    GRPC_HOST_MAV="mav:50053"
 
 RUN apk upgrade --update-cache --available && \
 	apk add openssl
