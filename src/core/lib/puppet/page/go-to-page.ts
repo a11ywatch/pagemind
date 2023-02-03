@@ -11,6 +11,7 @@ const skippedResources = [
   "cdn.api.twitter",
   "google-analytics",
   "googletagmanager",
+  "usefathom",
   "google",
   "fontawesome",
   "facebook",

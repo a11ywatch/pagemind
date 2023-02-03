@@ -44,6 +44,7 @@ export const getPageIssues = async ({
 
   if (!skipContentIncluded && results.issues) {
     results.issues.push(skipContentTemplate); // containers issues add skip content to end
+    results.meta.warningCount += 1;
   }
 
   return [
