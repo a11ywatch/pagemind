@@ -95,7 +95,9 @@ const clean = async (page: Page, browser: Browser) => {
       console.error(e);
     }
   }
-  browser?.disconnect();
+  if(browser?.isConnected()) {
+    browser?.disconnect();
+  }
 };
 
 // clean the connection

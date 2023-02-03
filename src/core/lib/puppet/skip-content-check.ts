@@ -17,7 +17,7 @@ export const skipContentCheck = async ({
         "skip main navigation",
       ];
 
-      var matchFound = false;
+      let matchFound = false;
 
       void (function skipAll(index = 0, type = "a") {
         const xpath = `//${type}[translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz')='${skipNameList[index]}']`;
@@ -30,7 +30,7 @@ export const skipContentCheck = async ({
         ).singleNodeValue;
 
         if (!matchingElement) {
-          var nextIndex = index + 1;
+          const nextIndex = index + 1;
 
           if (nextIndex === skipNameList.length && type === "a") {
             index = 0;

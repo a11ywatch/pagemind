@@ -48,6 +48,9 @@ export const auditWebsite = async ({
 
   // handle the view port and ua for request
   if (page) {
+    page.on("error", async () => {
+      await pool.clean(page, browser);
+    });
     const { agent, vp } = spoofPage(mobile, ua);
 
     await Promise.all([page.setUserAgent(agent), page.setViewport(vp)]);
@@ -96,7 +99,6 @@ export const auditWebsite = async ({
 
   const [report, issueMeta] = pageIssues;
 
-  // valid page
   if (report) {
     // extra accessibility metrics
     await getPageMeta({ page, report, cv });
