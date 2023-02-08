@@ -13,6 +13,7 @@ import { getPageIssues } from "../lib/puppet/page/get-page-issues";
 import { spoofPage } from "../lib/puppet/spoof";
 import { setHtmlContent } from "../lib/puppet/page/go-to-page";
 import { puppetFirefoxPool } from "../lib/puppet/create-puppeteer-pool-firefox";
+import { a11yConfig } from "../../config/a11y-config";
 
 export const auditWebsite = async ({
   userId,
@@ -73,12 +74,35 @@ export const auditWebsite = async ({
     }
     usage = performance.now(); // page ttl
 
+    let pageRedirected = false;
+
+    page.on("response", (response) => {
+      const status = response.status();
+
+      if (status >= 300 && status <= 399) {
+        pageRedirected = true;
+      }
+    });
+
+    // not closed run scans
     if (!page.isClosed()) {
       if (html) {
         hasPage = await setHtmlContent(page, html);
       } else {
         hasPage = await goToPage(page, urlMap);
       }
+
+      if (pageRedirected) {
+        try {
+          // wait for html if goto used. todo: html should use networkidle2
+          await page.waitForSelector("html", {
+            timeout: a11yConfig.timeout,
+          });
+        } catch (e) {
+          hasPage = false;
+        }
+      }
+      page.removeAllListeners("response");
     }
 
     duration = performance.now() - usage; // set the duration to time it takes to load page for ttyl
@@ -88,7 +112,7 @@ export const auditWebsite = async ({
 
   // if page did not succeed exit.
   if (!hasPage) {
-    await pool.clean(page);
+    await pool.clean(page, browser);
 
     return {
       issues: undefined,
@@ -158,7 +182,7 @@ export const auditWebsite = async ({
     });
   }
 
-  await pool.clean(page);
+  await pool.clean(page, browser);
 
   return {
     webPage: {

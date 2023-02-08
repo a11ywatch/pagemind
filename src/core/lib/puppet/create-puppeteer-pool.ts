@@ -6,7 +6,7 @@ import {
   wsChromeEndpointurl,
   chromeLb,
 } from "../../../config/chrome";
-import { clean } from "./utils/clean";
+import { clean } from './utils/clean'
 
 // return the valid connection for request
 type ConnectionResponse = {
@@ -15,51 +15,39 @@ type ConnectionResponse = {
 };
 
 // retry and wait for ws endpoint [todo: update endpoint to perform lb request gathering external hostname]
-async function getConnnection(
-  retried?: boolean,
+const getConnnection = async (
+  retry?: boolean,
   headers?: Record<string, string>
-): Promise<ConnectionResponse> {
-  if (!this.browser) {
-    try {
-      this.browser = await connect({
-        browserWSEndpoint: wsChromeEndpointurl,
-        ignoreHTTPSErrors: true,
-        headers,
-      });
+): Promise<ConnectionResponse> => {
+  try {
+    const browser = await connect({
+      browserWSEndpoint: wsChromeEndpointurl,
+      ignoreHTTPSErrors: true,
+      headers,
+    });
 
+    return {
+      host: chromeHost,
+      browser,
+    };
+  } catch (e) {
+    // retry connection once
+    if (!retry) {
+      await getWsEndPoint(false);
+      return await getConnnection(true, headers);
+    } else {
+      console.error(e);
       return {
+        browser: null,
         host: chromeHost,
-        browser: this.browser,
       };
-    } catch (e) {
-      // retry connection once
-      if (!retried) {
-        await getWsEndPoint(false);
-        let browser = this.browser;
-        queueMicrotask(async () => {
-          await clean(null, browser)
-        });
-        this.browser = null;
-        return await getConnnection(true, headers);
-      } else {
-        console.error(e);
-        return {
-          browser: null,
-          host: chromeHost,
-        };
-      }
     }
   }
-
-  return {
-    host: chromeHost,
-    browser: this.browser,
-  };
-}
+};
 
 // retry and wait for ws endpoint [todo: update endpoint to perform lb request gathering external hostname]
 async function getLbConnnection(
-  retried?: boolean,
+  retry?: boolean,
   headers?: Record<string, string>
 ): Promise<ConnectionResponse> {
   this.counter++;
@@ -67,16 +55,10 @@ async function getLbConnnection(
   // default to main global endpoint
   let browserWSEndpoint = wsChromeEndpointurl;
   let host = chromeHost;
-  const fetchConnection = this.counter >= this.scalePoint;
 
-  if (fetchConnection) {
+  if (this.counter >= this.scalePoint) {
     this.counter = 1;
     const connections = await getWsEndPoint();
-    let browser = this.browser;
-    queueMicrotask(async () => {
-      await clean(null, browser)
-    });
-    this.browser = null;
 
     // get the next connect if valid
     if (connections[1]) {
@@ -85,46 +67,37 @@ async function getLbConnnection(
     }
   }
 
-  // connect to cdp session
-  if (fetchConnection || !this.browser) {
-    try {
-      this.browser = await connect({
-        browserWSEndpoint,
-        ignoreHTTPSErrors: true,
-        headers,
-      });
+  try {
+    const browser = await connect({
+      browserWSEndpoint,
+      ignoreHTTPSErrors: true,
+      headers,
+    });
 
+    return {
+      host,
+      browser,
+    };
+  } catch (e) {
+    // reset the counter
+    this.counter = 0;
+    // retry connection once
+    if (!retry) {
+      await getWsEndPoint(false);
+      return await getConnnection(true, headers);
+    } else {
+      console.error(e);
       return {
-        host,
-        browser: this.browser,
+        browser: null,
+        host: chromeHost,
       };
-    } catch (e) {
-      // reset the counter
-      this.counter = 0;
-      // retry connection once
-      if (!retried) {
-        await getWsEndPoint(false);
-
-        return await getConnnection(true, headers);
-      } else {
-        console.error(e);
-        return {
-          browser: null,
-          host,
-        };
-      }
     }
   }
-
-  return {
-    host,
-    browser: this.browser,
-  };
 }
 
 // clean the connection
-async function cleanLbConnection(page?: Page): Promise<void> {
-  await clean(page);
+async function cleanLbConnection(page: Page, browser: Browser): Promise<void> {
+  await clean(page, browser);
   // remove workload counter
   this.counter--;
 }

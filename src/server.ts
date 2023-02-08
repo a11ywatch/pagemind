@@ -13,6 +13,7 @@ export const coreServer = async () => {
     getWsEndPoint(true),
     firefoxEnabled ? getFireFoxWsEndPoint(true) : Promise.resolve([null, null]),
   ]);
+
   const [__, endpoint] = endpoints;
   const [___, firefoxEndpoint] = firefoxEndpoints;
 
