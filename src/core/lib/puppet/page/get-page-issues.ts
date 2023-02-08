@@ -12,17 +12,24 @@ export const getPageIssues = async ({
   rules,
   runners,
 }): Promise<[Audit | null, IssueMeta]> => {
-  const results = await a11y({
-    includeNotices: false,
-    includeWarnings: true,
-    page,
-    browser,
-    actions,
-    standard: wcagStandard || "WCAG2AA",
-    ignore,
-    rules,
-    runners
-  });
+  let results = null;
+
+  try {
+    // catch errors on long timeouts CDP close
+    results = await a11y({
+      includeNotices: false,
+      includeWarnings: true,
+      page,
+      browser,
+      actions,
+      standard: wcagStandard || "WCAG2AA",
+      ignore,
+      rules,
+      runners,
+    });
+  } catch (e) {
+    console.error(e);
+  }
 
   if (!results) {
     return [

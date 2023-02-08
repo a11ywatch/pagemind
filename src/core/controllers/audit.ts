@@ -48,31 +48,39 @@ export const auditWebsite = async ({
 
   // handle the view port and ua for request
   if (page) {
-    page.on("error", async () => {
-      await pool.clean(page, browser);
-    });
     const { agent, vp } = spoofPage(mobile, ua);
-
-    await Promise.all([
-      pageHeaders.length
-        ? page.setExtraHTTPHeaders(
-            pageHeaders.reduce(
-              (a, item: {
-                key: string;
-                value: string;
-              }) => ({ ...a, [item.key]: item.value }),
-              {}
+    try {
+      await Promise.all([
+        pageHeaders.length
+          ? page.setExtraHTTPHeaders(
+              pageHeaders.reduce(
+                (
+                  a,
+                  item: {
+                    key: string;
+                    value: string;
+                  }
+                ) => ({ ...a, [item.key]: item.value }),
+                {}
+              )
             )
-          )
-        : Promise.resolve(),
-      page.setUserAgent(agent),
-      page.setViewport(vp),
-    ]);
-
+          : Promise.resolve(),
+        page.setUserAgent(agent),
+        page.setViewport(vp),
+      ]);
+    } catch (e) {
+      console.error(e);
+    }
     usage = performance.now(); // page ttl
-    hasPage = await (html
-      ? setHtmlContent(page, html)
-      : goToPage(page, urlMap)); // does the page exist
+
+    if (!page.isClosed()) {
+      if (html) {
+        hasPage = await setHtmlContent(page, html);
+      } else {
+        hasPage = await goToPage(page, urlMap);
+      }
+    }
+
     duration = performance.now() - usage; // set the duration to time it takes to load page for ttyl
   }
 
@@ -80,7 +88,7 @@ export const auditWebsite = async ({
 
   // if page did not succeed exit.
   if (!hasPage) {
-    await pool.clean(page, browser);
+    await pool.clean(page);
 
     return {
       issues: undefined,
@@ -119,8 +127,6 @@ export const auditWebsite = async ({
 
   usage = performance.now() - usage; // get total uptime used
 
-  await pool.clean(page, browser);
-
   const {
     errorCount,
     warningCount,
@@ -151,6 +157,8 @@ export const auditWebsite = async ({
       }
     });
   }
+
+  await pool.clean(page);
 
   return {
     webPage: {

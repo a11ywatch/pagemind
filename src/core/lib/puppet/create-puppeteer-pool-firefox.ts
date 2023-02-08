@@ -6,6 +6,7 @@ import {
   wsFirefoxEndpointurl,
   firefoxLb,
 } from "../../../config/firefox";
+import { clean } from "./utils/clean";
 
 // return the valid connection for request
 type ConnectionResponse = {
@@ -92,20 +93,6 @@ async function getLbConnnection(
     }
   }
 }
-
-// clean the connection
-const clean = async (page: Page, browser: Browser) => {
-  if (page && !page.isClosed()) {
-    try {
-      await page.close();
-    } catch (e) {
-      console.error(e);
-    }
-  }
-  if (browser && browser.isConnected()) {
-    browser.disconnect();
-  }
-};
 
 // clean the connection
 async function cleanLbConnection(page: Page, browser: Browser): Promise<void> {
