@@ -53,7 +53,21 @@ export const auditWebsite = async ({
     });
     const { agent, vp } = spoofPage(mobile, ua);
 
-    await Promise.all([page.setUserAgent(agent), page.setViewport(vp)]);
+    await Promise.all([
+      pageHeaders.length
+        ? page.setExtraHTTPHeaders(
+            pageHeaders.reduce(
+              (a, item: {
+                key: string;
+                value: string;
+              }) => ({ ...a, [item.key]: item.value }),
+              {}
+            )
+          )
+        : Promise.resolve(),
+      page.setUserAgent(agent),
+      page.setViewport(vp),
+    ]);
 
     usage = performance.now(); // page ttl
     hasPage = await (html
@@ -89,7 +103,6 @@ export const auditWebsite = async ({
   const pageIssues = await getPageIssues({
     page,
     browser,
-    pageHeaders,
     actions,
     standard,
     ignore,

@@ -1,6 +1,5 @@
-import puppeteer from "puppeteer";
+import { connect, Browser, Page } from "puppeteer";
 import os from "os";
-import type { Browser, Page } from "puppeteer";
 import {
   chromeHost,
   getWsEndPoint,
@@ -15,11 +14,15 @@ type ConnectionResponse = {
 };
 
 // retry and wait for ws endpoint [todo: update endpoint to perform lb request gathering external hostname]
-const getConnnection = async (retry?: boolean): Promise<ConnectionResponse> => {
+const getConnnection = async (
+  retry?: boolean,
+  headers?: Record<string, string>
+): Promise<ConnectionResponse> => {
   try {
-    const browser = await puppeteer.connect({
+    const browser = await connect({
       browserWSEndpoint: wsChromeEndpointurl,
       ignoreHTTPSErrors: true,
+      headers,
     });
 
     return {
@@ -30,7 +33,7 @@ const getConnnection = async (retry?: boolean): Promise<ConnectionResponse> => {
     // retry connection once
     if (!retry) {
       await getWsEndPoint(false);
-      return await getConnnection(true);
+      return await getConnnection(true, headers);
     } else {
       console.error(e);
       return {
@@ -42,7 +45,10 @@ const getConnnection = async (retry?: boolean): Promise<ConnectionResponse> => {
 };
 
 // retry and wait for ws endpoint [todo: update endpoint to perform lb request gathering external hostname]
-async function getLbConnnection(retry?: boolean): Promise<ConnectionResponse> {
+async function getLbConnnection(
+  retry?: boolean,
+  headers?: Record<string, string>
+): Promise<ConnectionResponse> {
   this.counter++;
 
   // default to main global endpoint
@@ -61,9 +67,10 @@ async function getLbConnnection(retry?: boolean): Promise<ConnectionResponse> {
   }
 
   try {
-    const browser = await puppeteer.connect({
+    const browser = await connect({
       browserWSEndpoint,
       ignoreHTTPSErrors: true,
+      headers,
     });
 
     return {
@@ -76,7 +83,7 @@ async function getLbConnnection(retry?: boolean): Promise<ConnectionResponse> {
     // retry connection once
     if (!retry) {
       await getWsEndPoint(false);
-      return await getConnnection(true);
+      return await getConnnection(true, headers);
     } else {
       console.error(e);
       return {
@@ -89,14 +96,16 @@ async function getLbConnnection(retry?: boolean): Promise<ConnectionResponse> {
 
 // clean the connection
 const clean = async (page: Page, browser: Browser) => {
-  if (page && !page?.isClosed()) {
+  if (page && !page.isClosed()) {
     try {
       await page.close();
     } catch (e) {
       console.error(e);
     }
   }
-  browser?.disconnect();
+  if (browser && browser.isConnected()) {
+    browser.disconnect();
+  }
 };
 
 // clean the connection

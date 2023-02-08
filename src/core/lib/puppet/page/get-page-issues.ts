@@ -6,7 +6,6 @@ import type { IssueMeta } from "../../../../types";
 export const getPageIssues = async ({
   page,
   browser,
-  pageHeaders,
   actions = [],
   standard: wcagStandard,
   ignore,
@@ -22,12 +21,7 @@ export const getPageIssues = async ({
     standard: wcagStandard || "WCAG2AA",
     ignore,
     rules,
-    runners,
-    headers: pageHeaders?.length
-      ? pageHeaders.map((item: any) => ({
-          [item.key]: item.value,
-        }))
-      : undefined,
+    runners
   });
 
   if (!results) {
