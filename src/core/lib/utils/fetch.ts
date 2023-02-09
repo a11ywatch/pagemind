@@ -63,8 +63,12 @@ export const fetchUrl = (
         }
         resolve(data);
       });
-    }).on("error", (err) => {
-      reject(err);
-    });
+    })
+      .on("error", (err) => {
+        reject(err);
+      })
+      .on("socket", (socket) => {
+        socket.emit("agentRemove");
+      });
   });
 };

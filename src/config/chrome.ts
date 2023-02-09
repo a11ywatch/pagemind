@@ -101,14 +101,27 @@ const getLbInstance = (nosave?: boolean): Promise<[string, string]> => {
 /*
  * Determine the chrome web socket connection resolved.
  * @param retry - retry connection on docker dns
- *
+ * @param rebind - rebind the singletons on lb
  * @return Promise<[string, string]> - the hostname and socket connection
  */
-const getWsEndPoint = async (retry?: boolean): Promise<[string, string]> => {
+const getWsEndPoint = async (
+  retry?: boolean,
+  rebind?: boolean
+): Promise<[string, string]> => {
   // return the load balancer instance of chrome
   if (chromeLb) {
-    return new Promise((resolve) => {
-      getLbInstance().then(resolve);
+    return new Promise(async (resolve) => {
+      const clb = await getLbInstance();
+
+      if (rebind) {
+        // get the next connect if valid
+        if (clb[1]) {
+          chromeHost = clb[0];
+          wsChromeEndpointurl = clb[1];
+        }
+      }
+
+      resolve(clb);
     });
   }
 

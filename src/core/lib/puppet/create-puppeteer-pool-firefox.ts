@@ -14,6 +14,20 @@ type ConnectionResponse = {
   host: string;
 };
 
+// puppeteer handling
+let puppetFirefoxPool = {
+  acquire: (_retry?: boolean, _headers?: Record<string, string>) => {
+    return Promise.resolve({
+      host: firefoxHost,
+      browser: null,
+    });
+  },
+  clean: (_, __) => Promise.resolve(),
+  // scale prop defaults
+  counter: null,
+  scalePoint: null,
+};
+
 // retry and wait for ws endpoint [todo: update endpoint to perform lb request gathering external hostname]
 const getConnnection = async (
   retry?: boolean,
@@ -33,7 +47,7 @@ const getConnnection = async (
   } catch (e) {
     if (!retry) {
       await getFireFoxWsEndPoint(false);
-      return await getConnnection(true, headers);
+      return await puppetFirefoxPool.acquire(true, headers);
     } else {
       console.error(e);
       return {
@@ -83,7 +97,7 @@ async function getLbConnnection(
     // retry connection once
     if (!retry) {
       await getFireFoxWsEndPoint(false);
-      return await getConnnection(true, headers);
+      return await puppetFirefoxPool.acquire(true, headers);
     } else {
       console.error(e);
       return {
@@ -101,15 +115,6 @@ async function cleanLbConnection(page: Page, browser: Browser): Promise<void> {
   this.counter--;
 }
 
-// puppeteer handling
-let puppetFirefoxPool = {
-  acquire: getConnnection,
-  clean,
-  // scale prop defaults
-  counter: null,
-  scalePoint: null,
-};
-
 // handle load balance connection req high performance hybrid robin sequence
 if (firefoxLb) {
   const mem = Math.round(
@@ -122,6 +127,15 @@ if (firefoxLb) {
     // scale props
     counter: 0,
     scalePoint: Math.max(mem, 10) * 4,
+  };
+} else {
+  // puppeteer handling
+  puppetFirefoxPool = {
+    acquire: getConnnection,
+    clean,
+    // scale prop defaults
+    counter: null,
+    scalePoint: null,
   };
 }
 

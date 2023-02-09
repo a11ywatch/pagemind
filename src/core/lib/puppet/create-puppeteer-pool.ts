@@ -6,12 +6,26 @@ import {
   wsChromeEndpointurl,
   chromeLb,
 } from "../../../config/chrome";
-import { clean } from './utils/clean'
+import { clean } from "./utils/clean";
 
 // return the valid connection for request
 type ConnectionResponse = {
   browser: Browser;
   host: string;
+};
+
+// puppeteer handling
+let puppetPool = {
+  acquire: (_retry?: boolean, _headers?: Record<string, string>) => {
+    return Promise.resolve({
+      host: chromeHost,
+      browser: null,
+    });
+  },
+  clean: (_, __) => Promise.resolve(),
+  // scale prop defaults
+  counter: null,
+  scalePoint: null,
 };
 
 // retry and wait for ws endpoint [todo: update endpoint to perform lb request gathering external hostname]
@@ -34,9 +48,9 @@ const getConnnection = async (
     // retry connection once
     if (!retry) {
       await getWsEndPoint(false);
-      return await getConnnection(true, headers);
+      return await puppetPool.acquire(true, headers);
     } else {
-      console.error(e);
+      console.error(`Retry connection error ${e}`);
       return {
         browser: null,
         host: chromeHost,
@@ -50,32 +64,22 @@ async function getLbConnnection(
   retry?: boolean,
   headers?: Record<string, string>
 ): Promise<ConnectionResponse> {
-  this.counter++;
-
-  // default to main global endpoint
-  let browserWSEndpoint = wsChromeEndpointurl;
-  let host = chromeHost;
-
   if (this.counter >= this.scalePoint) {
-    this.counter = 1;
-    const connections = await getWsEndPoint();
-
-    // get the next connect if valid
-    if (connections[1]) {
-      host = connections[0];
-      browserWSEndpoint = connections[1];
-    }
+    this.counter = 0; // reset counter
+    await getWsEndPoint(false, true);
   }
+
+  this.counter++;
 
   try {
     const browser = await connect({
-      browserWSEndpoint,
+      browserWSEndpoint: wsChromeEndpointurl,
       ignoreHTTPSErrors: true,
       headers,
     });
 
     return {
-      host,
+      host: chromeHost,
       browser,
     };
   } catch (e) {
@@ -83,10 +87,12 @@ async function getLbConnnection(
     this.counter = 0;
     // retry connection once
     if (!retry) {
-      await getWsEndPoint(false);
-      return await getConnnection(true, headers);
+      await getWsEndPoint(false, true);
+
+      return await puppetPool.acquire(true, headers);
     } else {
-      console.error(e);
+      console.error(`Retry LB connection error: ${e?.message}`);
+
       return {
         browser: null,
         host: chromeHost,
@@ -98,18 +104,8 @@ async function getLbConnnection(
 // clean the connection
 async function cleanLbConnection(page: Page, browser: Browser): Promise<void> {
   await clean(page, browser);
-  // remove workload counter
   this.counter--;
 }
-
-// puppeteer handling
-let puppetPool = {
-  acquire: getConnnection,
-  clean,
-  // scale prop defaults
-  counter: null,
-  scalePoint: null,
-};
 
 // handle load balance connection req high performance hybrid robin sequence
 if (chromeLb) {
@@ -123,6 +119,15 @@ if (chromeLb) {
     // scale props
     counter: 0,
     scalePoint: Math.max(mem, 10) * 4,
+  };
+} else {
+  // puppeteer handling
+  puppetPool = {
+    acquire: getConnnection,
+    clean,
+    // scale prop defaults
+    counter: null,
+    scalePoint: null,
   };
 }
 
