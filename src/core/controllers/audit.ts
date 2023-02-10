@@ -112,7 +112,7 @@ export const auditWebsite = async ({
 
   // if page did not succeed exit.
   if (!hasPage) {
-    await pool.clean(page, browser);
+    await pool.clean(page);
 
     return {
       issues: undefined,
@@ -182,7 +182,7 @@ export const auditWebsite = async ({
     });
   }
 
-  await pool.clean(page, browser);
+  await pool.clean(page);
 
   return {
     webPage: {
