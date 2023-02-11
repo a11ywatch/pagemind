@@ -1,11 +1,11 @@
+import lighthouse from "lighthouse";
 import fastq from "fastq";
 import type { queueAsPromised } from "fastq";
-import lighthouse from "lighthouse";
 import { struct } from "pb-util";
 import { chromeHost } from "../../../config/chrome";
 import { CHROME_PORT } from "../../../config/config";
-import { lighthouseEmitter } from "../../event/lh";
 import { fetchUrl } from "../utils/fetch";
+import { controller } from "../../../proto/website-client";
 
 interface Task {
   // the url
@@ -14,9 +14,16 @@ interface Task {
   apiKey?: string;
   // the hostname for the request
   host: string;
+  userId: number;
+  domain: string;
 }
 
-export const promisifyLighthouse = async ({ urlMap, host }: Task) => {
+export const promisifyLighthouse = async ({
+  urlMap,
+  host,
+  domain,
+  userId,
+}: Task) => {
   let data;
 
   try {
@@ -34,7 +41,16 @@ export const promisifyLighthouse = async ({ urlMap, host }: Task) => {
     }
   } catch (_) {}
 
-  lighthouseEmitter.emit(`lh-processing-${urlMap}`, data);
+  try {
+    await controller.addLighthouse({
+      user_id: userId,
+      insight: struct.encode(data),
+      domain,
+      url: urlMap,
+    });
+  } catch (e) {
+    console.error(e);
+  }
 
   return data;
 };
@@ -53,46 +69,48 @@ const categories =
   "&category=accessibility&category=best-practices&category=performance&category=seo";
 
 // slow queue lighthouse one by one on devtool instance
-export const queueLighthouseUntilResults = ({ urlMap, apiKey, host }: Task) => {
+export const queueLighthouseUntilResults = async ({
+  urlMap,
+  apiKey,
+  host,
+  userId,
+  domain,
+}: Task) => {
   // queue and wait for results
-  return new Promise(async (resolve) => {
-    const key = apiKey || process.env.PAGESPEED_API_KEY;
-    const API_KEY = key ? `&key=${String(key).trim()}` : "";
+  const key = apiKey || process.env.PAGESPEED_API_KEY;
+  const API_KEY = key ? `&key=${String(key).trim()}` : "";
 
-    // if item in queue use rest API for pageinsights to speed up process. SWAP between queue and network.
-    if (
-      apiKey ||
-      (!queueLighthouse.idle() && key) ||
-      (!key && !queueLighthouse.idle() && queueLighthouse.length() === 1)
-    ) {
-      const data = await fetchUrl(
-        `https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=${urlMap}${categories}${API_KEY}`,
-        false,
-        true // add ua keep alive
-      ).catch((e) => {
+  // if item in queue use rest API for pageinsights to speed up process. SWAP between queue and network.
+  if (
+    apiKey ||
+    (!queueLighthouse.idle() && key) ||
+    (!key && !queueLighthouse.idle() && queueLighthouse.length() === 1)
+  ) {
+    const data = await fetchUrl(
+      `https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=${urlMap}${categories}${API_KEY}`,
+      false,
+      true // add ua keep alive
+    ).catch((e) => {
+      console.error(e);
+    });
+
+    // no errors exist process results.
+    if (data && "lighthouseResult" in data && "error" in data === false) {
+      try {
+        await controller.addLighthouse({
+          user_id: userId,
+          insight: struct.encode(data.lighthouseResult),
+          domain,
+          url: urlMap,
+        });
+      } catch (e) {
         console.error(e);
-      });
-
-      // no errors exist process results.
-      if (data && "lighthouseResult" in data && "error" in data === false) {
-        return resolve(struct.encode(data.lighthouseResult));
       }
     }
+  }
 
-    // event process the lighthouse result from queue
-    lighthouseEmitter.once(`lh-processing-${urlMap}`, (data) => {
-      if (data) {
-        resolve(struct.encode(data));
-      } else {
-        resolve(data);
-      }
-    });
-
-    // internal queue for single process lighthouse devtools
-    await queueLighthouse.unshift({ urlMap, host }).catch((e) => {
-      console.error(e);
-      // exit the method
-      resolve(null);
-    });
+  // internal queue for single process lighthouse devtools
+  await queueLighthouse.unshift({ urlMap, host, userId, domain }).catch((e) => {
+    console.error(e);
   });
 };

@@ -8,7 +8,6 @@ import {
   getPageMeta,
   queueLighthouseUntilResults,
 } from "../lib";
-import { controller } from "../../proto/website-client";
 import { getPageIssues } from "../lib/puppet/page/get-page-issues";
 import { spoofPage } from "../lib/puppet/spoof";
 import { setHtmlContent } from "../lib/puppet/page/go-to-page";
@@ -162,23 +161,13 @@ export const auditWebsite = async ({
   // light house pageinsights
   if (report && pageInsights) {
     setImmediate(async () => {
-      const insight = await queueLighthouseUntilResults({
+      await queueLighthouseUntilResults({
         urlMap,
         apiKey: pageSpeedApiKey,
         host,
+        userId: userId,
+        domain,
       });
-
-      // catch error incase server is down or restarting for re-client connect
-      try {
-        await controller.addLighthouse({
-          user_id: userId,
-          insight,
-          domain,
-          url: urlMap,
-        });
-      } catch (e) {
-        console.error(e);
-      }
     });
   }
 
