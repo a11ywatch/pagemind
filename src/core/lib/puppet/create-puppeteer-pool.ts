@@ -19,14 +19,19 @@ const getConnnection = async (
   retry?: boolean,
   headers?: Record<string, string>
 ): Promise<ConnectionResponse> => {
+  if (browser && !retry) {
+    return {
+      host: chromeHost,
+      browser,
+    };
+  }
+
   try {
-    if (!browser || retry) {
-      browser = await connect({
-        browserWSEndpoint: wsChromeEndpointurl,
-        ignoreHTTPSErrors: true,
-        headers,
-      });
-    }
+    browser = await connect({
+      browserWSEndpoint: wsChromeEndpointurl,
+      ignoreHTTPSErrors: true,
+      headers,
+    });
 
     return {
       host: chromeHost,

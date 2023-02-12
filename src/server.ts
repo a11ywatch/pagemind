@@ -4,6 +4,7 @@ import { getFireFoxWsEndPoint, setFirefoxWsEndPoint } from "./config/firefox";
 
 import { chromeArgs } from "./config/chrome-args";
 import { firefoxArgs } from "./config/firefox-args";
+import { puppetPool } from "./core/lib";
 
 const firefoxEnabled = process.env.FIREFOX_ENABLED === "true";
 
@@ -41,7 +42,7 @@ export const coreServer = async () => {
   }
 
   // launch firefox locally
-  if (!firefoxEndpoint && firefoxEnabled) {
+  if (firefoxEnabled && !firefoxEndpoint) {
     try {
       const puppeteer = await import("puppeteer");
       const browser = await puppeteer.launch({
@@ -63,6 +64,8 @@ export const coreServer = async () => {
       );
     }
   }
+
+  await puppetPool.acquire(false);
 };
 
 (async () => {
