@@ -139,6 +139,7 @@ export const auditWebsite = async ({
     ignore,
     rules,
     runners, // set to undefined to use default
+    origin: html && pageUrl ? pageUrl : undefined
   });
 
   const [report, issueMeta] = pageIssues;
