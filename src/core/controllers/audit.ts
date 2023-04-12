@@ -185,7 +185,7 @@ export const auditWebsite = async ({
       insight: null,
       issuesInfo: {
         possibleIssuesFixedByCdn: possibleIssuesFixedByCdn,
-        totalIssues: (report && report.issues && report.issues.length) || 0,
+        totalIssues: errorCount + warningCount + noticeCount,
         issuesFixedByCdn: possibleIssuesFixedByCdn || 0, // TODO: update confirmation
         errorCount,
         warningCount,
