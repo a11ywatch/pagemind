@@ -31,27 +31,23 @@ const skippedResources = [
   "widget.intercom.io",
 ];
 
-const blockedResourceTypes = [
-  "media",
-  "font",
-  "texttrack",
-  "object",
-  "beacon",
-  "csp_report",
-  "websocket",
-  "script",
-  "preflight",
-  "image",
-  "imageset",
-  "ping",
-];
+const blockedResourceTypes = {
+  media: null,
+  font: null,
+  texttrack: null,
+  object: null,
+  beacon: null,
+  csp_report: null,
+  websocket: null,
+  script: null,
+  preflight: null,
+  image: null,
+  imageset: null,
+  ping: null,
+};
 
 export const networkBlock = (request: HTTPRequest, allowImage?: boolean) => {
   const url = request.url();
-  const urlBase = url?.split("?");
-  const splitBase = urlBase?.length ? urlBase[0].split("#") : [];
-  const requestUrl = splitBase?.length ? splitBase[0] : "";
-
   const resourceType = request.resourceType();
 
   // allow images upon reload intercepting.
@@ -60,25 +56,22 @@ export const networkBlock = (request: HTTPRequest, allowImage?: boolean) => {
     return;
   }
 
-  // abort all video request
-  if (
-    resourceType == "media" ||
-    url.endsWith(".mp4") ||
-    url.endsWith(".avi") ||
-    url.endsWith(".flv") ||
-    url.endsWith(".mov") ||
-    url.endsWith(".wmv")
-  ) {
+  if (blockedResourceTypes.hasOwnProperty(resourceType)) {
     request.abort();
     return;
   }
 
-  if (
-    blockedResourceTypes.indexOf(request.resourceType()) !== -1 ||
-    skippedResources.some((resource) => requestUrl.indexOf(resource) !== -1)
-  ) {
-    request.abort();
-    return;
+  if (url && resourceType === "script") {
+    const urlBase = url.split("?");
+    const splitBase = urlBase.length ? urlBase[0].split("#") : [];
+    const requestUrl = splitBase.length ? splitBase[0] : "";
+
+    if (
+      skippedResources.some((resource) => requestUrl.indexOf(resource) !== -1)
+    ) {
+      request.abort();
+      return;
+    }
   }
 
   request.continue();

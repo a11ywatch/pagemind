@@ -11,7 +11,7 @@ export const getPageIssues = async ({
   ignore,
   rules,
   runners,
-  origin
+  origin,
 }): Promise<[Audit | null, IssueMeta]> => {
   let results = null;
 
@@ -27,7 +27,7 @@ export const getPageIssues = async ({
       ignore,
       rules,
       runners,
-      origin
+      origin,
     });
   } catch (e) {
     console.error(e);
