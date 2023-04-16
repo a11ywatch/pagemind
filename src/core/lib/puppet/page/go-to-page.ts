@@ -1,80 +1,32 @@
 import { a11yConfig } from "../../../../config/a11y-config";
+import { blockedResourceTypes, skippedResources } from "./resource-ignore";
 import type { Page, HTTPRequest } from "puppeteer";
 
-const skippedResources = [
-  "quantserve",
-  "adzerk",
-  "doubleclick",
-  "adition",
-  "exelator",
-  "sharethrough",
-  "cdn.api.twitter",
-  "google-analytics",
-  "googletagmanager",
-  "usefathom",
-  "google",
-  "fontawesome",
-  "facebook",
-  "analytics",
-  "optimizely",
-  "clicktale",
-  "mixpanel",
-  "zedo",
-  "clicksor",
-  "tiqcdn",
-  "livereload",
-  "cdn.jsdelivr.net",
-  "https://www.facebook.com/sharer.php?", // authenticated facebook page
-  "googlesyndication.com",
-  "adservice.google.com",
-  "client.crisp.chat",
-  "widget.intercom.io",
-];
-
-const blockedResourceTypes = {
-  media: null,
-  font: null,
-  texttrack: null,
-  object: null,
-  beacon: null,
-  csp_report: null,
-  websocket: null,
-  script: null,
-  preflight: null,
-  image: null,
-  imageset: null,
-  ping: null,
-};
-
 export const networkBlock = (request: HTTPRequest, allowImage?: boolean) => {
-  const url = request.url();
   const resourceType = request.resourceType();
 
   // allow images upon reload intercepting.
   if (resourceType === "image" && allowImage) {
-    request.continue();
-    return;
+    return request.continue();
   }
 
   if (blockedResourceTypes.hasOwnProperty(resourceType)) {
-    request.abort();
-    return;
+    return request.abort();
   }
+
+  const url = request.url();
 
   if (url && resourceType === "script") {
     const urlBase = url.split("?");
     const splitBase = urlBase.length ? urlBase[0].split("#") : [];
     const requestUrl = splitBase.length ? splitBase[0] : "";
 
-    if (
-      skippedResources.some((resource) => requestUrl.indexOf(resource) !== -1)
-    ) {
-      request.abort();
-      return;
+    if (skippedResources.hasOwnProperty(requestUrl)) {
+      return request.abort();
     }
   }
 
-  request.continue();
+  return request.continue();
 };
 
 const setNetwork = async (page: Page): Promise<boolean> => {
