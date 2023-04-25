@@ -156,7 +156,6 @@ export const auditWebsite = async ({
     warningCount,
     noticeCount,
     accessScore,
-    possibleIssuesFixedByCdn,
   } = report?.meta ?? {};
 
   // light house pageinsights
@@ -184,9 +183,9 @@ export const auditWebsite = async ({
       },
       insight: null,
       issuesInfo: {
-        possibleIssuesFixedByCdn: possibleIssuesFixedByCdn,
+        possibleIssuesFixedByCdn: 0, // TODO: remove field
+        issuesFixedByCdn: 0, // TODO: remove field
         totalIssues: errorCount + warningCount + noticeCount,
-        issuesFixedByCdn: possibleIssuesFixedByCdn || 0, // TODO: update confirmation
         errorCount,
         warningCount,
         noticeCount,
