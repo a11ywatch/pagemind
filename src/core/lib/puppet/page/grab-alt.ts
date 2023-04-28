@@ -30,6 +30,9 @@ interface AltProps {
   cv?: boolean; // can use computer vision
 }
 
+// allow images with network
+const blockNetwork = async (req) => await networkBlock(req, true);
+
 // determine if an alt is missing in an image and reload the page.
 export const getAltImage = async ({
   element,
@@ -47,9 +50,8 @@ export const getAltImage = async ({
       try {
         page.off("request", networkBlock);
         page.removeAllListeners("request");
-
         // allow images to run
-        page.on("request", (req) => networkBlock(req, true));
+        page.on("request", blockNetwork);
         await page.reload();
       } catch (e) {
         console.error(e);

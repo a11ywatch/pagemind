@@ -1,33 +1,11 @@
+import { networkBlock as blocknet } from "a11y-js/build/utils/go-to-page";
 import { a11yConfig } from "../../../../config/a11y-config";
-import { blockedResourceTypes, skippedResources } from "./resource-ignore";
 import type { Page, HTTPRequest } from "puppeteer";
 
-export const networkBlock = (request: HTTPRequest, allowImage?: boolean) => {
-  const resourceType = request.resourceType();
-
-  // allow images upon reload intercepting.
-  if (resourceType === "image" && allowImage) {
-    return request.continue();
-  }
-
-  if (blockedResourceTypes.hasOwnProperty(resourceType)) {
-    return request.abort();
-  }
-
-  const url = request.url();
-
-  if (url && resourceType === "script") {
-    const urlBase = url.split("?");
-    const splitBase = urlBase.length ? urlBase[0].split("#") : [];
-    const requestUrl = splitBase.length ? splitBase[0] : "";
-
-    if (skippedResources.hasOwnProperty(requestUrl)) {
-      return request.abort();
-    }
-  }
-
-  return request.continue();
-};
+export const networkBlock = async (
+  request: HTTPRequest,
+  allowImage?: boolean
+) => await blocknet(request, undefined, allowImage);
 
 const setNetwork = async (page: Page): Promise<boolean> => {
   try {

@@ -151,12 +151,8 @@ export const auditWebsite = async ({
 
   usage = performance.now() - usage; // get total uptime used
 
-  const {
-    errorCount,
-    warningCount,
-    noticeCount,
-    accessScore,
-  } = report?.meta ?? {};
+  const { errorCount, warningCount, noticeCount, accessScore } =
+    report?.meta ?? {};
 
   // light house pageinsights
   if (report && pageInsights) {

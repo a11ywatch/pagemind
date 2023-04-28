@@ -26,7 +26,7 @@ export const getPageIssues = async ({
       standard: wcagStandard || "WCAG2AA",
       ignore,
       rules,
-      runners: runners && runners.length ? runners : ['htmlcs', 'axe'], // default to include all runners
+      runners: runners && runners.length ? runners : ["htmlcs", "axe"], // default to include all runners
       origin,
     });
   } catch (e) {
