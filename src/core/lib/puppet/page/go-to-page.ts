@@ -1,20 +1,47 @@
-import { networkBlock as blocknet } from "a11y-js/build/utils/go-to-page";
 import { a11yConfig } from "../../../../config/a11y-config";
+import { blockedResourceTypes, skippedResources } from "./resource-ignore";
 import type { Page, HTTPRequest, WaitForOptions } from "puppeteer";
 
-export const networkBlock = async (
-  request: HTTPRequest,
-  allowImage?: boolean
-) => await blocknet(request, undefined, allowImage);
+const networkBlock = async (request: HTTPRequest, allowImage?: boolean) => {
+  if (
+    request.isInterceptResolutionHandled &&
+    request.isInterceptResolutionHandled()
+  ) {
+    return await Promise.resolve();
+  }
 
-const setNetwork = async (page: Page): Promise<boolean> => {
+  const resourceType = request.resourceType();
+
+  // allow images upon reload intercepting.
+  if (resourceType === "image" && allowImage) {
+    return await request.continue();
+  }
+
+  if (blockedResourceTypes.hasOwnProperty(resourceType)) {
+    return await request.abort();
+  }
+
+  const url = request.url();
+
+  if (url && resourceType === "script") {
+    const urlBase = url.split("?");
+    const splitBase = urlBase.length ? urlBase[0].split("#") : [];
+    const requestUrl = splitBase.length ? splitBase[0] : "";
+
+    if (skippedResources.hasOwnProperty(requestUrl)) {
+      return await request.abort();
+    }
+  }
+
+  return await request.continue();
+};
+
+const setNetwork = async (page: Page): Promise<void> => {
   try {
     await page.setRequestInterception(true);
     page.on("request", networkBlock);
-    return true;
   } catch (e) {
-    console.error(e);
-    return false;
+    //
   }
 };
 
@@ -28,6 +55,7 @@ const goToPage = async (page: Page, url: string): Promise<boolean> => {
   let valid = false;
 
   await setNetwork(page);
+
   return new Promise(async (resolve) => {
     try {
       const res = await page.goto(url, navConfig);
@@ -35,36 +63,55 @@ const goToPage = async (page: Page, url: string): Promise<boolean> => {
         valid = res.status() === 304 || res.ok();
       }
     } catch (e) {
-      console.error(e);
+      // page does not exist
     }
 
     resolve(valid);
   });
 };
 
-// raw html content
+// set RAW HTML CONTENT
 const setHtmlContent = async (
   page: Page,
   html: string,
-  domain: string
+  url: string
 ): Promise<boolean> => {
   let valid = false;
+  let firstRequest = false;
 
-  await setNetwork(page);
+  try {
+    await page.setRequestInterception(true);
+  } catch (e) {
+    console.error(e);
+  }
+
   return new Promise(async (resolve) => {
     try {
-      // todo: send base target from crawler instead
-      await page.setContent(
-        html.replace("<head>", `<head><base target="_self" href="${domain}">`),
-        navConfig
-      );
-      valid = true;
+      page.on("request", async (request) => {
+        // initial page navigation request intercept with custom HTML
+        if (!firstRequest) {
+          firstRequest = true;
+          await request.respond({
+            status: 200,
+            contentType: "text/html",
+            body: html,
+          });
+        } else {
+          await networkBlock(request);
+        }
+      });
+
+      const res = await page.goto(url, navConfig);
+
+      if (res) {
+        valid = res.status() === 304 || res.ok();
+      }
     } catch (e) {
-      console.error(e);
+      //
     }
 
     resolve(valid);
   });
 };
 
-export { goToPage, setHtmlContent };
+export { goToPage, setHtmlContent, networkBlock };

@@ -90,9 +90,7 @@ export const auditWebsite = async ({
         hasPage = await setHtmlContent(
           page,
           html, /// allow resources to load for the frame
-          `${
-            urlMap && urlMap.startsWith("https") ? "https" : "http"
-          }://${domain}`
+          urlMap
         );
       } else {
         hasPage = await goToPage(page, urlMap);
