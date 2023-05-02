@@ -1,7 +1,6 @@
 import getPageSpeed from "get-page-speed";
 import { sourceBuild } from "@a11ywatch/website-source-builder";
 import type { Page } from "puppeteer";
-import { performance } from "perf_hooks";
 import {
   puppetPool,
   goToPage,
@@ -33,9 +32,13 @@ export const auditWebsite = async ({
 }) => {
   // determine which pool to use
   const pool = firefox ? puppetFirefoxPool : puppetPool;
+
   const { browser, host } = await pool.acquire(false);
+
   let page: Page = null;
   let hasPage = false;
+  let duration = 0;
+  let usage = 0;
 
   try {
     page = await browser?.newPage();
@@ -43,8 +46,7 @@ export const auditWebsite = async ({
     console.error(e); // issue with creating a new page occurred [todo: fallback to outside remote chrome]
   }
 
-  let duration = 0;
-  let usage = 0;
+  const { domain, pageUrl } = sourceBuild(urlMap);
 
   // handle the view port and ua for request
   if (page) {
@@ -71,7 +73,6 @@ export const auditWebsite = async ({
     } catch (e) {
       console.error(e);
     }
-    usage = performance.now(); // page ttl
 
     let pageRedirected = false;
 
@@ -86,7 +87,13 @@ export const auditWebsite = async ({
     // not closed run scans
     if (!page.isClosed()) {
       if (html) {
-        hasPage = await setHtmlContent(page, html);
+        hasPage = await setHtmlContent(
+          page,
+          html, /// allow resources to load for the frame
+          `${
+            urlMap && urlMap.startsWith("https") ? "https" : "http"
+          }://${domain}`
+        );
       } else {
         hasPage = await goToPage(page, urlMap);
       }
@@ -103,15 +110,27 @@ export const auditWebsite = async ({
       }
       page.removeAllListeners("response");
     }
-
-    duration = performance.now() - usage; // set the duration to time it takes to load page for ttyl
   }
-
-  const { domain, pageUrl } = sourceBuild(urlMap);
 
   // if page did not succeed exit.
   if (!hasPage) {
     await pool.clean(page);
+
+    try {
+      const metrics = await page.metrics();
+
+      const {
+        TaskDuration,
+        ScriptDuration,
+        RecalcStyleDuration,
+        LayoutDuration,
+      } = metrics;
+
+      duration = (ScriptDuration + RecalcStyleDuration + LayoutDuration) * 1000;
+      usage = TaskDuration * 1000;
+    } catch (e) {
+      console.error(e);
+    }
 
     return {
       issues: undefined,
@@ -127,7 +146,7 @@ export const auditWebsite = async ({
         lastScanDate: new Date().toISOString(),
       },
       userId,
-      usage: duration + 0.25,
+      usage,
     };
   }
 
@@ -149,7 +168,21 @@ export const auditWebsite = async ({
     await getPageMeta({ page, report, cv });
   }
 
-  usage = performance.now() - usage; // get total uptime used
+  try {
+    const metrics = await page.metrics();
+
+    const {
+      TaskDuration,
+      ScriptDuration,
+      RecalcStyleDuration,
+      LayoutDuration,
+    } = metrics;
+
+    duration = (ScriptDuration + RecalcStyleDuration + LayoutDuration) * 1000;
+    usage = TaskDuration * 1000;
+  } catch (e) {
+    console.error(e);
+  }
 
   const { errorCount, warningCount, noticeCount, accessScore } =
     report?.meta ?? {};

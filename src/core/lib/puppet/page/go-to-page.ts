@@ -1,6 +1,6 @@
 import { networkBlock as blocknet } from "a11y-js/build/utils/go-to-page";
 import { a11yConfig } from "../../../../config/a11y-config";
-import type { Page, HTTPRequest } from "puppeteer";
+import type { Page, HTTPRequest, WaitForOptions } from "puppeteer";
 
 export const networkBlock = async (
   request: HTTPRequest,
@@ -18,6 +18,11 @@ const setNetwork = async (page: Page): Promise<boolean> => {
   }
 };
 
+const navConfig: WaitForOptions = {
+  timeout: a11yConfig.timeout,
+  waitUntil: "domcontentloaded",
+};
+
 // lazy go to page
 const goToPage = async (page: Page, url: string): Promise<boolean> => {
   let valid = false;
@@ -25,10 +30,7 @@ const goToPage = async (page: Page, url: string): Promise<boolean> => {
   await setNetwork(page);
   return new Promise(async (resolve) => {
     try {
-      const res = await page.goto(url, {
-        timeout: a11yConfig.timeout,
-        waitUntil: "domcontentloaded",
-      });
+      const res = await page.goto(url, navConfig);
       if (res) {
         valid = res.status() === 304 || res.ok();
       }
@@ -41,16 +43,21 @@ const goToPage = async (page: Page, url: string): Promise<boolean> => {
 };
 
 // raw html content
-const setHtmlContent = async (page: Page, html: string): Promise<boolean> => {
+const setHtmlContent = async (
+  page: Page,
+  html: string,
+  domain: string
+): Promise<boolean> => {
   let valid = false;
 
   await setNetwork(page);
   return new Promise(async (resolve) => {
     try {
-      await page.setContent(html, {
-        timeout: a11yConfig.timeout,
-        waitUntil: "domcontentloaded",
-      });
+      // todo: send base target from crawler instead
+      await page.setContent(
+        html.replace("<head>", `<head><base target="_self" href="${domain}">`),
+        navConfig
+      );
       valid = true;
     } catch (e) {
       console.error(e);
