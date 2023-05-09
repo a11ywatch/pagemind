@@ -1,4 +1,4 @@
-import type { Issue } from "a11y-js";
+import type { Issue } from "kayle";
 
 export const skipContentTemplate: Issue = {
   code: "WCAG2A.Principle1.Guideline2.4",

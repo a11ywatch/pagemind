@@ -1,4 +1,4 @@
-import { a11y, Audit } from "a11y-js";
+import { kayle, Audit } from "kayle";
 import { skipContentCheck } from "../skip-content-check";
 import { skipContentTemplate } from "../../../controllers/update/templates";
 import type { IssueMeta } from "../../../../types";
@@ -17,7 +17,7 @@ export const getPageIssues = async ({
 
   try {
     // catch errors on long timeouts CDP close
-    results = await a11y({
+    results = await kayle({
       includeNotices: false,
       includeWarnings: true,
       page,
