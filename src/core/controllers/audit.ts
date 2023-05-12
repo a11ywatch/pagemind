@@ -1,6 +1,6 @@
 import getPageSpeed from "get-page-speed";
 import { sourceBuild } from "@a11ywatch/website-source-builder";
-import type { Page, CDPSession } from "playwright";
+import type { Page, CDPSession, BrowserContext } from "playwright";
 import { puppetPool, getPageMeta, queueLighthouseUntilResults } from "../lib";
 import { getPageIssues } from "../lib/puppet/page/get-page-issues";
 import { spoofPage } from "../lib/puppet/spoof";
@@ -30,6 +30,7 @@ export const auditWebsite = async ({
   const { browser, host } = await pool.acquire(false);
 
   let page: Page = null;
+  let context: BrowserContext = null;
   let duration = 0;
   let usage = 0;
 
@@ -40,7 +41,7 @@ export const auditWebsite = async ({
     const { agent, vp } = spoofPage(mobile, ua);
 
     try {
-      page = await browser?.newPage({
+      context = await browser?.newContext({
         userAgent: agent,
         viewport: vp,
         extraHTTPHeaders: pageHeaders.length
@@ -56,6 +57,7 @@ export const auditWebsite = async ({
             )
           : undefined,
       });
+      page = await context.newPage();
     } catch (e) {
       if (e instanceof Error) {
         console.error(`browser new page failed: ${e.message}`);
@@ -125,7 +127,7 @@ export const auditWebsite = async ({
     console.error(e);
   }
 
-  await pool.clean(page);
+  await pool.clean(context);
 
   return {
     webPage: {
