@@ -1,4 +1,4 @@
-import { connect, Browser } from "puppeteer";
+import { chromium, Browser } from "playwright";
 import {
   chromeHost,
   getWsEndPoint,
@@ -27,9 +27,7 @@ const getConnnection = async (
   }
 
   try {
-    browser = await connect({
-      browserWSEndpoint: wsChromeEndpointurl,
-      ignoreHTTPSErrors: true,
+    browser = await chromium.connectOverCDP(wsChromeEndpointurl, {
       headers,
     });
 

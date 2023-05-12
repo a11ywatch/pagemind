@@ -21,13 +21,12 @@ export const coreServer = async () => {
   // launch chrome instance local
   if (!endpoint) {
     try {
-      const puppeteer = await import("puppeteer");
-      const browser = await puppeteer.launch({
+      const playwright = await import("playwright");
+      const browserServer = await playwright.chromium.launchServer({
         headless: true,
         args: chromeArgs,
-        waitForInitialPage: false,
       });
-      const browserWSEndpoint = await browser.wsEndpoint();
+      const browserWSEndpoint = browserServer.wsEndpoint();
 
       if (browserWSEndpoint) {
         setWsEndPoint(browserWSEndpoint);
@@ -44,14 +43,12 @@ export const coreServer = async () => {
   // launch firefox locally
   if (firefoxEnabled && !firefoxEndpoint) {
     try {
-      const puppeteer = await import("puppeteer");
-      const browser = await puppeteer.launch({
+      const playwright = await import("playwright");
+      const browserServer = await playwright.firefox.launchServer({
         headless: true,
         args: firefoxArgs,
-        waitForInitialPage: false,
-        product: "firefox",
       });
-      const browserWSEndpoint = await browser.wsEndpoint();
+      const browserWSEndpoint = browserServer.wsEndpoint();
 
       if (browserWSEndpoint) {
         setFirefoxWsEndPoint(browserWSEndpoint);

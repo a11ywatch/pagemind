@@ -13,9 +13,9 @@ COPY . .
 
 RUN cargo install --no-default-features --path .
 
-FROM node:20.0-alpine3.17
+FROM node:20.1-alpine3.17
 
-ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD="true" \ 
+ENV PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD="true" \ 
 	NODE_ENV="development" \
     GRPC_HOST_MAV="mav:50053"
 

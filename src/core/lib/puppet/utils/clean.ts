@@ -1,4 +1,4 @@
-import type { Browser, Page } from "puppeteer";
+import type { Browser, Page } from "playwright";
 
 // clean the connection
 export const clean = async (page?: Page, browser?: Browser) => {
@@ -8,8 +8,5 @@ export const clean = async (page?: Page, browser?: Browser) => {
     } catch (e) {
       console.error(e);
     }
-  }
-  if (browser && browser.isConnected()) {
-    browser.disconnect();
   }
 };

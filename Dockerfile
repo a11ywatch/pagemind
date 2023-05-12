@@ -13,9 +13,9 @@ COPY . .
 
 RUN cargo install --no-default-features --path .
 
-FROM node:20.0-alpine3.17 AS BUILD_IMAGE
+FROM node:20.1-alpine3.17 AS BUILD_IMAGE
 
-ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD="true"
+ENV PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD="true"
 
 WORKDIR /usr/src/app
 
@@ -27,7 +27,7 @@ RUN rm -R ./node_modules
 RUN npm install --production
 
 # final image
-FROM node:20.0-alpine3.17
+FROM node:20.1-alpine3.17
 
 RUN apk upgrade --update-cache --available && \
 	apk add openssl

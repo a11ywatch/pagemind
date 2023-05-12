@@ -1,4 +1,4 @@
-import { connect, Browser } from "puppeteer";
+import { firefox, Browser } from "playwright";
 import {
   firefoxHost,
   getFireFoxWsEndPoint,
@@ -21,9 +21,7 @@ const getConnnection = async (
 ): Promise<ConnectionResponse> => {
   try {
     if (!browser || retry) {
-      browser = await connect({
-        browserWSEndpoint: wsFirefoxEndpointurl,
-        ignoreHTTPSErrors: true,
+      browser = await firefox.connectOverCDP(wsFirefoxEndpointurl, {
         headers,
       });
     }
