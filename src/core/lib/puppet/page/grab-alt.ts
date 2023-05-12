@@ -1,13 +1,14 @@
-import type { Page } from "puppeteer";
-import { detectImageModel } from "../../../ai";
+import { networkBlock } from "kayle";
+import { detectImageModel } from "../../../ai/detectImage";
 import { createCanvasPupet } from "../create-canvas";
+import { a11yConfig } from "../../../../config";
+import type { Page } from "playwright-core";
 import {
   needsLongTextAlt,
   missingAltText,
   imgAltMissing,
 } from "../../../strings";
 import { INVALID_HTML_PROPS } from "../../engine/models/issue-type";
-import { networkBlock } from "./go-to-page";
 
 interface Alt {
   alt: string;
@@ -23,6 +24,11 @@ export const isAltMissing = (message: string) =>
     missingAltText,
   ].includes(message);
 
+interface Alt {
+  alt: string;
+  lang: string;
+}
+
 interface AltProps {
   element: any;
   page: Page;
@@ -30,8 +36,9 @@ interface AltProps {
   cv?: boolean; // can use computer vision
 }
 
-// allow images with network
-const blockNetwork = async (req) => await networkBlock(req, true);
+// reblock async images
+const performNetworkBlock = async (req, reqq) =>
+  await networkBlock(req, reqq, true);
 
 // determine if an alt is missing in an image and reload the page.
 export const getAltImage = async ({
@@ -48,22 +55,21 @@ export const getAltImage = async ({
     // reload the page and allow request to get images
     if (index === 0) {
       try {
-        page.off("request", networkBlock);
-        page.removeAllListeners("request");
-        // allow images to run
-        page.on("request", blockNetwork);
-        await page.reload();
+        page.off("request" as any, networkBlock as any);
+        page.route("**/*", performNetworkBlock);
+        await page.reload({
+          waitUntil: "networkidle",
+          timeout: a11yConfig.timeout,
+        });
       } catch (e) {
         console.error(e);
       }
     }
 
     let canvas;
+
     try {
-      canvas = (await page.evaluate(
-        createCanvasPupet,
-        element.selector
-      )) as any;
+      canvas = await page.evaluate(createCanvasPupet, element.selector);
     } catch (e) {
       console.error(e);
     }
@@ -79,6 +85,7 @@ export const getAltImage = async ({
         url,
         cv
       );
+
       if (img && "className" in img && "probability" in img) {
         if (img.probability >= Number(0.5)) {
           alt = img.className; // TODO: allow user to determine score
