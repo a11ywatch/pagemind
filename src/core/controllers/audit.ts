@@ -1,6 +1,6 @@
 import getPageSpeed from "get-page-speed";
 import { sourceBuild } from "@a11ywatch/website-source-builder";
-import type { Page } from "playwright";
+import type { Page, CDPSession } from "playwright";
 import { puppetPool, getPageMeta, queueLighthouseUntilResults } from "../lib";
 import { getPageIssues } from "../lib/puppet/page/get-page-issues";
 import { spoofPage } from "../lib/puppet/spoof";
@@ -65,6 +65,16 @@ export const auditWebsite = async ({
     }
   }
 
+  let client: CDPSession;
+
+  try {
+    // todo: get prior client
+    client = await page.context().newCDPSession(page);
+    await client.send("Performance.enable");
+  } catch (e) {
+    console.error(e);
+  }
+
   const pageIssues = await getPageIssues({
     page,
     browser,
@@ -84,20 +94,6 @@ export const auditWebsite = async ({
     await getPageMeta({ page, report, cv });
   }
 
-  try {
-    const metrics = await getMetrics(page);
-
-    // get the duration of the page
-    duration =
-      (metrics.ScriptDuration +
-        metrics.RecalcStyleDuration +
-        metrics.LayoutDuration) *
-      1000;
-    usage = metrics.TaskDuration * 1000;
-  } catch (e) {
-    console.error(e);
-  }
-
   const { errorCount, warningCount, noticeCount, accessScore } =
     report?.meta ?? {};
 
@@ -112,6 +108,21 @@ export const auditWebsite = async ({
         domain,
       });
     });
+  }
+
+  try {
+    const metrics = await getMetrics(client);
+
+    // get the duration of the page
+    duration =
+      (metrics.ScriptDuration +
+        metrics.RecalcStyleDuration +
+        metrics.LayoutDuration) *
+      1000;
+
+    usage = metrics.TaskDuration * 1000;
+  } catch (e) {
+    console.error(e);
   }
 
   await pool.clean(page);

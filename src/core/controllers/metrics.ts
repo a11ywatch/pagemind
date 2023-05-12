@@ -1,4 +1,4 @@
-import type { Page } from "playwright";
+import { CDPSession } from "playwright";
 
 type Metrics = {
   TaskDuration: number;
@@ -7,19 +7,46 @@ type Metrics = {
   LayoutDuration: number;
 };
 
-export async function getMetrics(page: Page): Promise<Metrics> {
-  const client = await page.context().newCDPSession(page);
-  await client.send("Performance.enable");
-  const perfMetricObject = await client.send("Performance.getMetrics");
+const supportedMetrics: Set<string> = new Set([
+  "Timestamp",
+  "Documents",
+  "Frames",
+  "JSEventListeners",
+  "Nodes",
+  "LayoutCount",
+  "RecalcStyleCount",
+  "LayoutDuration",
+  "RecalcStyleDuration",
+  "ScriptDuration",
+  "TaskDuration",
+  "JSHeapUsedSize",
+  "JSHeapTotalSize",
+]);
 
-  const metricObject = perfMetricObject?.metrics.reduce(
-    (acc: Metrics, { name, value }) => {
-      acc[name] = value;
+export async function getMetrics(client: CDPSession): Promise<Metrics> {
+  const result = {
+    ScriptDuration: 0,
+    RecalcStyleDuration: 0,
+    LayoutDuration: 0,
+    TaskDuration: 0,
+  };
 
-      return acc;
-    },
-    {} as Metrics
-  );
+  if (!client) {
+    return result;
+  }
 
-  return metricObject;
+  try {
+    const perfMetricObject = await client.send("Performance.getMetrics");
+
+    for (const metric of perfMetricObject?.metrics || []) {
+      if (supportedMetrics.has(metric.name)) {
+        result[metric.name] = metric.value;
+      }
+    }
+  } catch (e) {
+    console.error(e);
+  }
+
+
+  return result as Metrics;
 }
