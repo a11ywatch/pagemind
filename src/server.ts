@@ -1,7 +1,7 @@
+import { chromium, firefox } from "playwright"
 import { startGRPC } from "./proto/init";
 import { getWsEndPoint, setWsEndPoint } from "./config/chrome";
 import { getFireFoxWsEndPoint, setFirefoxWsEndPoint } from "./config/firefox";
-
 import { chromeArgs } from "./config/chrome-args";
 import { firefoxArgs } from "./config/firefox-args";
 import { puppetPool } from "./core/lib";
@@ -21,20 +21,17 @@ export const coreServer = async () => {
   // launch chrome instance local
   if (!endpoint) {
     try {
-      const playwright = await import("playwright");
-      const browserServer = await playwright.chromium.launchServer({
+      const browserServer = await chromium.launchServer({
         headless: true,
         args: chromeArgs,
       });
       const browserWSEndpoint = browserServer.wsEndpoint();
 
-      if (browserWSEndpoint) {
-        setWsEndPoint(browserWSEndpoint);
-        console.log(`chrome launched and connected on: ${browserWSEndpoint}`);
-      }
+      setWsEndPoint(browserWSEndpoint);
+      console.log(`chrome launched and connected on: ${browserWSEndpoint}`);
     } catch (e) {
       console.error(
-        "could not start chrome. Check to see if chrome is downloaded on the system.",
+        "Error: could not start chrome. Check to see if chrome is downloaded on the system.",
         e
       );
     }
@@ -43,20 +40,17 @@ export const coreServer = async () => {
   // launch firefox locally
   if (firefoxEnabled && !firefoxEndpoint) {
     try {
-      const playwright = await import("playwright");
-      const browserServer = await playwright.firefox.launchServer({
+      const browserServer = await firefox.launchServer({
         headless: true,
         args: firefoxArgs,
       });
       const browserWSEndpoint = browserServer.wsEndpoint();
 
-      if (browserWSEndpoint) {
-        setFirefoxWsEndPoint(browserWSEndpoint);
-        console.log(`firefox launched and connected on: ${browserWSEndpoint}`);
-      }
+      setFirefoxWsEndPoint(browserWSEndpoint);
+      console.log(`firefox launched and connected on: ${browserWSEndpoint}`);
     } catch (e) {
       console.error(
-        "could not start firefox. Check to see if firefox is downloaded on the system.",
+        "Error: could not start firefox. Check to see if firefox is downloaded on the system.",
         e
       );
     }
