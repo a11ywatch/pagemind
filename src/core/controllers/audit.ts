@@ -31,10 +31,19 @@ export const auditWebsite = async ({
 
   let page: Page = null;
   let context: BrowserContext = null;
+  let client: CDPSession = null;
   let duration = 0;
   let usage = 0;
 
   const { domain, pageUrl } = sourceBuild(urlMap);
+
+  try {
+    // todo: get prior client
+    client = await page.context().newCDPSession(page);
+    await client.send("Performance.enable");
+  } catch (e) {
+    console.error(e);
+  }
 
   // handle the view port and ua for request
   if (browser) {
@@ -67,16 +76,6 @@ export const auditWebsite = async ({
     }
   }
 
-  let client: CDPSession;
-
-  try {
-    // todo: get prior client
-    client = await page.context().newCDPSession(page);
-    await client.send("Performance.enable");
-  } catch (e) {
-    console.error(e);
-  }
-
   const pageIssues = await getPageIssues({
     page,
     browser,
@@ -85,7 +84,7 @@ export const auditWebsite = async ({
     ignore,
     rules,
     runners, // set to undefined to use default
-    origin: html && pageUrl ? pageUrl : undefined,
+    origin: pageUrl,
     html,
   });
 

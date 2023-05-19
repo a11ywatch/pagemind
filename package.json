@@ -1,6 +1,6 @@
 {
   "name": "@a11ywatch/pagemind",
-  "version": "0.9.11",
+  "version": "0.9.12",
   "description": "Get metrics on your web page with inclusion",
   "main": "./server.js",
   "author": "Jeff Mendez",
@@ -30,7 +30,7 @@
     "@grpc/proto-loader": "0.7.6",
     "fastq": "1.15.0",
     "get-page-speed": "1.0.1",
-    "kayle": "0.4.34",
+    "kayle": "0.4.37",
     "lighthouse": "9.6.8",
     "pb-util": "1.0.3",
     "playwright": "^1.33.0"

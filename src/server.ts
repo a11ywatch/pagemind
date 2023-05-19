@@ -1,4 +1,4 @@
-import { chromium, firefox } from "playwright"
+import { chromium, firefox } from "playwright";
 import { startGRPC } from "./proto/init";
 import { getWsEndPoint, setWsEndPoint } from "./config/chrome";
 import { getFireFoxWsEndPoint, setFirefoxWsEndPoint } from "./config/firefox";

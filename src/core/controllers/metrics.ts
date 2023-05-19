@@ -47,6 +47,5 @@ export async function getMetrics(client: CDPSession): Promise<Metrics> {
     console.error(e);
   }
 
-
   return result as Metrics;
 }
