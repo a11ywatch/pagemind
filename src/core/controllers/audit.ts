@@ -37,14 +37,6 @@ export const auditWebsite = async ({
 
   const { domain, pageUrl } = sourceBuild(urlMap);
 
-  try {
-    // todo: get prior client
-    client = await page.context().newCDPSession(page);
-    await client.send("Performance.enable");
-  } catch (e) {
-    console.error(e);
-  }
-
   // handle the view port and ua for request
   if (browser) {
     const { agent, vp } = spoofPage(mobile, ua);
@@ -73,6 +65,14 @@ export const auditWebsite = async ({
       } else {
         console.error("browser new page failed.");
       }
+    }
+
+    try {
+      // todo: get prior client
+      client = await page.context().newCDPSession(page);
+      await client.send("Performance.enable");
+    } catch (e) {
+      console.error(e);
     }
   }
 
