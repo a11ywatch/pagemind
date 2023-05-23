@@ -1,7 +1,6 @@
 import { networkBlock } from "kayle";
 import { detectImageModel } from "../../../ai/detectImage";
 import { createCanvasPupet } from "../create-canvas";
-import { a11yConfig } from "../../../../config";
 import type { Page } from "playwright-core";
 import {
   needsLongTextAlt,
@@ -32,19 +31,17 @@ interface Alt {
 interface AltProps {
   element: any;
   page: Page;
-  index: number;
   cv?: boolean; // can use computer vision
 }
 
 // reblock async images
-const performNetworkBlock = async (req, reqq) =>
+export const performNetworkBlock = async (req, reqq) =>
   await networkBlock(req, reqq, true);
 
-// determine if an alt is missing in an image and reload the page.
+// determine if an alt is missing in an image and reload the page. mutates elements
 export const getAltImage = async ({
   element,
   page,
-  index,
   cv,
 }: AltProps): Promise<Alt> => {
   let alt = "";
@@ -52,20 +49,6 @@ export const getAltImage = async ({
   const selector = element?.selector; // the selector to use for the page
 
   if (selector) {
-    // reload the page and allow request to get images
-    if (index === 0) {
-      try {
-        page.off("request" as any, networkBlock as any);
-        page.route("**/*", performNetworkBlock);
-        await page.reload({
-          waitUntil: "networkidle",
-          timeout: a11yConfig.timeout,
-        });
-      } catch (e) {
-        console.error(e);
-      }
-    }
-
     let canvas;
 
     try {

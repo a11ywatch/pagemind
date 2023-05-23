@@ -1,48 +1,39 @@
-import { getAltImage } from "./grab-alt";
+import { networkBlock } from "kayle";
+import { getAltImage, performNetworkBlock } from "./grab-alt";
+import { a11yConfig } from "../../../../config";
 
-// disable AI for getting page alt images
 const AI_DISABLED = process.env.AI_DISABLED === "true";
 
-export const getPageMeta = ({ report, page, cv }): Promise<void> => {
+export const getPageMeta = async ({ report, page, cv }): Promise<void> => {
   const pageIssues = (report && report?.issues) || [];
   const automateable = (report && report?.automateable?.missingAltIndexs) || [];
 
-  return new Promise(async (resolve) => {
-    if (!pageIssues?.length || AI_DISABLED) {
-      resolve();
-    }
-
-    let index = 0;
-
-    for (const eleIndex of automateable) {
-      // exit if over 5000 missing alts exist
-      if (index > 5000) {
-        break;
-      }
-
-      // element from issues array
-      const element = pageIssues[eleIndex];
-
-      // element contains alt tag related error message and reload the page if issues exist.
-      const extraConfig = await getAltImage({
-        element,
-        page,
-        index,
-        cv,
-      }).catch((e) => {
-        console.error(e);
+  if (pageIssues?.length && !AI_DISABLED) {
+    try {
+      await page.unroute("**/*", networkBlock);
+      await page.route("**/*", performNetworkBlock);
+      await page.reload({
+        waitUntil: "domcontentloaded",
+        timeout: a11yConfig.timeout,
       });
-
-      const altFix = extraConfig && extraConfig?.alt;
-
-      // if alt exist apply recommendation to element
-      if (altFix) {
-        element.message = `${element.message} Recommendation: change alt to ${altFix}.`;
-      }
-
-      index++;
+    } catch (e) {
+      // console.error(e);
     }
 
-    resolve();
-  });
+    await Promise.all(
+      automateable.map(async (eleIndex) => {
+        const element = pageIssues[eleIndex];
+
+        const { alt } = await getAltImage({
+          element,
+          page,
+          cv,
+        });
+
+        if (alt) {
+          element.message = `${element.message} Recommendation: change alt to ${alt}.`;
+        }
+      })
+    );
+  }
 };
