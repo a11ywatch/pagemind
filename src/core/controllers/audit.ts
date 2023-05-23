@@ -35,7 +35,7 @@ export const auditWebsite = async ({
   let duration = 0;
   let usage = 0;
 
-  const { domain, pageUrl } = sourceBuild(urlMap);
+  const { domain } = sourceBuild(urlMap);
 
   // handle the view port and ua for request
   if (browser) {
@@ -84,7 +84,7 @@ export const auditWebsite = async ({
     ignore,
     rules,
     runners, // set to undefined to use default
-    origin: pageUrl,
+    origin: urlMap,
     html,
   });
 
@@ -131,7 +131,7 @@ export const auditWebsite = async ({
   return {
     webPage: {
       domain,
-      url: pageUrl,
+      url: urlMap,
       pageLoadTime: {
         duration,
         durationFormated: getPageSpeed(duration),
@@ -151,7 +151,7 @@ export const auditWebsite = async ({
     },
     issues: {
       domain,
-      pageUrl,
+      pageUrl: urlMap,
       issues: (report && report.issues) || [],
       documentTitle: (report && report.documentTitle) || "",
     },
