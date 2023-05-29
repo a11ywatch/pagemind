@@ -5,7 +5,22 @@ import { puppetPool, getPageMeta, queueLighthouseUntilResults } from "../lib";
 import { getPageIssues } from "../lib/puppet/page/get-page-issues";
 import { spoofPage } from "../lib/puppet/spoof";
 import { puppetFirefoxPool } from "../lib/puppet/create-puppeteer-pool-firefox";
-import { getMetrics } from "./metrics";
+import { getMetrics } from "../lib/puppet/metrics";
+import { ScanRpcParams } from "../../types/types";
+
+// manage shared connections
+const sharedContext = new Map<
+  string,
+  { ctx: BrowserContext; size: number }
+>();
+
+// get the shared contextID
+const getSharedContextID = (
+  params: Partial<ScanRpcParams> & { domain?: string }
+) => {
+  // todo: decorate headers symbol
+  return `${params.userId}_${params.domain}_${params.firefox}_${params.pageHeaders.length}`;
+};
 
 export const auditWebsite = async ({
   userId,
@@ -30,35 +45,51 @@ export const auditWebsite = async ({
   const { browser, host } = await pool.acquire(false);
 
   let page: Page = null;
-  let context: BrowserContext = null;
+  let context: { ctx: BrowserContext; size: number } = null;
   let client: CDPSession = null;
   let duration = 0;
   let usage = 0;
 
   const { domain } = sourceBuild(urlMap);
+  const sharedContextID = getSharedContextID({
+    domain,
+    userId,
+    pageHeaders,
+    firefox,
+  });
 
   // handle the view port and ua for request
   if (browser) {
     const { agent, vp } = spoofPage(mobile, ua);
 
     try {
-      context = await browser?.newContext({
-        userAgent: agent,
-        viewport: vp,
-        extraHTTPHeaders: pageHeaders.length
-          ? pageHeaders.reduce(
-              (
-                a,
-                item: {
-                  key: string;
-                  value: string;
-                }
-              ) => ({ ...a, [item.key]: item.value }),
-              {}
-            )
-          : undefined,
-      });
-      page = await context.newPage();
+      if (!sharedContext.has(sharedContextID)) {
+        const ctx = await browser?.newContext({
+          userAgent: agent,
+          viewport: vp,
+          extraHTTPHeaders: pageHeaders.length
+            ? pageHeaders.reduce(
+                (
+                  a,
+                  item: {
+                    key: string;
+                    value: string;
+                  }
+                ) => ({ ...a, [item.key]: item.value }),
+                {}
+              )
+            : undefined,
+        });
+
+        // set the initial context
+        sharedContext.set(sharedContextID, { ctx, size: 1 });
+        context = sharedContext.get(sharedContextID);
+      } else {
+        context = sharedContext.get(sharedContextID);
+        context.size++;
+      }
+
+      page = await context.ctx.newPage();
     } catch (e) {
       if (e instanceof Error) {
         console.error(`browser new page failed: ${e.message}`);
@@ -126,7 +157,13 @@ export const auditWebsite = async ({
     console.error(e);
   }
 
-  await pool.clean(context);
+  context.size--;
+
+  // if context is empty cleanup
+  if (!context.size) {
+    sharedContext.delete(sharedContextID);
+    await puppetPool.clean(context.ctx);
+  }
 
   return {
     webPage: {
