@@ -8,8 +8,6 @@ export const chromeLb = process.env.CHROME_LB;
 let chromeHost = process.env.CHROME_HOST;
 // the chrome socket connection to connect to
 let wsChromeEndpointurl = process.env.CHROME_SOCKET_URL;
-// did attempt to get chrome dns
-let attemptedChromeHost = false;
 
 // default chrome configs
 const {
@@ -68,8 +66,7 @@ const getWs = async (host?: string): Promise<string> => {
   let target = "";
 
   // Attempt to find chrome host through DNS [todo: dns outside]
-  if (validateDNS && !attemptedChromeHost) {
-    attemptedChromeHost = true;
+  if (validateDNS) {
     target = await bindChromeDns("chrome");
   }
 

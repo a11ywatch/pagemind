@@ -7,12 +7,10 @@ import { spoofPage } from "../lib/puppet/spoof";
 import { puppetFirefoxPool } from "../lib/puppet/create-puppeteer-pool-firefox";
 import { getMetrics } from "../lib/puppet/metrics";
 import { ScanRpcParams } from "../../types/types";
+import { getWsEndPoint } from "../../config";
 
 // manage shared connections
-const sharedContext = new Map<
-  string,
-  { ctx: BrowserContext; size: number }
->();
+const sharedContext = new Map<string, { ctx: BrowserContext; size: number }>();
 
 // get the shared contextID
 const getSharedContextID = (
@@ -22,23 +20,24 @@ const getSharedContextID = (
   return `${params.userId}_${params.domain}_${params.firefox}_${params.pageHeaders.length}`;
 };
 
-export const auditWebsite = async ({
-  userId,
-  url: urlMap,
-  pageHeaders,
-  pageInsights,
-  mobile, // mobile view port
-  actions,
-  standard,
-  ua,
-  cv,
-  pageSpeedApiKey,
-  html,
-  firefox, // experimental
-  ignore,
-  rules,
-  runners = [],
-}) => {
+export const auditWebsite = async (params, retry?: boolean) => {
+  const {
+    userId,
+    url: urlMap,
+    pageHeaders,
+    pageInsights,
+    mobile, // mobile view port
+    actions,
+    standard,
+    ua,
+    cv,
+    pageSpeedApiKey,
+    html,
+    firefox, // experimental
+    ignore,
+    rules,
+    runners = [],
+  } = params;
   // determine which pool to use
   const pool = firefox ? puppetFirefoxPool : puppetPool;
 
@@ -58,12 +57,12 @@ export const auditWebsite = async ({
     firefox,
   });
 
-  // handle the view port and ua for request
+  // if not browser attempt reconnection
   if (browser) {
     const { agent, vp } = spoofPage(mobile, ua);
 
-    try {
-      if (!sharedContext.has(sharedContextID)) {
+    if (!sharedContext.has(sharedContextID)) {
+      try {
         const ctx = await browser?.newContext({
           userAgent: agent,
           viewport: vp,
@@ -82,28 +81,43 @@ export const auditWebsite = async ({
         });
 
         // set the initial context
-        sharedContext.set(sharedContextID, { ctx, size: 1 });
+        sharedContext.set(sharedContextID, { ctx: ctx, size: 1 });
         context = sharedContext.get(sharedContextID);
-      } else {
-        context = sharedContext.get(sharedContextID);
-        context.size++;
+      } catch (e) {
+        if (e instanceof Error) {
+          console.error(e ? e.message : "Browser page failed.");
+          // fetching new browser instance
+          await getWsEndPoint(true);
+          // retry the method once after connecting to the next
+          if (!retry) {
+            return await auditWebsite(params, true);
+          }
+        }
       }
-
-      page = await context.ctx.newPage();
-    } catch (e) {
-      if (e instanceof Error) {
-        console.error(`browser new page failed: ${e.message}`);
-      } else {
-        console.error("browser new page failed.");
+    } else {
+      context = sharedContext.get(sharedContextID);
+      if (context) {
+        context.size++;
       }
     }
 
-    try {
-      // todo: get prior client
-      client = await page.context().newCDPSession(page);
-      await client.send("Performance.enable");
-    } catch (e) {
-      console.error(e);
+    // establish a new page
+    if (context) {
+      try {
+        page = await context.ctx.newPage();
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    // establish CDP session
+    if (page) {
+      try {
+        client = await page.context().newCDPSession(page);
+        await client.send("Performance.enable");
+      } catch (e) {
+        console.error(e);
+      }
     }
   }
 
@@ -157,12 +171,14 @@ export const auditWebsite = async ({
     console.error(e);
   }
 
-  context.size--;
+  if (context) {
+    context.size--;
 
-  // if context is empty cleanup
-  if (!context.size) {
-    sharedContext.delete(sharedContextID);
-    await puppetPool.clean(context.ctx);
+    // if context is empty cleanup
+    if (!context.size) {
+      sharedContext.delete(sharedContextID);
+      await puppetPool.clean(context.ctx);
+    }
   }
 
   return {
