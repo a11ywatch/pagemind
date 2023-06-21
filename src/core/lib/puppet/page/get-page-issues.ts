@@ -29,6 +29,7 @@ export const getPageIssues = async ({
         runners: runners && runners.length ? runners : ["htmlcs", "axe"], // default to include all runners
         origin,
         html,
+        waitUntil: "domcontentloaded",
       },
       true
     );

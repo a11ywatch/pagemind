@@ -15,10 +15,8 @@ const sharedContext = new Map<string, { ctx: BrowserContext; size: number }>();
 // get the shared contextID
 const getSharedContextID = (
   params: Partial<ScanRpcParams> & { domain?: string }
-) => {
-  // todo: decorate headers symbol
-  return `${params.userId}_${params.domain}_${params.firefox}_${params.pageHeaders.length}`;
-};
+) =>
+  `${params.userId}_${params.domain}_${params.firefox}_${params.pageHeaders.length}`;
 
 export const auditWebsite = async (params, retry?: boolean) => {
   const {
@@ -40,9 +38,7 @@ export const auditWebsite = async (params, retry?: boolean) => {
   } = params;
   // determine which pool to use
   const pool = firefox ? puppetFirefoxPool : puppetPool;
-
   const { browser, host } = await pool.acquire(!!retry);
-
   const { domain } = sourceBuild(urlMap);
   const sharedContextID = getSharedContextID({
     domain,
