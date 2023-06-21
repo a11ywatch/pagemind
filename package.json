@@ -24,7 +24,7 @@
     "pub": "tsc && cp package.json dist && cp package-lock.json dist && cp README.md dist && cp LICENSE dist && cd dist && npm publish"
   },
   "dependencies": {
-    "@a11ywatch/protos": "^0.4.3",
+    "@a11ywatch/protos": "^0.4.7",
     "@a11ywatch/website-source-builder": "^0.1.8",
     "@grpc/grpc-js": "1.8.16",
     "@grpc/proto-loader": "0.7.7",

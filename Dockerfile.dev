@@ -26,6 +26,7 @@ WORKDIR /usr/src/app
 
 COPY package*.json ./
 COPY --from=rustbuilder /usr/local/cargo/bin/health_client /usr/local/bin/health_client
+COPY --from=rustbuilder /app/node_modules ./node_modules
 
 RUN npm ci
 
