@@ -41,13 +41,7 @@ export const auditWebsite = async (params, retry?: boolean) => {
   // determine which pool to use
   const pool = firefox ? puppetFirefoxPool : puppetPool;
 
-  const { browser, host } = await pool.acquire(false);
-
-  let page: Page = null;
-  let context: { ctx: BrowserContext; size: number } = null;
-  let client: CDPSession = null;
-  let duration = 0;
-  let usage = 0;
+  const { browser, host } = await pool.acquire(!!retry);
 
   const { domain } = sourceBuild(urlMap);
   const sharedContextID = getSharedContextID({
@@ -56,6 +50,12 @@ export const auditWebsite = async (params, retry?: boolean) => {
     pageHeaders,
     firefox,
   });
+
+  let page: Page = null;
+  let context: { ctx: BrowserContext; size: number } = null;
+  let client: CDPSession = null;
+  let duration = 0;
+  let usage = 0;
 
   // if not browser attempt reconnection
   if (browser) {
@@ -81,7 +81,7 @@ export const auditWebsite = async (params, retry?: boolean) => {
         });
 
         // set the initial context
-        sharedContext.set(sharedContextID, { ctx: ctx, size: 1 });
+        sharedContext.set(sharedContextID, { ctx, size: 1 });
         context = sharedContext.get(sharedContextID);
       } catch (e) {
         if (e instanceof Error) {
@@ -121,17 +121,20 @@ export const auditWebsite = async (params, retry?: boolean) => {
     }
   }
 
-  const pageIssues = await getPageIssues({
-    page,
-    browser,
-    actions,
-    standard,
-    ignore,
-    rules,
-    runners, // set to undefined to use default
-    origin: urlMap,
-    html,
-  });
+  const pageIssues =
+    page &&
+    browser &&
+    (await getPageIssues({
+      page,
+      browser,
+      actions,
+      standard,
+      ignore,
+      rules,
+      runners, // set to undefined to use default
+      origin: urlMap,
+      html,
+    }));
 
   const [report, issueMeta] = pageIssues;
 
