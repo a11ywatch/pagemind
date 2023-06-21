@@ -2,7 +2,8 @@ import dns from "dns";
 import { fetchUrl } from "../core/lib/utils/fetch";
 import { getLoadBalancerDefaults } from "../core/lib/utils/connection/load-balancer";
 
-export const chromeLb = process.env.CHROME_LB;
+// chrome load balancer endpoint
+const chromeLb = process.env.CHROME_LB;
 
 // the chrome hostname dns to connect to with lighthouse sockets
 let chromeHost = process.env.CHROME_HOST;
@@ -22,6 +23,7 @@ const lookupChromeHost = async (
   rp?: boolean,
   nosave?: boolean
 ) => {
+  // gets the websocket chrome target ID locally to instance
   const { webSocketDebuggerUrl } = await fetchUrl(
     `${tpt}://${target || "127.0.0.1"}:9222/json/version`,
     defaultTPTHttp
@@ -31,11 +33,14 @@ const lookupChromeHost = async (
     };
   });
 
+  // new url exist
   if (webSocketDebuggerUrl) {
-    // todo: exact match trim performance
-    const targetUrl = rp
-      ? webSocketDebuggerUrl.replace("127.0.0.1", target)
-      : webSocketDebuggerUrl;
+    let targetUrl = webSocketDebuggerUrl;
+
+    if (rp) {
+      // replace the chrome load balancer task IP
+      targetUrl = webSocketDebuggerUrl.replace("127.0.0.1", target);
+    }
 
     if (!nosave) {
       wsChromeEndpointurl = targetUrl;
@@ -49,16 +54,19 @@ const lookupChromeHost = async (
 };
 
 // bind top level chrome address hostname
-const bindChromeDns = (ad: string, nosave?: boolean): Promise<string> =>
-  new Promise((resolve) => {
-    dns.lookup(ad, (_err, address) => {
-      // set top level address
-      if (!nosave && address) {
-        chromeHost = address;
-      }
-      resolve(address || "");
-    });
-  });
+const bindChromeDns = async (ad: string, nosave?: boolean): Promise<string> => {
+  try {
+    const addr = await dns.promises.lookup(ad);
+
+    if (!nosave && addr && addr.address) {
+      chromeHost = addr.address;
+    }
+
+    return chromeHost;
+  } catch (e) {
+    console.error(e);
+  }
+};
 
 // get the chrome websocket endpoint via dns lookup
 const getWs = async (host?: string): Promise<string> => {
@@ -76,42 +84,41 @@ const getWs = async (host?: string): Promise<string> => {
 };
 
 // resolve chrome lb instance
-const getLbInstance = (nosave?: boolean): Promise<[string, string]> => {
-  let address = "";
+const getLbInstance = async (nosave?: boolean): Promise<[string, string]> => {
+  let address = chromeHost;
   let source = "";
 
-  return new Promise(async (resolve) => {
-    try {
-      address = await bindChromeDns(chromeLbHost, nosave);
-    } catch (e) {
-      console.error(e);
-    }
+  const ad = await bindChromeDns(chromeLbHost, nosave);
 
-    if (address) {
-      source = await lookupChromeHost(address, true, nosave);
-    }
+  if (ad) {
+    address = ad;
+  }
 
-    resolve([address, source]);
-  });
+  // get the source of the host json protocol
+  if (address) {
+    source = await lookupChromeHost(address, true, nosave);
+  }
+
+  return [address, source];
 };
 
 /*
  * Determine the chrome web socket connection resolved.
  * @param retry - retry connection on docker dns
- * @param rebind - rebind the singletons on lb
+ *
  * @return Promise<[string, string]> - the hostname and socket connection
  */
 const getWsEndPoint = async (
   retry?: boolean,
-  rebind?: boolean
+  bindHost?: boolean
 ): Promise<[string, string]> => {
   // return the load balancer instance of chrome
   if (chromeLb) {
     return new Promise(async (resolve) => {
       const clb = await getLbInstance();
 
-      if (rebind) {
-        // get the next connect if valid
+      if (bindHost) {
+        // bind the request context
         if (clb[1]) {
           chromeHost = clb[0];
           wsChromeEndpointurl = clb[1];
@@ -142,4 +149,10 @@ const setWsEndPoint = (endpoint: string) => {
   wsChromeEndpointurl = endpoint;
 };
 
-export { wsChromeEndpointurl, chromeHost, setWsEndPoint, getWsEndPoint };
+export {
+  chromeLb,
+  wsChromeEndpointurl,
+  chromeHost,
+  setWsEndPoint,
+  getWsEndPoint,
+};

@@ -9,17 +9,17 @@ import { puppetPool } from "./core/lib";
 const firefoxEnabled = process.env.FIREFOX_ENABLED === "true";
 
 export const coreServer = async () => {
-  const [_, endpoints, firefoxEndpoints] = await Promise.all([
+  const [_, chromeEndpoints, firefoxEndpoints] = await Promise.all([
     startGRPC(),
     getWsEndPoint(true),
     firefoxEnabled ? getFireFoxWsEndPoint(true) : Promise.resolve([null, null]),
   ]);
 
-  const [__, endpoint] = endpoints;
+  const [__, chromeEndpoint] = chromeEndpoints;
   const [___, firefoxEndpoint] = firefoxEndpoints;
 
   // launch chrome instance local
-  if (!endpoint) {
+  if (!chromeEndpoint) {
     try {
       const browserServer = await chromium.launchServer({
         headless: true,
@@ -62,5 +62,3 @@ export const coreServer = async () => {
 (async () => {
   await coreServer();
 })();
-
-// cron daily reset agents

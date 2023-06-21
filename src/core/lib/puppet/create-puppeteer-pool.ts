@@ -12,13 +12,15 @@ type ConnectionResponse = {
   host: string;
 };
 
-let browser: Browser;
+let browser: Browser = null;
 
 // retry and wait for ws endpoint [todo: update endpoint to perform lb request gathering external hostname]
 const getConnnection = async (
   retry?: boolean,
-  headers?: Record<string, string>
+  headers?: Record<string, string>,
+  retryCount?: number
 ): Promise<ConnectionResponse> => {
+  // direct return browser
   if (browser && !retry) {
     return {
       host: chromeHost,
@@ -27,6 +29,7 @@ const getConnnection = async (
   }
 
   try {
+    // only one browser allowed per cluster
     browser = await chromium.connectOverCDP(wsChromeEndpointurl, {
       headers,
     });
@@ -38,11 +41,21 @@ const getConnnection = async (
   } catch (e) {
     // retry connection once
     if (!retry) {
+      browser = null;
       await getWsEndPoint(false);
-      await puppetPool.clean(null, browser);
-      return await puppetPool.acquire(true, headers);
+      return await getConnnection(true, headers, retryCount);
     } else {
-      console.error(`Retry connection error ${e?.message}`);
+      console.error(`Retry connection error ${e}`);
+
+      if (!retryCount || (retryCount && retryCount < 10)) {
+        browser = null;
+        // keep retrying until connected
+        const retrySet = (retryCount ?? 0) + 1;
+
+        // attempt to repair once
+        setTimeout(async () => await getWsEndPoint(true), 2000 * retrySet);
+      }
+
       return {
         browser: null,
         host: chromeHost,
