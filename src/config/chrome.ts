@@ -1,9 +1,16 @@
 import dns from "dns";
+import { EventEmitter } from "node:events";
 import { fetchUrl } from "../core/lib/utils/fetch";
 import { getLoadBalancerDefaults } from "../core/lib/utils/connection/load-balancer";
 
+class LoadEmitter extends EventEmitter {}
+
+const loadEmitter = new LoadEmitter();
+
 // chrome load balancer endpoint
 const chromeLb = process.env.CHROME_LB;
+
+let CONNECTION_FETCHING = false;
 
 // the chrome hostname dns to connect to with lighthouse sockets
 let chromeHost = process.env.CHROME_HOST;
@@ -112,6 +119,15 @@ const getWsEndPoint = async (
   retry?: boolean,
   bindHost?: boolean
 ): Promise<[string, string]> => {
+  if (CONNECTION_FETCHING) {
+    return new Promise((resolve) => {
+      loadEmitter.once("event", () => {
+        resolve([chromeHost, wsChromeEndpointurl]);
+      });
+    });
+  }
+  CONNECTION_FETCHING = true;
+
   // return the load balancer instance of chrome
   if (chromeLb) {
     return new Promise(async (resolve) => {
@@ -124,7 +140,8 @@ const getWsEndPoint = async (
           wsChromeEndpointurl = clb[1];
         }
       }
-
+      CONNECTION_FETCHING = false;
+      loadEmitter.emit("event");
       resolve(clb);
     });
   }
@@ -136,9 +153,13 @@ const getWsEndPoint = async (
     if (retry && !wsChromeEndpointurl) {
       setTimeout(async () => {
         await getWs();
+        CONNECTION_FETCHING = false;
+        loadEmitter.emit("event");
         resolve([chromeHost, wsChromeEndpointurl]);
       }, 33);
     } else {
+      CONNECTION_FETCHING = false;
+      loadEmitter.emit("event");
       resolve([chromeHost, wsChromeEndpointurl]);
     }
   });
