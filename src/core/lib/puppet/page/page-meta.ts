@@ -6,9 +6,9 @@ const AI_DISABLED = process.env.AI_DISABLED === "true";
 
 export const getPageMeta = async ({ report, page, cv }): Promise<void> => {
   const pageIssues = (report && report?.issues) || [];
-  const automateable = (report && report?.automateable?.missingAltIndexs) || [];
+  const automateable = report && report?.automateable?.missingAltIndexs;
 
-  if (pageIssues?.length && !AI_DISABLED) {
+  if (automateable && automateable?.length && !AI_DISABLED) {
     try {
       await page.unroute("**/*", networkBlock);
       await page.route("**/*", performNetworkBlock);
