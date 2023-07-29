@@ -1,4 +1,3 @@
-import { networkBlock } from "kayle";
 import { detectImageModel } from "../../../ai/detectImage";
 import { createCanvasPupet } from "../create-canvas";
 import type { Page } from "playwright-core";
@@ -33,10 +32,6 @@ interface AltProps {
   page: Page;
   cv?: boolean; // can use computer vision
 }
-
-// reblock async images
-export const performNetworkBlock = async (req, reqq) =>
-  await networkBlock(req, reqq, true);
 
 // determine if an alt is missing in an image and reload the page. mutates elements
 export const getAltImage = async ({

@@ -1,17 +1,20 @@
-import { networkBlock } from "kayle";
-import { getAltImage, performNetworkBlock } from "./grab-alt";
+import { getAltImage } from "./grab-alt";
 import { a11yConfig } from "../../../../config";
 
 const AI_DISABLED = process.env.AI_DISABLED === "true";
 
-export const getPageMeta = async ({ report, page, cv }): Promise<void> => {
+export const getPageMeta = async ({
+  report,
+  page,
+  cv,
+  client,
+}): Promise<void> => {
   const pageIssues = (report && report?.issues) || [];
   const automateable = report && report?.automateable?.missingAltIndexs;
 
   if (automateable && automateable?.length && !AI_DISABLED) {
     try {
-      await page.unroute("**/*", networkBlock);
-      await page.route("**/*", performNetworkBlock);
+      await client.send("Fetch.disable");
       await page.reload({
         waitUntil: "domcontentloaded",
         timeout: a11yConfig.timeout,
@@ -20,7 +23,7 @@ export const getPageMeta = async ({ report, page, cv }): Promise<void> => {
       // console.error(e);
     }
 
-    await Promise.all(
+    await Promise.allSettled(
       automateable.map(async (eleIndex) => {
         const element = pageIssues[eleIndex];
 

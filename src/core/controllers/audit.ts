@@ -61,7 +61,7 @@ export const auditWebsite = async (params, retry?: boolean) => {
       try {
         const ctx = await browser?.newContext({
           userAgent: agent,
-          viewport: vp,
+          viewport: vp.isMobile ? vp : undefined,
           extraHTTPHeaders: pageHeaders.length
             ? pageHeaders.reduce(
                 (
@@ -136,7 +136,7 @@ export const auditWebsite = async (params, retry?: boolean) => {
 
   if (report) {
     // extra accessibility metrics
-    await getPageMeta({ page, report, cv });
+    await getPageMeta({ page, report, cv, client });
   }
 
   const { errorCount, warningCount, noticeCount, accessScore } =
