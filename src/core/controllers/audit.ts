@@ -171,6 +171,12 @@ export const auditWebsite = async (params, retry?: boolean) => {
   }
 
   if (context) {
+    try {
+      await page.close()
+    } catch(e) {
+      console.error(e)
+    }
+    
     context.size--;
 
     // if context is empty cleanup
