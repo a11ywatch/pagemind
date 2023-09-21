@@ -28,6 +28,7 @@ In order to enable firefox use the `FIREFOX_ENABLED` env var. You also need to r
 AI_DISABLED=false
 CHROME_LB=
 FIREFOX_ENABLED=false
+PAGEMIND_RECORD=true
 ```
 
 ## Healthcheck

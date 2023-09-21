@@ -13,7 +13,7 @@ COPY . .
 
 RUN cargo install --no-default-features --path .
 
-FROM node:20.2-alpine3.17 AS BUILD_IMAGE
+FROM node:20.6.1-alpine3.17 AS BUILD_IMAGE
 
 ENV PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD="true"
 
@@ -27,10 +27,12 @@ RUN rm -R ./node_modules
 RUN npm install --production
 
 # final image
-FROM node:20.2-alpine3.17
+FROM node:20.6.1-alpine3.17
 
 RUN apk upgrade --update-cache --available && \
 	apk add openssl
+
+RUN npx playwright install ffmpeg
 
 ENV GRPC_HOST_MAV="mav:50053" \
     NODE_ENV=production

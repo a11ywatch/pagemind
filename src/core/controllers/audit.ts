@@ -12,6 +12,10 @@ import { getWsEndPoint } from "../../config";
 // manage shared connections
 const sharedContext = new Map<string, { ctx: BrowserContext; size: number }>();
 
+// record the video
+const RECORD = process.env.PAGEMIND_RECORD;
+const RECORDING_BASE_DIR = RECORD === "true" ? "./recordings" : RECORD;
+
 // get the shared contextID
 const getSharedContextID = (
   params: Partial<ScanRpcParams> & { domain?: string }
@@ -74,6 +78,12 @@ export const auditWebsite = async (params, retry?: boolean) => {
                 {}
               )
             : undefined,
+          recordVideo:
+            RECORD && RECORD !== "false"
+              ? {
+                  dir: `${RECORDING_BASE_DIR}/${sharedContextID}`,
+                }
+              : undefined,
         });
 
         // set the initial context
@@ -172,11 +182,11 @@ export const auditWebsite = async (params, retry?: boolean) => {
 
   if (context) {
     try {
-      await page.close()
-    } catch(e) {
-      console.error(e)
+      await page.close();
+    } catch (e) {
+      console.error(e);
     }
-    
+
     context.size--;
 
     // if context is empty cleanup
