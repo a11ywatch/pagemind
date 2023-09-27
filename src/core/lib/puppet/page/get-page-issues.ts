@@ -1,6 +1,17 @@
 import { kayle, Audit } from "kayle";
 import type { IssueMeta } from "../../../../types";
 
+const baseRunners = ["htmlcs", "axe"];
+const DEFAULT_RUNNERS = process.env.DEFAULT_RUNNERS
+  ? process.env.DEFAULT_RUNNERS.split(",")
+  : [];
+const dr = DEFAULT_RUNNERS.length
+  ? DEFAULT_RUNNERS.filter((runner) =>
+      ["htmlcs", "axe", "ace"].includes(runner)
+    )
+  : baseRunners;
+const defaultRunners = dr.length ? dr : baseRunners;
+
 export const getPageIssues = async ({
   page,
   browser,
@@ -26,7 +37,7 @@ export const getPageIssues = async ({
         standard: wcagStandard || "WCAG2AA",
         ignore,
         rules,
-        runners: runners && runners.length ? runners : ["htmlcs", "axe"], // default to include all runners
+        runners: runners && runners.length ? runners : defaultRunners, // default to include all runners
         origin,
         html,
         waitUntil: "domcontentloaded",

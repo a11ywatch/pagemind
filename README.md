@@ -29,7 +29,10 @@ AI_DISABLED=false
 CHROME_LB=
 FIREFOX_ENABLED=false
 PAGEMIND_RECORD=true
+DEFAULT_RUNNERS=htmlcs,ace
 ```
+
+You can set `DEFAULT_RUNNERS` to a comma seperated list with the values of `ace`, `axe`, and `htmlcs`.
 
 ## Healthcheck
 

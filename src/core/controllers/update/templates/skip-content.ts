@@ -1,6 +1,4 @@
-import type { Issue } from "kayle";
-
-export const skipContentTemplate: Issue = {
+export const skipContentTemplate = {
   code: "WCAG2A.Principle1.Guideline2.4",
   type: "warning",
   typeCode: 2,
