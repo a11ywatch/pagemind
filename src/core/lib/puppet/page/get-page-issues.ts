@@ -12,6 +12,10 @@ const dr = DEFAULT_RUNNERS.length
   : baseRunners;
 const defaultRunners = dr.length ? dr : baseRunners;
 
+const warningsEnabled = process.env.PAGEMIND_IGNORE_WARNINGS === "true" ? false : true;
+// can set the lang based on kayle
+const language = process.env.KAYLE_DEFAULT_LANG;
+
 export const getPageIssues = async ({
   page,
   browser,
@@ -30,12 +34,13 @@ export const getPageIssues = async ({
     results = await kayle(
       {
         includeNotices: false,
-        includeWarnings: true,
+        includeWarnings: warningsEnabled,
         page,
         browser,
         actions,
         standard: wcagStandard || "WCAG2AA",
         ignore,
+        language,
         rules,
         runners: runners && runners.length ? runners : defaultRunners, // default to include all runners
         origin,

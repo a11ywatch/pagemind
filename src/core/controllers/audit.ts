@@ -66,6 +66,9 @@ export const auditWebsite = async (params, retry?: boolean) => {
         const ctx = await browser?.newContext({
           userAgent: agent,
           viewport: vp.isMobile ? vp : undefined,
+          bypassCSP: true,
+          isMobile: vp.isMobile,
+          ignoreHTTPSErrors: true,
           extraHTTPHeaders: pageHeaders.length
             ? pageHeaders.reduce(
                 (
