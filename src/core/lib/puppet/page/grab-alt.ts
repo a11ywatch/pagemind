@@ -33,6 +33,9 @@ interface AltProps {
   cv?: boolean; // can use computer vision
 }
 
+// validates a query selector string
+const regexValidSelector = /^(?!.*#)|^#[a-zA-Z][a-zA-Z0-9_-]*$/;
+
 // determine if an alt is missing in an image and reload the page. mutates elements
 export const getAltImage = async ({
   element,
@@ -43,11 +46,11 @@ export const getAltImage = async ({
 
   const selector = element?.selector; // the selector to use for the page
 
-  if (selector) {
+  if (selector && regexValidSelector.test(selector)) {
     let canvas;
 
     try {
-      canvas = await page.evaluate(createCanvasPupet, element.selector);
+      canvas = await page.evaluate(createCanvasPupet, selector);
     } catch (e) {
       console.error(e);
     }
