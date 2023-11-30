@@ -31,7 +31,7 @@
     "fastq": "1.15.0",
     "get-page-speed": "1.0.1",
     "kayle": "0.7.12",
-    "lighthouse": "9.6.8",
+    "lighthouse": "10.0.0",
     "pb-util": "1.0.3",
     "playwright": "^1.38.1"
   },
