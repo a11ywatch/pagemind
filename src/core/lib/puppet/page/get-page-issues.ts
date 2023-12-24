@@ -7,7 +7,7 @@ const DEFAULT_RUNNERS = process.env.DEFAULT_RUNNERS
   : [];
 const dr = DEFAULT_RUNNERS.length
   ? DEFAULT_RUNNERS.filter((runner) =>
-      ["htmlcs", "axe", "ace"].includes(runner)
+      ["htmlcs", "axe"].includes(runner)
     )
   : baseRunners;
 const defaultRunners = dr.length ? dr : baseRunners;
