@@ -29,6 +29,9 @@ RUN npm install --production
 # final image
 FROM node:20.6.1-alpine3.17
 
+ARG NODE_ENV=production
+ENV NODE_ENV $NODE_ENV
+
 RUN apk upgrade --update-cache --available && \
 	apk add openssl
 
