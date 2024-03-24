@@ -1,4 +1,4 @@
-FROM rust:alpine3.17 AS rustbuilder
+FROM rust:alpine3.19 AS rustbuilder
 
 WORKDIR /app
 
@@ -13,7 +13,7 @@ COPY . .
 
 RUN cargo install --no-default-features --path .
 
-FROM node:20.6.1-alpine3.17 AS BUILD_IMAGE
+FROM node:21.7-alpine3.19 AS BUILD_IMAGE
 
 ENV PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD="true"
 
@@ -27,7 +27,7 @@ RUN rm -R ./node_modules
 RUN npm install --production
 
 # final image
-FROM node:20.6.1-alpine3.17
+FROM node:21.7-alpine3.19
 
 ARG NODE_ENV=production
 ENV NODE_ENV $NODE_ENV
